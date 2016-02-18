@@ -11,9 +11,11 @@ func main() {
 
   // listen on all interfaces
   ln, _ := net.Listen("tcp", fmt.Sprintf(":%d",port))
+  fmt.Printf("Listening on port %d\n", port)
 
   // accept connection on port
   conn, _ := ln.Accept()
+  fmt.Printf("client %s connected\n", conn.RemoteAddr())
 
   // run loop forever (or until ctrl-c)
   for {
