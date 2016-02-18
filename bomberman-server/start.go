@@ -6,11 +6,11 @@ import "bufio"
 import "strings" // only needed below for sample processing
 
 func main() {
-
+  port := 5000
   fmt.Println("Launching server...")
 
   // listen on all interfaces
-  ln, _ := net.Listen("tcp", ":5000")
+  ln, _ := net.Listen("tcp", fmt.Sprintf(":%d",port))
 
   // accept connection on port
   conn, _ := ln.Accept()
