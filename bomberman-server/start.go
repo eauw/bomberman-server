@@ -19,37 +19,15 @@ func main() {
 
   // run loop forever (or until ctrl-c)
   for {
-    message, _, _ := bufio.NewReader(conn).ReadLine()
-    messageString := string(message)
+    messageBytes, _, _ := bufio.NewReader(conn).ReadLine()
+    messageString := string(messageBytes)
     // output message received
     fmt.Printf("Message Received:%s\n", messageString)
 
-    var printMessage = ""
-
-    switch messageString {
-    case "a":
-      printMessage = "go left"
-      break
-
-    case "d":
-      printMessage = "go right"
-      break
-
-    case "w":
-      printMessage = "go up"
-      break
-
-    case "s":
-      printMessage = "go down"
-      break
-
-    case "quit":
+    printMessage := handleMessage(messageString)
+    if printMessage == "quit" {
       conn.Close()
       return
-
-    default:
-      fmt.Printf("no valid command")
-      break
     }
 
     fmt.Println(printMessage)
@@ -59,4 +37,35 @@ func main() {
     // send new string back to client
     conn.Write([]byte(newMessage + "\n"))
   }
+}
+
+func handleMessage(message string) (s string) {
+  var printMessage = ""
+
+  switch message {
+  case "a":
+    printMessage = "go left"
+    break
+
+  case "d":
+    printMessage = "go right"
+    break
+
+  case "w":
+    printMessage = "go up"
+    break
+
+  case "s":
+    printMessage = "go down"
+    break
+
+  case "quit":
+    return "quit"
+
+  default:
+    fmt.Printf("no valid command")
+    break
+  }
+
+  return printMessage
 }
