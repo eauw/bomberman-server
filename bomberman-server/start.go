@@ -19,8 +19,40 @@ func main() {
   for {
     // will listen for message to process ending in newline (\n)
     message, _ := bufio.NewReader(conn).ReadString('\n')
+    messageString := strings.Replace(message,"\r\n","",-1)
     // output message received
-    fmt.Print("Message Received:", string(message))
+    fmt.Printf("Message Received:%s\n", messageString)
+    //fmt.Printf(">>% x<<\n", messageString)
+
+    var printMessage = ""
+
+    switch messageString {
+    case "a":
+      printMessage = "go left"
+      break
+
+    case "d":
+      printMessage = "go right"
+      break
+
+    case "w":
+      printMessage = "go up"
+      break
+
+    case "s":
+      printMessage = "go down"
+      break
+
+    case "quit":
+      conn.Close()
+      return
+
+    default:
+      fmt.Printf("no valid command")
+      break
+    }
+
+    fmt.Println(printMessage)
 
     // sample process for string received
     newMessage := strings.ToUpper(message)
