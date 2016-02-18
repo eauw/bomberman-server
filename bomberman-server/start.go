@@ -17,12 +17,10 @@ func main() {
 
   // run loop forever (or until ctrl-c)
   for {
-    // will listen for message to process ending in newline (\n)
-    message, _ := bufio.NewReader(conn).ReadString('\n')
-    messageString := strings.Replace(message,"\r\n","",-1)
+    message, _, _ := bufio.NewReader(conn).ReadLine()
+    messageString := string(message)
     // output message received
     fmt.Printf("Message Received:%s\n", messageString)
-    //fmt.Printf(">>% x<<\n", messageString)
 
     var printMessage = ""
 
@@ -55,7 +53,7 @@ func main() {
     fmt.Println(printMessage)
 
     // sample process for string received
-    newMessage := strings.ToUpper(message)
+    newMessage := strings.ToUpper(messageString)
     // send new string back to client
     conn.Write([]byte(newMessage + "\n"))
   }
