@@ -3,15 +3,15 @@ package main
 import "net"
 import "fmt"
 import "bufio"
-import "strings" // only needed below for sample processing
+import "strings"
 
 func main() {
   port := 5000
-  fmt.Println("Launching server...")
+  fmt.Println("Launching tcp server...")
 
   // listen on all interfaces
   ln, _ := net.Listen("tcp", fmt.Sprintf(":%d",port))
-  fmt.Printf("Listening on port %d\n", port)
+  fmt.Printf("Listening tcp on port %d\n", port)
 
   // accept connection on port
   conn, _ := ln.Accept()
@@ -24,13 +24,10 @@ func main() {
     // output message received
     fmt.Printf("Message Received:%s\n", messageString)
 
-    printMessage := handleMessage(messageString)
-    if printMessage == "quit" {
-      conn.Close()
+    // if message is "quit" server will stop
+    if handleMessage(messageString, conn) == false {
       return
     }
-
-    fmt.Println(printMessage)
 
     // sample process for string received
     newMessage := strings.ToUpper(messageString)
@@ -39,8 +36,8 @@ func main() {
   }
 }
 
-func handleMessage(message string) (s string) {
-  var printMessage = ""
+func handleMessage(message string, conn net.Conn) bool {
+  printMessage := ""
 
   switch message {
   case "a":
@@ -60,12 +57,15 @@ func handleMessage(message string) (s string) {
     break
 
   case "quit":
-    return "quit"
+    conn.Close()
+    return false
 
   default:
     fmt.Printf("no valid command")
     break
   }
 
-  return printMessage
+  fmt.Println(printMessage)
+
+  return true
 }
