@@ -70,6 +70,10 @@ func handleMessage(message string, conn net.Conn) bool {
     conn.Close()
     return false
 
+  case "exit":
+    conn.Close()
+    return false
+
   default:
     fmt.Printf("no valid command")
     break

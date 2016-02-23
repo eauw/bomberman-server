@@ -3,4 +3,4 @@
 Server starten:
 $ go run start.go
 
-Per Telnet-Client verbinden.
+Per Telnet-Client über Port 5000 verbinden.
