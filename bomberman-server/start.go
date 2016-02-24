@@ -24,6 +24,7 @@ func main() {
 
 func newClientConnected(conn net.Conn) {
   fmt.Printf("client %s connected\n", conn.RemoteAddr())
+  conn.Write([]byte("Successfully connected to Bomberman-Server\nEnter quit or exit to disconnect.\n"))
 
   // run loop forever (or until ctrl-c)
   for {
