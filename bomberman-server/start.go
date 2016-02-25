@@ -36,7 +36,8 @@ func newClientConnected(conn net.Conn) {
     fmt.Printf("Message Received:%s\n", messageString)
 
     // if message is "quit" server will close connection
-    if handleMessage(messageString, conn) == false {
+    if handleMessage(messageString) == false {
+      conn.Close()
       return
     }
 
@@ -47,7 +48,7 @@ func newClientConnected(conn net.Conn) {
   }
 }
 
-func handleMessage(message string, conn net.Conn) bool {
+func handleMessage(message string) bool {
   printMessage := ""
 
   switch message {
@@ -68,15 +69,13 @@ func handleMessage(message string, conn net.Conn) bool {
     break
 
   case "quit":
-    conn.Close()
     return false
 
   case "exit":
-    conn.Close()
     return false
 
   default:
-    fmt.Printf("no valid command")
+    fmt.Printf("no valid command: %d", len(message))
     break
   }
 
