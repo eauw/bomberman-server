@@ -28,23 +28,30 @@ func newClientConnected(conn net.Conn) {
 
   // run loop forever (or until ctrl-c)
   for {
-    messageBytes, _, _ := bufio.NewReader(conn).ReadLine()
-    messageString := string(messageBytes)
-    // output message received
-    fmt.Println("----------------")
-    fmt.Printf("Message from client: %s\n", conn.RemoteAddr())
-    fmt.Printf("Message Received:%s\n", messageString)
+    messageBytes, _, err := bufio.NewReader(conn).ReadLine()
+      if err == nil {
+        messageString := string(messageBytes)
+        // output message received
+        fmt.Println("----------------")
+        fmt.Printf("Message from client: %s\n", conn.RemoteAddr())
+        fmt.Printf("Message Received:%s\n", messageString)
 
-    // if message is "quit" server will close connection
-    if handleMessage(messageString) == false {
-      conn.Close()
-      return
-    }
+        // if message is "quit" server will close connection
+        if handleMessage(messageString) == false {
+          conn.Close()
+          return
+        }
 
-    // sample process for string received
-    newMessage := strings.ToUpper(messageString)
-    // send new string back to client
-    conn.Write([]byte(newMessage + "\n"))
+        // sample process for string received
+        newMessage := strings.ToUpper(messageString)
+        // send new string back to client
+        conn.Write([]byte(newMessage + "\n"))
+      } else {
+        fmt.Printf("Connection Error: %s\n", err)
+        fmt.Println("Client disconnected.")
+        conn.Close()
+        return
+      }
   }
 }
 
