@@ -4,7 +4,4 @@ Branches:
 develop - zum entwickeln  
 master - lauffähige Versionen
 
-Server starten:
-$ go run start.go
-
-Per Telnet-Client über Port 5000 verbinden.
+Alle Infos im [Wiki](https://github.com/eauw/mica2016/wiki "MICA 2016 Wiki") 
