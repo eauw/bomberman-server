@@ -1,5 +1,9 @@
 # mica2016
 
+Branches:
+develop - zum entwickeln  
+master - lauffähige Versionen
+
 Server starten:
 $ go run start.go
 
