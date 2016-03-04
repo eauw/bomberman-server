@@ -1,4 +1,6 @@
-type Player struct {
+package main
+
+type Player struct {
   name string
   points int
 }

@@ -2,6 +2,7 @@ package main
 
 import (
   "net"
+  "net/http"
   "fmt"
   "bufio"
   "strings"
@@ -18,7 +19,12 @@ func main() {
   ln, _ := net.Listen("tcp", fmt.Sprintf(":%d", port))
   fmt.Printf("Listening tcp on port %d\n", port)
 
+  // start http server
+  http.HandleFunc("/", handler)
+  http.ListenAndServe("localhost:8000", nil)
+
   game = NewGame()
+
   go handleChannel()
 
   for {
@@ -107,4 +113,12 @@ func handleMessage(message string) bool {
   fmt.Println(printMessage)
 
   return true
+}
+
+// http Stuff
+func handler(w http.ResponseWriter, r *http.Request) {
+  html := "hallo"
+  //fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+  fmt.Fprintf(w, html)
+
 }
