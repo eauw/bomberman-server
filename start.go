@@ -2,14 +2,15 @@ package main
 
 import (
   "net"
-  "net/http"
   "fmt"
   "bufio"
   "strings"
   "time"
+  "os"
 )
 
 var game *Game
+var httpServer *HTTPServer
 
 func main() {
   port := 5000
@@ -19,13 +20,20 @@ func main() {
   ln, _ := net.Listen("tcp", fmt.Sprintf(":%d", port))
   fmt.Printf("Listening tcp on port %d\n", port)
 
-  // start http server
-  http.HandleFunc("/", handler)
-  http.ListenAndServe("localhost:8000", nil)
+  if len(os.Args) > 1 {
+    if os.Args[1] == "http" {
+      fmt.Println("Launching http server...")
+      httpServer = NewHTTPServer()
+      go httpServer.start()
+      fmt.Println("Listening http on port 8000")
+      go handleHTTPChannel()
+    }
+  }
+
 
   game = NewGame()
 
-  go handleChannel()
+  go handleGameChannel()
 
   for {
     // accept connection on port
@@ -36,10 +44,17 @@ func main() {
   }
 }
 
-func handleChannel() {
+func handleGameChannel() {
   for {
     var x = <- game.channel
-    fmt.Printf("channel: %s", x)
+    fmt.Printf("game channel: %s", x)
+  }
+}
+
+func handleHTTPChannel() {
+  for {
+    var x = <- httpServer.channel
+    fmt.Printf("httpServer: %s", x)
   }
 }
 
@@ -113,12 +128,4 @@ func handleMessage(message string) bool {
   fmt.Println(printMessage)
 
   return true
-}
-
-// http Stuff
-func handler(w http.ResponseWriter, r *http.Request) {
-  html := "hallo"
-  //fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
-  fmt.Fprintf(w, html)
-
 }
