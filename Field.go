@@ -10,6 +10,7 @@ type Field struct {
 	verticalFieldCode   int // vCode
 	containsSpecial     bool
 	containsWall        bool
+	players             []*Player
 }
 
 func NewField(vCode int, hCode int) *Field {

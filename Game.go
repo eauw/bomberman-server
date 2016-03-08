@@ -22,3 +22,9 @@ func (game *Game) addPlayer(player *Player) {
 func (game *Game) removePlayer(player *Player) {
 
 }
+
+// func (game *Game) placePlayers() {
+// 	for p := range game.players {
+//
+// 	}
+// }

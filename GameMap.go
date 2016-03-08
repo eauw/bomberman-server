@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+import "bomberman-server/helper"
 
 type GameMap struct {
 	size   int
@@ -36,18 +36,20 @@ func createFields(size int) [][]*Field {
 	walls := 20
 	specials := 5
 
+	// place walls
 	for i := 0; i <= walls; i++ {
-		randomHorzitontalFieldCode := randomNumber(0, size)
-		randomVerticalFieldCode := randomNumber(0, size)
+		randomHorzitontalFieldCode := helper.RandomNumber(0, size)
+		randomVerticalFieldCode := helper.RandomNumber(0, size)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
 		fields[randomVerticalFieldCode][randomHorzitontalFieldCode].setWall(true)
 	}
 
+	// place specials
 	for i := 0; i <= specials; i++ {
-		randomHorzitontalFieldCode := randomNumber(0, size)
-		randomVerticalFieldCode := randomNumber(0, size)
+		randomHorzitontalFieldCode := helper.RandomNumber(0, size)
+		randomVerticalFieldCode := helper.RandomNumber(0, size)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
@@ -58,22 +60,34 @@ func createFields(size int) [][]*Field {
 }
 
 func (gm *GameMap) toString() {
+	mapString := "\n"
+	// fmt.Println()
 	for i := range gm.fields {
 		for j := range gm.fields[i] {
 			f := gm.fields[i][j]
 			// h := f.horizontalFieldCode
 			// v := f.verticalFieldCode
 
-			if f.containsWall == true {
-				fmt.Printf("W")
+			if len(f.players) > 0 {
+				// fmt.Printf("P")
+				mapString += "P"
+			} else if f.containsWall == true {
+				// fmt.Printf("W")
+				mapString += "W"
 			} else if f.containsSpecial == true {
-				fmt.Printf("S")
+				// fmt.Printf("S")
+				mapString += "S"
 			} else {
-				fmt.Printf("_") //fmt.Printf("i %d, j %d", h, v) //fmt.Print(h + v)
+				//fmt.Printf("_") //fmt.Printf("i %d, j %d", h, v) //fmt.Print(h + v)
+				mapString += "_"
 			}
 
-			fmt.Print("|")
+			// fmt.Print("|")
+			mapString += "|"
 		}
-		fmt.Println()
+		// fmt.Println()
+		mapString += "\n"
 	}
+
+	mainChannel <- mapString
 }

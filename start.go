@@ -11,8 +11,12 @@ import (
 
 var game *Game
 var httpServer *HTTPServer
+var mainChannel chan string
 
 func main() {
+	mainChannel = make(chan string)
+	go handleMainChannel()
+
 	tcpPort := 5000
 	fmt.Println("\n\n\n\nLaunching tcp server...")
 
@@ -20,17 +24,19 @@ func main() {
 	ln, _ := net.Listen("tcp", fmt.Sprintf(":%d", tcpPort))
 	fmt.Printf("Listening tcp on port %d\n", tcpPort)
 
+	game = NewGame()
+
 	if len(os.Args) > 1 {
 		if os.Args[1] == "http" {
 			fmt.Println("Launching http server...")
 			httpServer = NewHTTPServer()
+			httpServer.game = game
 			go httpServer.start()
 			fmt.Printf("Listening http on port %s\n", httpServer.port)
 			go handleHTTPChannel()
 		}
 	}
 
-	game = NewGame()
 	game.gameMap.toString()
 
 	go handleGameChannel()
@@ -39,8 +45,15 @@ func main() {
 		// accept connection on port
 		conn, _ := ln.Accept()
 		if conn != nil {
-			go newClientConnected(conn)
+			go newClientConnected(conn, game)
 		}
+	}
+}
+
+func handleMainChannel() {
+	for {
+		var x = <-mainChannel
+		fmt.Print(x)
 	}
 }
 
@@ -58,12 +71,15 @@ func handleHTTPChannel() {
 	}
 }
 
-func newClientConnected(conn net.Conn) {
+func newClientConnected(conn net.Conn, game *Game) {
 	fmt.Printf("\nclient %s connected\n", conn.RemoteAddr())
 	conn.Write([]byte("Successfully connected to Bomberman-Server\nEnter quit or exit to disconnect.\n"))
 
 	newPlayer := NewPlayer("New Player")
 	game.addPlayer(newPlayer)
+
+	fieldPlayers := game.gameMap.fields[0][0].players
+	fieldPlayers = append(fieldPlayers, newPlayer)
 
 	// run loop forever (or until ctrl-c)
 	for {
@@ -122,6 +138,10 @@ func handleMessage(message string) bool {
 
 	case "exit":
 		return false
+
+	case "game state":
+		game.gameMap.toString()
+		break
 
 	default:
 		fmt.Printf("no valid command: %d", len(message))
