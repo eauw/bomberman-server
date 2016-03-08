@@ -1,15 +1,24 @@
 package main
 
 type Game struct {
-  channel chan string
-  gameMap *GameMap
+	channel chan string
+	gameMap *GameMap
+	players []*Player
 }
 
 func NewGame() *Game {
-  ch := make(chan string)
+	ch := make(chan string)
 
-  return &Game{
-    channel: ch,
-    gameMap: NewGameMap(20),
-  }
+	return &Game{
+		channel: ch,
+		gameMap: NewGameMap(20),
+	}
+}
+
+func (game *Game) addPlayer(player *Player) {
+	game.players = append(game.players, player)
+}
+
+func (game *Game) removePlayer(player *Player) {
+
 }

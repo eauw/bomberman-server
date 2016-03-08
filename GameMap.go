@@ -1,10 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"math/rand"
-	"time"
-)
+import "fmt"
 
 type GameMap struct {
 	size   int
@@ -41,9 +37,8 @@ func createFields(size int) [][]*Field {
 	specials := 5
 
 	for i := 0; i <= walls; i++ {
-		randomHorzitontalFieldCode := random(0, size)
-		randomVerticalFieldCode := random(0, size)
-		fmt.Printf("walls: %d, %d\n", randomVerticalFieldCode, randomHorzitontalFieldCode)
+		randomHorzitontalFieldCode := randomNumber(0, size)
+		randomVerticalFieldCode := randomNumber(0, size)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
@@ -51,9 +46,9 @@ func createFields(size int) [][]*Field {
 	}
 
 	for i := 0; i <= specials; i++ {
-		randomHorzitontalFieldCode := random(0, size)
-		randomVerticalFieldCode := random(0, size)
-		fmt.Printf("specials: %d, %d\n", randomVerticalFieldCode, randomHorzitontalFieldCode)
+		randomHorzitontalFieldCode := randomNumber(0, size)
+		randomVerticalFieldCode := randomNumber(0, size)
+
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
 		fields[randomVerticalFieldCode][randomHorzitontalFieldCode].setSpecial(true)
@@ -81,9 +76,4 @@ func (gm *GameMap) toString() {
 		}
 		fmt.Println()
 	}
-}
-
-func random(min, max int) int {
-	rand.Seed(int64(time.Now().Nanosecond()))
-	return rand.Intn(max-min) + min
 }

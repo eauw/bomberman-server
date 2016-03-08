@@ -62,6 +62,9 @@ func newClientConnected(conn net.Conn) {
 	fmt.Printf("\nclient %s connected\n", conn.RemoteAddr())
 	conn.Write([]byte("Successfully connected to Bomberman-Server\nEnter quit or exit to disconnect.\n"))
 
+	newPlayer := NewPlayer("New Player")
+	game.addPlayer(newPlayer)
+
 	// run loop forever (or until ctrl-c)
 	for {
 		messageBytes, _, err := bufio.NewReader(conn).ReadLine()
