@@ -2,5 +2,16 @@
 <div>{{ .Title }}</div>
 <h3>Spieler</h3>
 <table>
-  
+  <tr>
+    <th>Name</th>
+    <th></th>
+  </tr>
+
+{{range $element := .Players}}
+  <tr>
+    <td>{{ $element }}</td>
+    <td></td>
+  </tr>
+{{ end }}
+
 </table>
