@@ -14,6 +14,9 @@ var httpServer *HTTPServer
 var mainChannel chan string
 
 func main() {
+	// handle command line arguments
+	handleArgs()
+
 	mainChannel = make(chan string)
 	go handleMainChannel()
 
@@ -25,18 +28,6 @@ func main() {
 	fmt.Printf("Listening tcp on port %d\n", tcpPort)
 
 	game = NewGame()
-
-	if len(os.Args) > 1 {
-		if os.Args[1] == "http" {
-			fmt.Println("Launching http server...")
-			httpServer = NewHTTPServer()
-			httpServer.game = game
-			go httpServer.start()
-			fmt.Printf("Listening http on port %s\n", httpServer.port)
-			go handleHTTPChannel()
-		}
-	}
-
 	game.gameMap.toString()
 
 	go handleGameChannel()
@@ -46,6 +37,32 @@ func main() {
 		conn, _ := ln.Accept()
 		if conn != nil {
 			go newClientConnected(conn, game)
+		}
+	}
+}
+
+func handleArgs() {
+	if len(os.Args) > 1 {
+		for _, v := range os.Args {
+			switch v {
+			case "-h":
+				// show help
+				helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
+				helpString += "Commands:\n\n"
+				helpString += "\t-w\tstarts with http server\n\n"
+				fmt.Print(helpString)
+				os.Exit(0)
+				break
+
+			case "-w":
+				fmt.Println("Launching http server...")
+				httpServer = NewHTTPServer()
+				httpServer.game = game
+				go httpServer.start()
+				fmt.Printf("Listening http on port %s\n", httpServer.port)
+				go handleHTTPChannel()
+			}
+
 		}
 	}
 }
