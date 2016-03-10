@@ -78,7 +78,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 type Page struct {
 	Title   string
 	Body    template.HTML
-	Number  int
 	Players []*Player
 }
 
@@ -90,7 +89,7 @@ func loadPage(title string, r *http.Request, game *Game) (*Page, error) {
 	}
 
 	//testplayers := []string{"player 1", "player 2", "player 3"}
-	return &Page{Title: title, Body: template.HTML(body), Number: 23, Players: game.players}, nil
+	return &Page{Title: title, Body: template.HTML(body), Players: game.players}, nil
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request, game *Game) {

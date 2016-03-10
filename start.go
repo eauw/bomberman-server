@@ -41,28 +41,42 @@ func main() {
 	}
 }
 
+// check commandline arguments on program start
 func handleArgs() {
+	// only check if there is an parameter given
 	if len(os.Args) > 1 {
-		for _, v := range os.Args {
-			switch v {
-			case "-h":
+		// ignore first parameter because its the programs name
+		for i, v := range os.Args {
+			if i > 0 {
+				switch v {
+
+				default:
+					fmt.Println("invalid commandline parameter")
+					os.Exit(0)
+					break
+
 				// show help
-				helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
-				helpString += "Commands:\n\n"
-				helpString += "\t-w\tstarts with http server\n\n"
-				fmt.Print(helpString)
-				os.Exit(0)
-				break
+				case "-h":
+					// show help
+					helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
+					helpString += "Commands:\n\n"
+					helpString += "\t-w\tstarts with http server\n\n"
+					fmt.Print(helpString)
+					os.Exit(0)
+					break
 
-			case "-w":
-				fmt.Println("Launching http server...")
-				httpServer = NewHTTPServer()
-				httpServer.game = game
-				go httpServer.start()
-				fmt.Printf("Listening http on port %s\n", httpServer.port)
-				go handleHTTPChannel()
+				// start with http server
+				case "-w":
+					fmt.Println("Launching http server...")
+					httpServer = NewHTTPServer()
+					httpServer.game = game
+					go httpServer.start()
+					fmt.Printf("Listening http on port %s\n", httpServer.port)
+					go handleHTTPChannel()
+					break
+
+				}
 			}
-
 		}
 	}
 }
@@ -74,6 +88,7 @@ func handleMainChannel() {
 	}
 }
 
+// receives all information about the game
 func handleGameChannel() {
 	for {
 		var x = <-game.channel
@@ -81,6 +96,7 @@ func handleGameChannel() {
 	}
 }
 
+// receives all information about http
 func handleHTTPChannel() {
 	for {
 		var x = <-httpServer.channel
@@ -95,8 +111,8 @@ func newClientConnected(conn net.Conn, game *Game) {
 	newPlayer := NewPlayer("New Player")
 	game.addPlayer(newPlayer)
 
-	fieldPlayers := game.gameMap.fields[0][0].players
-	fieldPlayers = append(fieldPlayers, newPlayer)
+	players := game.gameMap.fields[0][0].players
+	game.gameMap.fields[0][0].players = append(players, newPlayer)
 
 	// run loop forever (or until ctrl-c)
 	for {
@@ -158,6 +174,10 @@ func handleMessage(message string) bool {
 
 	case "game state":
 		game.gameMap.toString()
+		break
+
+	case "show players":
+		printMessage = game.printPlayers()
 		break
 
 	default:

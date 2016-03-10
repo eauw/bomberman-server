@@ -1,5 +1,9 @@
 package main
 
+import(
+	"fmt"
+)
+
 type Game struct {
 	channel chan string
 	gameMap *GameMap
@@ -21,6 +25,15 @@ func (game *Game) addPlayer(player *Player) {
 
 func (game *Game) removePlayer(player *Player) {
 
+}
+
+func (game *Game) printPlayers() string {
+	s := ""
+	for _, v := range game.players {
+		s += fmt.Sprintf("Player-ID: %s\n",v.id)
+	}
+
+	return s
 }
 
 // func (game *Game) placePlayers() {
