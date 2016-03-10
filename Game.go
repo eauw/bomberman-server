@@ -51,9 +51,10 @@ func (game *Game) removePlayer(player *Player) {
 }
 
 func (game *Game) printPlayers() string {
-	s := ""
-	for _, v := range game.players {
-		s += fmt.Sprintf("Player-ID: %s\n",v.id)
+	s := "Players\n"
+	for i, v := range game.players {
+		playerCount := i+1
+		s += fmt.Sprintf("%d. ID: %s | IP: %s | Name: %s \n", playerCount, v.id, v.ip, v.name)
 	}
 
 	return s

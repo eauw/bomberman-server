@@ -5,6 +5,7 @@ import "bomberman-server/helper"
 // Player
 type Player struct {
 	id           string
+	ip					 string
 	name         string
 	points       int
 	currentField *Field
@@ -18,10 +19,6 @@ func NewPlayer(name string) *Player {
 		id:   playerID,
 		name: name,
 	}
-}
-
-func (player *Player) setName(name string) {
-	player.name = name
 }
 
 // func (player *Player) setPosition(x int, y int) {

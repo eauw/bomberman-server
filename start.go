@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"bomberman-server/helper"
 )
 
 var game *Game
@@ -98,7 +99,13 @@ func newClientConnected(conn net.Conn, game *Game) {
 	fmt.Printf("\nclient %s connected\n", conn.RemoteAddr())
 	conn.Write([]byte("Successfully connected to Bomberman-Server\nEnter quit or exit to disconnect.\n"))
 
+	// get clients ip
+	clientIP := helper.IpFromAddr(conn)
+
+
+	// create player
 	newPlayer := NewPlayer("New Player")
+	newPlayer.ip = clientIP
 	game.addPlayer(newPlayer)
 
 	players := game.gameMap.fields[0][0].players
@@ -113,10 +120,6 @@ func newClientConnected(conn net.Conn, game *Game) {
 			fmt.Println("----------------")
 			timeStamp := time.Now()
 			fmt.Println(timeStamp)
-
-			clientAddr := conn.RemoteAddr().String()
-			remAddr := strings.Split(clientAddr, ":")
-			fmt.Printf("ip: %s",remAddr[0])
 
 			fmt.Printf("Message from client: %s\n", conn.RemoteAddr())
 			fmt.Printf("Message Received:%s\n", messageString)
