@@ -16,6 +16,7 @@ var httpChannel chan string
 var mainChannel chan string
 
 func main() {
+	// create main channel
 	mainChannel = make(chan string)
 	go handleMainChannel()
 
@@ -29,6 +30,7 @@ func main() {
 	ln, _ := net.Listen("tcp", fmt.Sprintf(":%d", tcpPort))
 	fmt.Printf("Listening tcp on port %d\n", tcpPort)
 
+	// create game
 	game = NewGame()
 	gameChannel = game.channel
 	game.mainChannel = mainChannel
@@ -111,6 +113,11 @@ func newClientConnected(conn net.Conn, game *Game) {
 			fmt.Println("----------------")
 			timeStamp := time.Now()
 			fmt.Println(timeStamp)
+
+			clientAddr := conn.RemoteAddr().String()
+			remAddr := strings.Split(clientAddr, ":")
+			fmt.Printf("ip: %s",remAddr[0])
+
 			fmt.Printf("Message from client: %s\n", conn.RemoteAddr())
 			fmt.Printf("Message Received:%s\n", messageString)
 			game.channel <- messageString

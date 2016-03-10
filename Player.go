@@ -27,3 +27,19 @@ func (player *Player) setName(name string) {
 // func (player *Player) setPosition(x int, y int) {
 // 	player.position.setPosition(x, y)
 // }
+
+func (player *Player) moveLeft() {
+	player.currentField.horizontalFieldCode -= 1
+}
+
+func (player *Player) moveRight() {
+	player.currentField.horizontalFieldCode += 1
+}
+
+func (player *Player) moveUp() {
+	player.currentField.verticalFieldCode -= 1
+}
+
+func (player *Player) moveDown() {
+	player.currentField.verticalFieldCode += 1
+}
