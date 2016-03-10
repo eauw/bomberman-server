@@ -1,18 +1,19 @@
 package main
 
-import(
+import (
 	"fmt"
+	"log"
 )
 
 type Game struct {
-	channel chan string
+	channel     chan *GameChannelMessage
 	mainChannel chan string
-	gameMap *GameMap
-	players []*Player
+	gameMap     *GameMap
+	players     []*Player
 }
 
 func NewGame() *Game {
-	ch := make(chan string)
+	ch := make(chan *GameChannelMessage)
 	gm := NewGameMap(20)
 
 	newGame := &Game{
@@ -32,13 +33,8 @@ func (game *Game) start() {
 // receives all information about the game
 func (game *Game) handleGameChannel() {
 	for {
-		var x = <-game.channel
-		//fmt.Printf("game channel: %s", x)
-		switch x {
-		case "":
-			break
-
-		}
+		var gameChannelMessage = <-game.channel
+		handleGameChannelMessage(gameChannelMessage)
 	}
 }
 
@@ -53,11 +49,43 @@ func (game *Game) removePlayer(player *Player) {
 func (game *Game) printPlayers() string {
 	s := "Players\n"
 	for i, v := range game.players {
-		playerCount := i+1
+		playerCount := i + 1
 		s += fmt.Sprintf("%d. ID: %s | IP: %s | Name: %s \n", playerCount, v.id, v.ip, v.name)
 	}
 
 	return s
+}
+
+func (game *Game) getPlayerByIP(ip string) *Player {
+	for _, p := range game.players {
+		if p.ip == ip {
+			return p
+		}
+	}
+
+	return nil
+}
+
+func handleGameChannelMessage(gcm *GameChannelMessage) {
+	log.Printf("aaaa: %s", gcm.player.toString())
+	switch gcm.text {
+	case "move up":
+		gcm.player.moveUp()
+		break
+
+	case "move down":
+		gcm.player.moveDown()
+		break
+
+	case "move left":
+		gcm.player.moveLeft()
+		break
+
+	case "move right":
+		gcm.player.moveRight()
+		break
+
+	}
 }
 
 // func (game *Game) placePlayers() {

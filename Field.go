@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -23,6 +24,25 @@ func NewField(vCode int, hCode int) *Field {
 		containsSpecial:     false,
 		containsWall:        false,
 	}
+}
+
+func (field *Field) toString() string {
+	i := "nil"
+	j := "nil"
+
+	i = strconv.Itoa(field.horizontalFieldCode)
+
+	j = strconv.Itoa(field.verticalFieldCode)
+
+	fieldString := fmt.Sprintf("i%s j%s", i, j)
+
+	return fieldString
+
+}
+
+func (field *Field) addPlayer(player *Player) {
+	field.players = append(field.players, player)
+	player.currentField = field
 }
 
 func (field *Field) setSpecial(b bool) {

@@ -1,11 +1,15 @@
 package main
 
-import "bomberman-server/helper"
+import (
+	"bomberman-server/helper"
+	"fmt"
+)
 
 // Player
 type Player struct {
+	game         *Game
 	id           string
-	ip					 string
+	ip           string
 	name         string
 	points       int
 	currentField *Field
@@ -25,18 +29,60 @@ func NewPlayer(name string) *Player {
 // 	player.position.setPosition(x, y)
 // }
 
+func (player *Player) toString() string {
+	idString := ""
+	ipString := ""
+	nameString := ""
+	//pointsString := ""
+	currentFieldString := ""
+
+	if player.id != "" {
+		idString = player.id
+	} else {
+		idString = "nil"
+	}
+
+	if player.ip != "" {
+		ipString = player.ip
+	} else {
+		ipString = "nil"
+	}
+
+	if player.name != "" {
+		nameString = player.name
+	} else {
+		nameString = "nil"
+	}
+
+	if player.currentField != nil {
+		currentFieldString = player.currentField.toString()
+	} else {
+		currentFieldString = "nil"
+	}
+
+	playerString := fmt.Sprintf("id: " + idString + " ip: " + ipString + " name: " + nameString + " currentField: " + currentFieldString)
+
+	return playerString
+}
+
 func (player *Player) moveLeft() {
 	player.currentField.horizontalFieldCode -= 1
+	player.currentField.players = append(player.currentField.players, player)
 }
 
 func (player *Player) moveRight() {
-	player.currentField.horizontalFieldCode += 1
+	lastField := player.currentField
+
+	player.currentField = NewField(lastField.verticalFieldCode, lastField.horizontalFieldCode+1)
+	player.currentField.players = append(player.currentField.players, player)
 }
 
 func (player *Player) moveUp() {
 	player.currentField.verticalFieldCode -= 1
+	player.currentField.players = append(player.currentField.players, player)
 }
 
 func (player *Player) moveDown() {
 	player.currentField.verticalFieldCode += 1
+	player.currentField.players = append(player.currentField.players, player)
 }

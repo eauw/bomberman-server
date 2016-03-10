@@ -1,17 +1,17 @@
 package main
 
 import (
+	"bomberman-server/helper"
 	"bufio"
 	"fmt"
 	"net"
 	"os"
 	"strings"
 	"time"
-	"bomberman-server/helper"
 )
 
 var game *Game
-var gameChannel chan string
+var gameChannel chan *GameChannelMessage
 var httpServer *HTTPServer
 var httpChannel chan string
 var mainChannel chan string
@@ -36,13 +36,13 @@ func main() {
 	gameChannel = game.channel
 	game.mainChannel = mainChannel
 	game.start()
-	game.gameMap.toString()
+	mainChannel <- game.gameMap.toString()
 
 	for {
 		// accept connection on port
 		conn, _ := ln.Accept()
 		if conn != nil {
-			go newClientConnected(conn, game)
+			go newClientConnected(conn, game) // TODO: Problem, Game soll synchron sein aber wird in einer routine übergeben, ÄNDERN!!!
 		}
 	}
 }
@@ -88,6 +88,7 @@ func handleArgs() {
 	}
 }
 
+// called as goroutine
 func handleMainChannel() {
 	for {
 		var x = <-mainChannel
@@ -95,41 +96,70 @@ func handleMainChannel() {
 	}
 }
 
+// called as goroutine
 func newClientConnected(conn net.Conn, game *Game) {
 	fmt.Printf("\nclient %s connected\n", conn.RemoteAddr())
-	conn.Write([]byte("Successfully connected to Bomberman-Server\nEnter quit or exit to disconnect.\n"))
+	conn.Write([]byte("Successfully connected to Bomberman-Server\n"))
+	conn.Write([]byte("Enter quit or exit to disconnect.\n"))
 
 	// get clients ip
 	clientIP := helper.IpFromAddr(conn)
-
 
 	// create player
 	newPlayer := NewPlayer("New Player")
 	newPlayer.ip = clientIP
 	game.addPlayer(newPlayer)
+	game.gameMap.fields[0][0].addPlayer(newPlayer)
 
-	players := game.gameMap.fields[0][0].players
-	game.gameMap.fields[0][0].players = append(players, newPlayer)
+	conn.Write([]byte("Your ID: "))
+	conn.Write([]byte(newPlayer.id))
+	conn.Write([]byte("\n"))
 
 	// run loop forever (or until ctrl-c)
 	for {
 		messageBytes, _, err := bufio.NewReader(conn).ReadLine()
 		if err == nil {
 			messageString := string(messageBytes)
+
+			tcpMessage := NewTCPMessage(messageString, clientIP)
+
 			// output message received
 			fmt.Println("----------------")
 			timeStamp := time.Now()
 			fmt.Println(timeStamp)
 
-			fmt.Printf("Message from client: %s\n", conn.RemoteAddr())
-			fmt.Printf("Message Received:%s\n", messageString)
-			game.channel <- messageString
+			mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
+			mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
 
 			// if message is "quit" server will close connection
-			if handleMessage(messageString) == false {
+			if _, b := handleMessage(messageString); b == false {
 				conn.Close()
 				return
+			} else {
+
+				//mainChannel <- game.getPlayerByIP(tcpMessage.senderIP).id
+				gameChannelMessage := NewGameChannelMessageFromTCPMessage(tcpMessage, game)
+				game.channel <- gameChannelMessage
 			}
+
+			if messageString == "game state" {
+				conn.Write([]byte(game.gameMap.toString()))
+			}
+
+			// else {
+			// 	switch m {
+			// 	case "game":
+			// 		gameChannelMessage := NewGameChannelMessage()
+			// 		gameChannelMessage.tcpMessage = tcpMessage
+			// 		game.channel <- gameChannelMessage
+			// 		break
+
+			// 	case "main":
+			// 		//game.mainChannel <- messageString
+			// 		break
+			// 	}
+
+			// }
 
 			// sample process for string received
 			newMessage := strings.ToUpper(messageString)
@@ -144,7 +174,8 @@ func newClientConnected(conn net.Conn, game *Game) {
 	}
 }
 
-func handleMessage(message string) bool {
+// handles the message sent by a client. returns a converted message and true. if message is "quit" or "exit" it returns false.
+func handleMessage(message string) (string, bool) {
 	printMessage := ""
 
 	switch message {
@@ -165,13 +196,13 @@ func handleMessage(message string) bool {
 		break
 
 	case "quit":
-		return false
+		return "", false
 
 	case "exit":
-		return false
+		return "", false
 
 	case "game state":
-		game.gameMap.toString()
+		mainChannel <- game.gameMap.toString()
 		break
 
 	case "show players":
@@ -179,11 +210,12 @@ func handleMessage(message string) bool {
 		break
 
 	default:
-		fmt.Printf("no valid command: %d", len(message))
+		fmt.Printf("invalid command: %d", len(message))
 		break
 	}
 
-	fmt.Println(printMessage)
+	printMessage += "\n"
+	mainChannel <- fmt.Sprintf(printMessage)
 
-	return true
+	return "", true
 }
