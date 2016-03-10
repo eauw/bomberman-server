@@ -6,16 +6,39 @@ import(
 
 type Game struct {
 	channel chan string
+	mainChannel chan string
 	gameMap *GameMap
 	players []*Player
 }
 
 func NewGame() *Game {
 	ch := make(chan string)
+	gm := NewGameMap(20)
 
-	return &Game{
+	newGame := &Game{
 		channel: ch,
-		gameMap: NewGameMap(20),
+		gameMap: gm,
+	}
+
+	gm.game = newGame
+
+	return newGame
+}
+
+func (game *Game) start() {
+	go game.handleGameChannel()
+}
+
+// receives all information about the game
+func (game *Game) handleGameChannel() {
+	for {
+		var x = <-game.channel
+		//fmt.Printf("game channel: %s", x)
+		switch x {
+		case "":
+			break
+
+		}
 	}
 }
 

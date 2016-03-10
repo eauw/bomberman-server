@@ -10,6 +10,7 @@ import (
 
 type HTTPServer struct {
 	channel chan string
+	mainChannel chan string
 	port    string
 	game    *Game
 }
@@ -24,17 +25,32 @@ func NewHTTPServer() *HTTPServer {
 }
 
 func (httpServer *HTTPServer) start() {
+	go httpServer.handleHTTPChannel()
+
 	// start http server
 	address := "localhost:" + httpServer.port
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		viewHandler(w, r, httpServer.game)
+		viewHandler(w, r, httpServer)
 	})
 
 	log.Fatal(http.ListenAndServe(address, nil))
 }
 
-// http Stuff
+// receives all information about http
+func (httpServer *HTTPServer) handleHTTPChannel() {
+	for {
+		var x = <-httpServer.channel
+		//fmt.Printf("httpServer: %s\n", x)
+		switch x {
+		case "":
+			break
+
+		}
+	}
+}
+
+// http stuff
 func handler(w http.ResponseWriter, r *http.Request) {
 	// html := "hallo"
 	//fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
@@ -92,8 +108,8 @@ func loadPage(title string, r *http.Request, game *Game) (*Page, error) {
 	return &Page{Title: title, Body: template.HTML(body), Players: game.players}, nil
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request, game *Game) {
-	httpServer.channel <- r.URL.Path
+func viewHandler(w http.ResponseWriter, r *http.Request, httpServer *HTTPServer) {
+	httpServer.mainChannel <- r.URL.Path
 	// Parses URL to obtain title of file to add to .body
 	title := r.URL.Path[len("/"):]
 

@@ -10,15 +10,17 @@ import (
 )
 
 var game *Game
+var gameChannel chan string
 var httpServer *HTTPServer
+var httpChannel chan string
 var mainChannel chan string
 
 func main() {
-	// handle command line arguments
-	handleArgs()
-
 	mainChannel = make(chan string)
 	go handleMainChannel()
+
+	// handle command line arguments
+	handleArgs()
 
 	tcpPort := 5000
 	fmt.Println("\n\n\n\nLaunching tcp server...")
@@ -28,9 +30,10 @@ func main() {
 	fmt.Printf("Listening tcp on port %d\n", tcpPort)
 
 	game = NewGame()
+	gameChannel = game.channel
+	game.mainChannel = mainChannel
+	game.start()
 	game.gameMap.toString()
-
-	go handleGameChannel()
 
 	for {
 		// accept connection on port
@@ -69,10 +72,11 @@ func handleArgs() {
 				case "-w":
 					fmt.Println("Launching http server...")
 					httpServer = NewHTTPServer()
+					httpChannel = httpServer.channel
+					httpServer.mainChannel = mainChannel
 					httpServer.game = game
 					go httpServer.start()
 					fmt.Printf("Listening http on port %s\n", httpServer.port)
-					go handleHTTPChannel()
 					break
 
 				}
@@ -85,22 +89,6 @@ func handleMainChannel() {
 	for {
 		var x = <-mainChannel
 		fmt.Print(x)
-	}
-}
-
-// receives all information about the game
-func handleGameChannel() {
-	for {
-		var x = <-game.channel
-		fmt.Printf("game channel: %s", x)
-	}
-}
-
-// receives all information about http
-func handleHTTPChannel() {
-	for {
-		var x = <-httpServer.channel
-		fmt.Printf("httpServer: %s\n", x)
 	}
 }
 

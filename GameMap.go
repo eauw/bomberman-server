@@ -3,6 +3,7 @@ package main
 import "bomberman-server/helper"
 
 type GameMap struct {
+	game *Game
 	size   int
 	fields [][]*Field
 }
@@ -89,5 +90,5 @@ func (gm *GameMap) toString() {
 		mapString += "\n"
 	}
 
-	mainChannel <- mapString
+	gm.game.mainChannel <- mapString
 }
