@@ -15,8 +15,8 @@ type Field struct {
 	players             map[string]*Player
 }
 
-func NewField(vCode int, hCode int) *Field {
-	fieldID := strconv.Itoa(vCode) + strconv.Itoa(hCode)
+func NewField(hCode int, vCode int) *Field {
+	fieldID := strconv.Itoa(hCode) + strconv.Itoa(vCode)
 
 	return &Field{
 		id:                  fieldID,

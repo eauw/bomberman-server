@@ -2,7 +2,7 @@ package gamemanager
 
 import "bomberman-server/helper"
 
-// import "fmt"
+import "fmt"
 
 type GameMap struct {
 	game   *Game
@@ -94,12 +94,13 @@ func (gm *GameMap) toString() string {
 
 	//gm.game.mainChannel <- mapString
 
-	// for i := range gm.fields {
-	// 	for j := range gm.fields[i] {
-	// 		f := gm.fields[i][j]
-	// 		mapString += fmt.Sprintf("%s %s", f.toString(), f.players)
-	// 	}
-	// }
+	for i := range gm.fields {
+		for j := range gm.fields[i] {
+			// f := gm.fields[i][j]
+			mapString += fmt.Sprintf("%d %d|", i, j)
+		}
+		mapString += "\n"
+	}
 
 	return mapString
 }

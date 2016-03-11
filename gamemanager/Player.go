@@ -45,6 +45,14 @@ func (player *Player) SetID(id string) {
 	player.id = id
 }
 
+func (player *Player) GetCurrentField() *Field {
+	return player.currentField
+}
+
+func (player *Player) SetCurrentField(field *Field) {
+	player.currentField = field
+}
+
 func (player *Player) toString() string {
 	idString := ""
 	ipString := ""
