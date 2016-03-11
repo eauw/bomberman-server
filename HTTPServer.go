@@ -2,6 +2,7 @@ package main
 
 import (
 	// "fmt"
+	"bomberman-server/gamemanager"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -9,10 +10,10 @@ import (
 )
 
 type HTTPServer struct {
-	channel chan string
+	channel     chan string
 	mainChannel chan string
-	port    string
-	game    *Game
+	port        string
+	game        *gamemanager.Game
 }
 
 func NewHTTPServer() *HTTPServer {
@@ -94,18 +95,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 type Page struct {
 	Title   string
 	Body    template.HTML
-	Players []*Player
+	Players []*gamemanager.Player
 }
 
 // Loads a page for use
-func loadPage(title string, r *http.Request, game *Game) (*Page, error) {
+func loadPage(title string, r *http.Request, game *gamemanager.Game) (*Page, error) {
 	body, err := ioutil.ReadFile(title)
 	if err != nil {
 		return nil, err
 	}
 
 	//testplayers := []string{"player 1", "player 2", "player 3"}
-	return &Page{Title: title, Body: template.HTML(body), Players: game.players}, nil
+	return &Page{Title: title, Body: template.HTML(body), Players: game.GetPlayersArray()}, nil
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request, httpServer *HTTPServer) {
@@ -114,7 +115,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, httpServer *HTTPServer)
 	title := r.URL.Path[len("/"):]
 
 	// Load templatized page, given title
-	page, _ := loadPage(title, r, game)
+	page, _ := loadPage(title, r, httpServer.game)
 
 	// Generate template t
 	t, _ := template.ParseFiles("index.html")

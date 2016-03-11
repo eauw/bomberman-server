@@ -1,20 +1,25 @@
 package main
 
 import (
+	"bomberman-server/gamemanager"
 	"bomberman-server/helper"
+	"bomberman-server/tcpmessage"
 	"bufio"
 	"fmt"
 	"net"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
-var game *Game
-var gameChannel chan *GameChannelMessage
+// var game *game.Game
+// var gameChannel chan *GameChannelMessage
 var httpServer *HTTPServer
 var httpChannel chan string
 var mainChannel chan string
+
+var mutex = &sync.Mutex{}
 
 func main() {
 	// create main channel
@@ -32,17 +37,19 @@ func main() {
 	fmt.Printf("Listening tcp on port %d\n", tcpPort)
 
 	// create game
-	game = NewGame()
-	gameChannel = game.channel
-	game.mainChannel = mainChannel
-	game.start()
-	mainChannel <- game.gameMap.toString()
+	gameManager := gamemanager.NewManager()
+	gameManager.SetMainChannel(mainChannel)
+	// game = NewGame()
+	// gameChannel = game.channel
+	// game.mainChannel = mainChannel
+	gameManager.Start()
+	// mainChannel <- game.gameMap.toString()
 
 	for {
 		// accept connection on port
 		conn, _ := ln.Accept()
 		if conn != nil {
-			go newClientConnected(conn, game) // TODO: Problem, Game soll synchron sein aber wird in einer routine übergeben, ÄNDERN!!!
+			go newClientConnected(conn, gameManager)
 		}
 	}
 }
@@ -77,7 +84,7 @@ func handleArgs() {
 					httpServer = NewHTTPServer()
 					httpChannel = httpServer.channel
 					httpServer.mainChannel = mainChannel
-					httpServer.game = game
+					// httpServer.game = game
 					go httpServer.start()
 					fmt.Printf("Listening http on port %s\n", httpServer.port)
 					break
@@ -97,7 +104,7 @@ func handleMainChannel() {
 }
 
 // called as goroutine
-func newClientConnected(conn net.Conn, game *Game) {
+func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	fmt.Printf("\nclient %s connected\n", conn.RemoteAddr())
 	conn.Write([]byte("Successfully connected to Bomberman-Server\n"))
 	conn.Write([]byte("Enter quit or exit to disconnect.\n"))
@@ -106,13 +113,16 @@ func newClientConnected(conn net.Conn, game *Game) {
 	clientIP := helper.IpFromAddr(conn)
 
 	// create player
-	newPlayer := NewPlayer("New Player")
-	newPlayer.ip = clientIP
-	game.addPlayer(newPlayer)
-	game.gameMap.fields[0][0].addPlayer(newPlayer)
+	newPlayer := gamemanager.NewPlayer("New Player")
+	newPlayer.SetIP(clientIP)
+
+	mutex.Lock()
+	gameManager.PlayerConnected(newPlayer)
+	// game.gameMap.fields[0][0].addPlayer(newPlayer)
+	mutex.Unlock()
 
 	conn.Write([]byte("Your ID: "))
-	conn.Write([]byte(newPlayer.id))
+	conn.Write([]byte(newPlayer.GetID()))
 	conn.Write([]byte("\n"))
 
 	// run loop forever (or until ctrl-c)
@@ -121,7 +131,7 @@ func newClientConnected(conn net.Conn, game *Game) {
 		if err == nil {
 			messageString := string(messageBytes)
 
-			tcpMessage := NewTCPMessage(messageString, clientIP)
+			tcpMessage := tcpmessage.NewTCPMessage(messageString, clientIP)
 
 			// output message received
 			fmt.Println("----------------")
@@ -136,14 +146,16 @@ func newClientConnected(conn net.Conn, game *Game) {
 				conn.Close()
 				return
 			} else {
-
+				mutex.Lock()
+				gameManager.MessageReceived(tcpMessage)
+				mutex.Unlock()
 				//mainChannel <- game.getPlayerByIP(tcpMessage.senderIP).id
-				gameChannelMessage := NewGameChannelMessageFromTCPMessage(tcpMessage, game)
-				game.channel <- gameChannelMessage
+				// gameChannelMessage := NewGameChannelMessageFromTCPMessage(tcpMessage, game)
+				// game.channel <- gameChannelMessage
 			}
 
 			if messageString == "game state" {
-				conn.Write([]byte(game.gameMap.toString()))
+				conn.Write([]byte(gameManager.GameState()))
 			}
 
 			// else {
@@ -202,11 +214,11 @@ func handleMessage(message string) (string, bool) {
 		return "", false
 
 	case "game state":
-		mainChannel <- game.gameMap.toString()
+		// mainChannel <- game.gameMap.toString()
 		break
 
 	case "show players":
-		printMessage = game.printPlayers()
+		// printMessage = game.printPlayers()
 		break
 
 	default:

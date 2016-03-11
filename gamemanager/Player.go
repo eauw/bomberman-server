@@ -1,4 +1,4 @@
-package main
+package gamemanager
 
 import (
 	"bomberman-server/helper"
@@ -28,6 +28,22 @@ func NewPlayer(name string) *Player {
 // func (player *Player) setPosition(x int, y int) {
 // 	player.position.setPosition(x, y)
 // }
+
+func (player *Player) GetIP() string {
+	return player.ip
+}
+
+func (player *Player) SetIP(ip string) {
+	player.ip = ip
+}
+
+func (player *Player) GetID() string {
+	return player.id
+}
+
+func (player *Player) SetID(id string) {
+	player.id = id
+}
 
 func (player *Player) toString() string {
 	idString := ""
@@ -65,24 +81,24 @@ func (player *Player) toString() string {
 	return playerString
 }
 
-func (player *Player) moveLeft() {
-	player.currentField.horizontalFieldCode -= 1
-	player.currentField.players = append(player.currentField.players, player)
-}
+// func (player *Player) moveLeft() {
+// 	player.currentField.horizontalFieldCode -= 1
+// 	player.currentField.players = append(player.currentField.players, player)
+// }
 
-func (player *Player) moveRight() {
-	lastField := player.currentField
+// func (player *Player) moveRight() {
+// 	lastField := player.currentField
 
-	player.currentField = NewField(lastField.verticalFieldCode, lastField.horizontalFieldCode+1)
-	player.currentField.players = append(player.currentField.players, player)
-}
+// 	player.currentField = NewField(lastField.verticalFieldCode, lastField.horizontalFieldCode+1)
+// 	player.currentField.players = append(player.currentField.players, player)
+// }
 
-func (player *Player) moveUp() {
-	player.currentField.verticalFieldCode -= 1
-	player.currentField.players = append(player.currentField.players, player)
-}
+// func (player *Player) moveUp() {
+// 	player.currentField.verticalFieldCode -= 1
+// 	player.currentField.players = append(player.currentField.players, player)
+// }
 
-func (player *Player) moveDown() {
-	player.currentField.verticalFieldCode += 1
-	player.currentField.players = append(player.currentField.players, player)
-}
+// func (player *Player) moveDown() {
+// 	player.currentField.verticalFieldCode += 1
+// 	player.currentField.players = append(player.currentField.players, player)
+// }

@@ -1,7 +1,8 @@
-package main
+package gamemanager
 
 import (
 	"fmt"
+	// "log"
 	"strconv"
 )
 
@@ -11,7 +12,7 @@ type Field struct {
 	verticalFieldCode   int // vCode
 	containsSpecial     bool
 	containsWall        bool
-	players             []*Player
+	players             map[string]*Player
 }
 
 func NewField(vCode int, hCode int) *Field {
@@ -23,6 +24,7 @@ func NewField(vCode int, hCode int) *Field {
 		verticalFieldCode:   vCode,
 		containsSpecial:     false,
 		containsWall:        false,
+		players:             make(map[string]*Player),
 	}
 }
 
@@ -40,9 +42,18 @@ func (field *Field) toString() string {
 
 }
 
+// func (field *Field) addPlayer(player *Player) {
+// 	field.players = append(field.players, player)
+// 	player.currentField = field
+// }
+
 func (field *Field) addPlayer(player *Player) {
-	field.players = append(field.players, player)
+	field.players[player.id] = player
 	player.currentField = field
+}
+
+func (field *Field) removePlayer(player *Player) {
+	delete(field.players, player.id)
 }
 
 func (field *Field) setSpecial(b bool) {

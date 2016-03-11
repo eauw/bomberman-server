@@ -1,4 +1,4 @@
-package main
+package gamemanager
 
 type Position struct {
 	x int

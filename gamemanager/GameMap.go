@@ -1,6 +1,8 @@
-package main
+package gamemanager
 
 import "bomberman-server/helper"
+
+// import "fmt"
 
 type GameMap struct {
 	game   *Game
@@ -17,8 +19,8 @@ func NewGameMap(size int) *GameMap {
 	}
 }
 
-func (gameMap *GameMap) field(vCode int, hCode int) *Field {
-	return gameMap.fields[vCode][hCode]
+func (gameMap *GameMap) getField(hCode int, vCode int) *Field {
+	return gameMap.fields[hCode][vCode]
 }
 
 func createFields(size int) [][]*Field {
@@ -44,7 +46,7 @@ func createFields(size int) [][]*Field {
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
-		fields[randomVerticalFieldCode][randomHorzitontalFieldCode].setWall(true)
+		fields[randomHorzitontalFieldCode][randomVerticalFieldCode].setWall(true)
 	}
 
 	// place specials
@@ -54,7 +56,7 @@ func createFields(size int) [][]*Field {
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
-		fields[randomVerticalFieldCode][randomHorzitontalFieldCode].setSpecial(true)
+		fields[randomHorzitontalFieldCode][randomVerticalFieldCode].setSpecial(true)
 	}
 
 	return fields
@@ -91,5 +93,13 @@ func (gm *GameMap) toString() string {
 	}
 
 	//gm.game.mainChannel <- mapString
+
+	// for i := range gm.fields {
+	// 	for j := range gm.fields[i] {
+	// 		f := gm.fields[i][j]
+	// 		mapString += fmt.Sprintf("%s %s", f.toString(), f.players)
+	// 	}
+	// }
+
 	return mapString
 }

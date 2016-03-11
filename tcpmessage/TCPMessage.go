@@ -1,14 +1,14 @@
-package main
+package tcpmessage
 
 type TCPMessage struct {
-	text     string
-	senderIP string
+	Text     string
+	SenderIP string
 }
 
 func NewTCPMessage(text string, senderIP string) *TCPMessage {
 
 	return &TCPMessage{
-		text:     text,
-		senderIP: senderIP,
+		Text:     text,
+		SenderIP: senderIP,
 	}
 }
