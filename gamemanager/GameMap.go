@@ -74,6 +74,8 @@ func (gm *GameMap) toString() string {
 			if len(f.players) > 0 {
 				// fmt.Printf("P")
 				mapString += "P"
+			} else if len(f.bombs) > 0 {
+				mapString += "B"
 			} else if f.containsWall == true {
 				// fmt.Printf("W")
 				mapString += "W"

@@ -106,13 +106,11 @@ func handleGameChannelMessage(gcm *GameChannelMessage) {
 	}
 }
 
-// TODO: prüfen ob spieler map verlassen will
-
 func (game *Game) PlayerMovesToLeft(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
+	currentField := player.currentField
 
 	if currentField.column == 0 {
 		return
@@ -130,7 +128,7 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
+	currentField := player.currentField
 
 	if currentField.column == (game.gameMap.size - 1) {
 		return
@@ -145,7 +143,7 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
+	currentField := player.currentField
 
 	if currentField.row == 0 {
 		return
@@ -161,7 +159,7 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
+	currentField := player.currentField
 
 	if currentField.row == (game.gameMap.size - 1) {
 		return
@@ -170,6 +168,16 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	nextField := game.gameMap.fields[currentField.row+1][currentField.column]
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
+
+}
+
+func (game *Game) PlayerPlacesBomb(player *Player) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	currentField := player.currentField
+
+	currentField.addNewBomb(player)
 
 }
 

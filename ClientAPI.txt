@@ -1,4 +1,6 @@
-"move up"
-"move down"
-"move left"
-"move right"
+Player geht ein Feld nach oben:		"move up","w"
+Player geht ein Feld nach unten:	"move down","s"
+Player geht ein Feld nach links:	"move left","a"
+Player geht ein Feld nach rechts:	"move right","d"
+Player wirft Bombe:				 	"bomb","b"
+

@@ -51,5 +51,9 @@ func (manager *Manager) MessageReceived(tcpMessage *tcpmessage.TCPMessage) {
 		manager.game.PlayerMovesToDown(player)
 		break
 
+	case "bomb":
+		manager.game.PlayerPlacesBomb(player)
+		break
+
 	}
 }
