@@ -7,24 +7,24 @@ import (
 )
 
 type Field struct {
-	id                  string
-	horizontalFieldCode int // hCode
-	verticalFieldCode   int // vCode
-	containsSpecial     bool
-	containsWall        bool
-	players             map[string]*Player
+	id              string
+	row             int // horizontal
+	column          int // vertical
+	containsSpecial bool
+	containsWall    bool
+	players         map[string]*Player
 }
 
-func NewField(hCode int, vCode int) *Field {
-	fieldID := strconv.Itoa(hCode) + strconv.Itoa(vCode)
+func NewField(row int, column int) *Field {
+	fieldID := strconv.Itoa(row) + strconv.Itoa(column)
 
 	return &Field{
-		id:                  fieldID,
-		horizontalFieldCode: hCode,
-		verticalFieldCode:   vCode,
-		containsSpecial:     false,
-		containsWall:        false,
-		players:             make(map[string]*Player),
+		id:              fieldID,
+		row:             row,
+		column:          column,
+		containsSpecial: false,
+		containsWall:    false,
+		players:         make(map[string]*Player),
 	}
 }
 
@@ -32,9 +32,9 @@ func (field *Field) toString() string {
 	i := "nil"
 	j := "nil"
 
-	i = strconv.Itoa(field.horizontalFieldCode)
+	i = strconv.Itoa(field.row)
 
-	j = strconv.Itoa(field.verticalFieldCode)
+	j = strconv.Itoa(field.column)
 
 	fieldString := fmt.Sprintf("i%s j%s", i, j)
 

@@ -2,7 +2,7 @@ package gamemanager
 
 import "bomberman-server/helper"
 
-import "fmt"
+// import "fmt"
 
 type GameMap struct {
 	game   *Game
@@ -19,8 +19,8 @@ func NewGameMap(size int) *GameMap {
 	}
 }
 
-func (gameMap *GameMap) getField(hCode int, vCode int) *Field {
-	return gameMap.fields[hCode][vCode]
+func (gameMap *GameMap) getField(row int, column int) *Field {
+	return gameMap.fields[row][column]
 }
 
 func createFields(size int) [][]*Field {
@@ -41,22 +41,22 @@ func createFields(size int) [][]*Field {
 
 	// place walls
 	for i := 0; i <= walls; i++ {
-		randomHorzitontalFieldCode := helper.RandomNumber(0, size)
-		randomVerticalFieldCode := helper.RandomNumber(0, size)
+		randomRow := helper.RandomNumber(0, size)
+		randomColumn := helper.RandomNumber(0, size)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
-		fields[randomHorzitontalFieldCode][randomVerticalFieldCode].setWall(true)
+		fields[randomRow][randomColumn].setWall(true)
 	}
 
 	// place specials
 	for i := 0; i <= specials; i++ {
-		randomHorzitontalFieldCode := helper.RandomNumber(0, size)
-		randomVerticalFieldCode := helper.RandomNumber(0, size)
+		randomRow := helper.RandomNumber(0, size)
+		randomColumn := helper.RandomNumber(0, size)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
-		fields[randomHorzitontalFieldCode][randomVerticalFieldCode].setSpecial(true)
+		fields[randomRow][randomColumn].setSpecial(true)
 	}
 
 	return fields
@@ -94,13 +94,13 @@ func (gm *GameMap) toString() string {
 
 	//gm.game.mainChannel <- mapString
 
-	for i := range gm.fields {
-		for j := range gm.fields[i] {
-			// f := gm.fields[i][j]
-			mapString += fmt.Sprintf("%d %d|", i, j)
-		}
-		mapString += "\n"
-	}
+	// for i := range gm.fields {
+	// 	for j := range gm.fields[i] {
+	// 		// f := gm.fields[i][j]
+	// 		mapString += fmt.Sprintf("%d %d|", i, j)
+	// 	}
+	// 	mapString += "\n"
+	// }
 
 	return mapString
 }

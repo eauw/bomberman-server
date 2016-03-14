@@ -106,20 +106,22 @@ func handleGameChannelMessage(gcm *GameChannelMessage) {
 	}
 }
 
+// TODO: prüfen ob spieler map verlassen will
+
 func (game *Game) PlayerMovesToLeft(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	i := player.currentField.horizontalFieldCode
-	j := player.currentField.verticalFieldCode
-	game.gameMap.fields[i][j].removePlayer(player)
-	game.gameMap.fields[i-1][j].addPlayer(player)
-	player.currentField = game.gameMap.fields[i-1][j]
-	log.Print(player.currentField.toString())
 
-	// currentField := game.gameMap.fields[player.currentField.horizontalFieldCode][player.currentField.verticalFieldCode]
-	// nextField := game.gameMap.fields[currentField.horizontalFieldCode-1][currentField.verticalFieldCode]
-	// nextField.addPlayer(player)
-	// currentField.removePlayer(player)
+	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
+
+	if currentField.column == 0 {
+		return
+	}
+
+	nextField := game.gameMap.fields[currentField.row][currentField.column-1]
+	nextField.addPlayer(player)
+	currentField.removePlayer(player)
+
 }
 
 var mutex = &sync.Mutex{}
@@ -127,62 +129,48 @@ var mutex = &sync.Mutex{}
 func (game *Game) PlayerMovesToRight(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	log.Println(player)
-	i := player.currentField.horizontalFieldCode
-	j := player.currentField.verticalFieldCode
-	log.Println(i)
-	log.Println(j)
 
-	oldField := game.gameMap.getField(i, j)
-	log.Println(oldField)
-	oldField.removePlayer(player)
-	log.Println(oldField)
-	// game.gameMap.fields[i][j].removePlayer(player)
-	i += 1
-	newField := game.gameMap.getField(i, j)
-	log.Println(newField)
-	newField.addPlayer(player)
-	log.Println(newField)
-	// game.gameMap.fields[i+1][j].addPlayer(player)
-	player.currentField = newField
-	log.Print(player.currentField.toString())
+	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
 
-	// currentField := game.gameMap.fields[player.currentField.horizontalFieldCode][player.currentField.verticalFieldCode]
-	// nextField := game.gameMap.fields[currentField.horizontalFieldCode+1][currentField.verticalFieldCode]
-	// nextField.addPlayer(player)
-	// currentField.removePlayer(player)
+	if currentField.column == (game.gameMap.size - 1) {
+		return
+	}
+
+	nextField := game.gameMap.fields[currentField.row][currentField.column+1]
+	nextField.addPlayer(player)
+	currentField.removePlayer(player)
 }
 
 func (game *Game) PlayerMovesToUp(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	i := player.currentField.horizontalFieldCode
-	j := player.currentField.verticalFieldCode
-	game.gameMap.fields[i][j].removePlayer(player)
-	game.gameMap.fields[i][j-1].addPlayer(player)
-	player.currentField = game.gameMap.fields[i][j-1]
-	log.Print(player.currentField.toString())
 
-	// currentField := game.gameMap.fields[player.currentField.horizontalFieldCode][player.currentField.verticalFieldCode]
-	// nextField := game.gameMap.fields[currentField.horizontalFieldCode][currentField.verticalFieldCode-1]
-	// nextField.addPlayer(player)
-	// currentField.removePlayer(player)
+	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
+
+	if currentField.row == 0 {
+		return
+	}
+
+	nextField := game.gameMap.fields[currentField.row-1][currentField.column]
+	nextField.addPlayer(player)
+	currentField.removePlayer(player)
+
 }
 
 func (game *Game) PlayerMovesToDown(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	i := player.currentField.horizontalFieldCode
-	j := player.currentField.verticalFieldCode
-	game.gameMap.fields[i][j].removePlayer(player)
-	game.gameMap.fields[i][j+1].addPlayer(player)
-	player.currentField = game.gameMap.fields[i][j+1]
-	log.Print(player.currentField.toString())
 
-	// currentField := game.gameMap.fields[player.currentField.horizontalFieldCode][player.currentField.verticalFieldCode]
-	// nextField := game.gameMap.fields[currentField.horizontalFieldCode][currentField.verticalFieldCode+1]
-	// nextField.addPlayer(player)
-	// currentField.removePlayer(player)
+	currentField := game.gameMap.fields[player.currentField.row][player.currentField.column]
+
+	if currentField.row == (game.gameMap.size - 1) {
+		return
+	}
+
+	nextField := game.gameMap.fields[currentField.row+1][currentField.column]
+	nextField.addPlayer(player)
+	currentField.removePlayer(player)
+
 }
 
 // func (game *Game) placePlayers() {
