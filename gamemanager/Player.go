@@ -14,15 +14,19 @@ type Player struct {
 	points       int
 	currentField *Field
 	hasSpecial   bool // wenn true dann hat er ein special eingesammelt und kann währenddessen irgendwas besonderes
+	isParalyzed  bool
 }
 
 // NewPlayer function is the players constructor
-func NewPlayer(name string) *Player {
+func NewPlayer(n string, f *Field) *Player {
 	playerID := helper.RandomString(8)
 
 	return &Player{
-		id:   playerID,
-		name: name,
+		id:           playerID,
+		name:         n,
+		currentField: f,
+		isParalyzed:  false,
+		hasSpecial:   false,
 	}
 }
 

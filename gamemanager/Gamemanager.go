@@ -24,8 +24,12 @@ func (manager *Manager) Start() {
 
 }
 
-func (manager *Manager) PlayerConnected(player *Player) {
-	manager.game.addPlayer(player)
+func (manager *Manager) PlayerConnected(ip string) *Player {
+	newPlayer := NewPlayer("New Player", manager.game.gameMap.fields[0][0])
+	newPlayer.SetIP(ip)
+	manager.game.addPlayer(newPlayer)
+
+	return newPlayer
 }
 
 func (manager *Manager) GameState() string {
@@ -35,25 +39,31 @@ func (manager *Manager) GameState() string {
 func (manager *Manager) MessageReceived(tcpMessage *tcpmessage.TCPMessage) {
 	player := manager.game.getPlayerByIP(tcpMessage.SenderIP)
 	switch tcpMessage.Text {
-	case "move right":
+	case "d":
 		manager.game.PlayerMovesToRight(player)
 		break
 
-	case "move left":
+	case "a":
 		manager.game.PlayerMovesToLeft(player)
 		break
 
-	case "move up":
+	case "w":
 		manager.game.PlayerMovesToUp(player)
 		break
 
-	case "move down":
+	case "s":
 		manager.game.PlayerMovesToDown(player)
 		break
 
-	case "bomb":
+	case "b":
 		manager.game.PlayerPlacesBomb(player)
 		break
 
+	case "x":
+		manager.game.ExplodeBomb()
+		break
+
+	case "end":
+		break
 	}
 }

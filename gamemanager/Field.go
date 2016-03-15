@@ -12,6 +12,7 @@ type Field struct {
 	column          int // vertical
 	containsSpecial bool
 	containsWall    bool
+	explodes        bool
 	players         map[string]*Player
 	bombs           []*Bomb
 }
@@ -25,6 +26,7 @@ func NewField(row int, column int) *Field {
 		column:          column,
 		containsSpecial: false,
 		containsWall:    false,
+		explodes:        false,
 		players:         make(map[string]*Player),
 		bombs:           make([]*Bomb, 0),
 	}
@@ -66,8 +68,11 @@ func (field *Field) setWall(b bool) {
 	field.containsWall = b
 }
 
-func (field *Field) addNewBomb(player *Player) {
-	field.bombs = append(field.bombs, NewBomb(player))
+func (field *Field) addNewBomb(player *Player) *Bomb {
+	bomb := NewBomb(player, field)
+	field.bombs = append(field.bombs, bomb)
+
+	return bomb
 }
 
 func (field *Field) removeBomb(bomb *Bomb) {
@@ -75,16 +80,18 @@ func (field *Field) removeBomb(bomb *Bomb) {
 
 	for i := range field.bombs {
 		if field.bombs[i] == bomb {
-			index = 1
+			index = i
 		}
 	}
 
-	slice1 := field.bombs[:index]
-	slice2 := field.bombs[index+1:]
+	if index > 0 {
+		slice1 := field.bombs[:index]
+		slice2 := field.bombs[index+1:]
 
-	newArray := append(slice1, slice2...)
+		newArray := append(slice1, slice2...)
 
-	field.bombs = newArray
+		field.bombs = newArray
+	}
 
 }
 

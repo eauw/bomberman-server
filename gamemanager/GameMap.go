@@ -8,6 +8,7 @@ type GameMap struct {
 	game   *Game
 	size   int
 	fields [][]*Field
+	bombs  []*Bomb
 }
 
 func NewGameMap(size int) *GameMap {
@@ -16,11 +17,97 @@ func NewGameMap(size int) *GameMap {
 	return &GameMap{
 		size:   size,
 		fields: f,
+		bombs:  []*Bomb{},
 	}
 }
 
-func (gameMap *GameMap) getField(row int, column int) *Field {
-	return gameMap.fields[row][column]
+// Liefert ein Feld anhand der Indizes zurück und True bei Erfolg, sonst False.
+func (gameMap *GameMap) getField(row int, column int) (*Field, bool) {
+	if row < 0 || row > len(gameMap.fields) || column < 0 || column > len(gameMap.fields) {
+		return nil, false
+	} else {
+		return gameMap.fields[row][column], true
+	}
+
+}
+
+// Liefert alle angrenzenden Felder eines Feldes als Array zurück. Das Ausgangsfeld ist nicht inbegriffen.
+func (gameMap *GameMap) GetFieldsAroundField(f *Field) []*Field {
+	arr := []*Field{}
+
+	if newField1, x := gameMap.getField(f.row-1, f.column-1); x {
+		arr = append(arr, newField1)
+	}
+	if newField2, x := gameMap.getField(f.row-1, f.column); x {
+		arr = append(arr, newField2)
+	}
+	if newField3, x := gameMap.getField(f.row-1, f.column+1); x {
+		arr = append(arr, newField3)
+	}
+	if newField4, x := gameMap.getField(f.row, f.column-1); x {
+		arr = append(arr, newField4)
+	}
+	if newField6, x := gameMap.getField(f.row, f.column+1); x {
+		arr = append(arr, newField6)
+	}
+	if newField7, x := gameMap.getField(f.row+1, f.column-1); x {
+		arr = append(arr, newField7)
+	}
+	if newField8, x := gameMap.getField(f.row+1, f.column); x {
+		arr = append(arr, newField8)
+	}
+	if newField9, x := gameMap.getField(f.row+1, f.column+1); x {
+		arr = append(arr, newField9)
+	}
+
+	// arr := []*Field{newField1, newField2, newField3, newField4, newField6, newField7, newField8, newField9}
+
+	return arr
+}
+
+// liefert das obere, rechte, untere und linke Feld eines Feldes als Array zurück. Das Ausgangsfeld ist nicht inbegriffen.
+func (gameMap *GameMap) GetNOSWFieldsOfField(f *Field) []*Field {
+	arr := []*Field{}
+
+	if newField2, x := gameMap.getField(f.row-1, f.column); x {
+		arr = append(arr, newField2)
+	}
+	if newField4, x := gameMap.getField(f.row, f.column-1); x {
+		arr = append(arr, newField4)
+	}
+	if newField6, x := gameMap.getField(f.row, f.column+1); x {
+		arr = append(arr, newField6)
+	}
+	if newField8, x := gameMap.getField(f.row+1, f.column); x {
+		arr = append(arr, newField8)
+	}
+
+	// arr := []*Field{newField2, newField4, newField6, newField8}
+
+	return arr
+}
+
+func (gameMap *GameMap) addBomb(b *Bomb) {
+	gameMap.bombs = append(gameMap.bombs, b)
+}
+
+func (gameMap *GameMap) removeBomb(b *Bomb) {
+	index := -1
+
+	for i := range gameMap.bombs {
+		if gameMap.bombs[i] == b {
+			index = i
+		}
+	}
+
+	if index > 0 {
+		slice1 := gameMap.bombs[:index]
+		slice2 := gameMap.bombs[index+1:]
+
+		newArray := append(slice1, slice2...)
+
+		gameMap.bombs = newArray
+	}
 }
 
 func createFields(size int) [][]*Field {

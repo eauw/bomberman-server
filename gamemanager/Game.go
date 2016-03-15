@@ -57,8 +57,8 @@ func (game *Game) GetPlayersArray() []*Player {
 }
 
 func (game *Game) addPlayer(player *Player) {
-	player.currentField = game.gameMap.getField(0, 0)
-	game.gameMap.getField(0, 0).addPlayer(player) // .players = append(firstField.players, player)
+	player.currentField = game.gameMap.fields[0][0]
+	game.gameMap.fields[0][0].addPlayer(player) // .players = append(firstField.players, player)
 	game.players[player.id] = player
 }
 
@@ -110,9 +110,15 @@ func handleGameChannelMessage(gcm *GameChannelMessage) {
 	}
 }
 
+var mutex = &sync.Mutex{}
+
 func (game *Game) PlayerMovesToLeft(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
+
+	if player.isParalyzed {
+		return
+	}
 
 	currentField := player.currentField
 
@@ -138,11 +144,13 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 
 }
 
-var mutex = &sync.Mutex{}
-
 func (game *Game) PlayerMovesToRight(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
+
+	if player.isParalyzed {
+		return
+	}
 
 	currentField := player.currentField
 
@@ -171,6 +179,10 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
+	if player.isParalyzed {
+		return
+	}
+
 	currentField := player.currentField
 
 	// prüfen ob der Spieler sich am Spielfeldrand befindet
@@ -198,6 +210,10 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 func (game *Game) PlayerMovesToDown(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
+
+	if player.isParalyzed {
+		return
+	}
 
 	currentField := player.currentField
 
@@ -229,8 +245,27 @@ func (game *Game) PlayerPlacesBomb(player *Player) {
 
 	currentField := player.currentField
 
-	currentField.addNewBomb(player)
+	bomb := currentField.addNewBomb(player)
+	game.gameMap.addBomb(bomb)
+}
 
+func (game *Game) ExplodeBomb() {
+	game.gameMap.bombs = []*Bomb{}
+
+	//var fields []*Field
+
+	for i := range game.gameMap.fields {
+		for j := range game.gameMap.fields[i] {
+			if len(game.gameMap.fields[i][j].bombs) > 0 {
+				for ib := range game.gameMap.fields[i][j].bombs {
+					game.gameMap.fields[i][j].bombs[ib].explode(game.gameMap)
+				}
+			}
+
+			game.gameMap.fields[i][j].bombs = []*Bomb{}
+
+		}
+	}
 }
 
 // func (game *Game) placePlayers() {

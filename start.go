@@ -112,13 +112,8 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	// get clients ip
 	clientIP := helper.IpFromAddr(conn)
 
-	// create player
-	newPlayer := gamemanager.NewPlayer("New Player")
-	newPlayer.SetIP(clientIP)
-
 	mutex.Lock()
-	gameManager.PlayerConnected(newPlayer)
-	// game.gameMap.fields[0][0].addPlayer(newPlayer)
+	newPlayer := gameManager.PlayerConnected(clientIP)
 	mutex.Unlock()
 
 	conn.Write([]byte("Your ID: "))
@@ -154,7 +149,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 				// game.channel <- gameChannelMessage
 			}
 
-			if messageString == "game state" {
+			if messageString == "l" {
 				conn.Write([]byte(gameManager.GameState()))
 			}
 
