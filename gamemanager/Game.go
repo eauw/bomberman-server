@@ -7,10 +7,12 @@ import (
 )
 
 type Game struct {
-	channel     chan *GameChannelMessage
-	mainChannel chan string
-	gameMap     *GameMap
-	players     map[string]*Player
+	channel      chan *GameChannelMessage
+	mainChannel  chan string
+	gameMap      *GameMap
+	players      map[string]*Player
+	rounds       int
+	currentRound int
 }
 
 func NewGame() *Game {
@@ -18,9 +20,11 @@ func NewGame() *Game {
 	gm := NewGameMap(10)
 
 	newGame := &Game{
-		channel: ch,
-		gameMap: gm,
-		players: make(map[string]*Player),
+		channel:      ch,
+		gameMap:      gm,
+		players:      make(map[string]*Player),
+		currentRound: 1,
+		rounds:       20,
 	}
 
 	gm.game = newGame
@@ -112,11 +116,23 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 
 	currentField := player.currentField
 
+	// prüfen ob der Spieler sich am Spielfeldrand befindet
 	if currentField.column == 0 {
 		return
 	}
 
 	nextField := game.gameMap.fields[currentField.row][currentField.column-1]
+
+	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
+	if nextField.containsWall {
+		return
+	}
+
+	if nextField.containsSpecial {
+		player.hasSpecial = true
+		nextField.containsSpecial = false
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -130,11 +146,23 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 
 	currentField := player.currentField
 
+	// prüfen ob der Spieler sich am Spielfeldrand befindet
 	if currentField.column == (game.gameMap.size - 1) {
 		return
 	}
 
 	nextField := game.gameMap.fields[currentField.row][currentField.column+1]
+
+	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
+	if nextField.containsWall {
+		return
+	}
+
+	if nextField.containsSpecial {
+		player.hasSpecial = true
+		nextField.containsSpecial = false
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 }
@@ -145,11 +173,23 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 
 	currentField := player.currentField
 
+	// prüfen ob der Spieler sich am Spielfeldrand befindet
 	if currentField.row == 0 {
 		return
 	}
 
 	nextField := game.gameMap.fields[currentField.row-1][currentField.column]
+
+	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
+	if nextField.containsWall {
+		return
+	}
+
+	if nextField.containsSpecial {
+		player.hasSpecial = true
+		nextField.containsSpecial = false
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -161,11 +201,23 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 
 	currentField := player.currentField
 
+	// prüfen ob der Spieler sich am Spielfeldrand befindet
 	if currentField.row == (game.gameMap.size - 1) {
 		return
 	}
 
 	nextField := game.gameMap.fields[currentField.row+1][currentField.column]
+
+	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
+	if nextField.containsWall {
+		return
+	}
+
+	if nextField.containsSpecial {
+		player.hasSpecial = true
+		nextField.containsSpecial = false
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 

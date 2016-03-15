@@ -9,3 +9,7 @@ func NewBomb(player *Player) *Bomb {
 		owner: player,
 	}
 }
+
+func (bomb *Bomb) explode() {
+
+}

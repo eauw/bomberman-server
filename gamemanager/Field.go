@@ -71,7 +71,21 @@ func (field *Field) addNewBomb(player *Player) {
 }
 
 func (field *Field) removeBomb(bomb *Bomb) {
-	// TODO: implementieren
+	index := -1
+
+	for i := range field.bombs {
+		if field.bombs[i] == bomb {
+			index = 1
+		}
+	}
+
+	slice1 := field.bombs[:index]
+	slice2 := field.bombs[index+1:]
+
+	newArray := append(slice1, slice2...)
+
+	field.bombs = newArray
+
 }
 
 // mach aus 1 -> 01 usw bis 10, ab dann normal

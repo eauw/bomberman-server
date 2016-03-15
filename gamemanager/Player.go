@@ -13,6 +13,7 @@ type Player struct {
 	name         string
 	points       int
 	currentField *Field
+	hasSpecial   bool // wenn true dann hat er ein special eingesammelt und kann währenddessen irgendwas besonderes
 }
 
 // NewPlayer function is the players constructor
