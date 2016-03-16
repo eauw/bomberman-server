@@ -88,6 +88,10 @@ func (game *Game) getPlayerByIP(ip string) *Player {
 	return nil
 }
 
+func (game *Game) getPlayerByID(id string) *Player {
+	return game.players[id]
+}
+
 func handleGameChannelMessage(gcm *GameChannelMessage) {
 	log.Printf("aaaa: %s", gcm.player.toString())
 	switch gcm.GetText() {

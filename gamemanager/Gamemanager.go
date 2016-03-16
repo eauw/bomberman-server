@@ -3,6 +3,7 @@ package gamemanager
 import (
 	"bomberman-server/tcpmessage"
 	"fmt"
+	// "log"
 	"math/rand"
 	"time"
 )
@@ -27,7 +28,11 @@ func (manager *Manager) SetMainChannel(ch chan string) {
 }
 
 func (manager *Manager) Start() {
+	manager.generatePlayersOrder()
+	// log.Print(manager.playersOrder)
+	manager.setCurrentPlayer(manager.game.getPlayerByID(manager.playersOrder[0]))
 
+	manager.mainChannel <- fmt.Sprintf("first player: %s", manager.currentPlayer.id)
 }
 
 func (manager *Manager) GetCurrentPlayer() *Player {
@@ -38,6 +43,15 @@ func (manager *Manager) setCurrentPlayer(p *Player) {
 	manager.currentPlayer = p
 }
 
+func (manager *Manager) PlayersCount() int {
+	if manager.game.players != nil {
+		return len(manager.game.players)
+	} else {
+		return 0
+	}
+}
+
+// Erstellt eine zufällige Spielerreihenfolge für die Runden.
 func (manager *Manager) generatePlayersOrder() {
 	a := []string{}
 

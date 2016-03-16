@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	maximumPlayers = 2
+)
+
 // var game *game.Game
 // var gameChannel chan *GameChannelMessage
 var httpServer *HTTPServer
@@ -42,7 +46,7 @@ func main() {
 	// game = NewGame()
 	// gameChannel = game.channel
 	// game.mainChannel = mainChannel
-	gameManager.Start()
+
 	// mainChannel <- game.gameMap.toString()
 
 	for {
@@ -115,6 +119,10 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	mutex.Lock()
 	newPlayer := gameManager.PlayerConnected(clientIP)
 	mutex.Unlock()
+
+	if gameManager.PlayersCount() >= maximumPlayers {
+		gameManager.Start()
+	}
 
 	conn.Write([]byte("Your ID: "))
 	conn.Write([]byte(newPlayer.GetID()))
