@@ -2,17 +2,23 @@ package gamemanager
 
 import (
 	"bomberman-server/tcpmessage"
+	"fmt"
+	"math/rand"
+	"time"
 )
 
 type Manager struct {
-	game        *Game
-	channel     chan *GameChannelMessage
-	mainChannel chan string
+	game          *Game
+	channel       chan *GameChannelMessage
+	mainChannel   chan string
+	currentPlayer *Player
+	playersOrder  []string
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		game: NewGame(),
+		game:         NewGame(),
+		playersOrder: []string{},
 	}
 }
 
@@ -24,6 +30,32 @@ func (manager *Manager) Start() {
 
 }
 
+func (manager *Manager) GetCurrentPlayer() *Player {
+	return manager.currentPlayer
+}
+
+func (manager *Manager) setCurrentPlayer(p *Player) {
+	manager.currentPlayer = p
+}
+
+func (manager *Manager) generatePlayersOrder() {
+	a := []string{}
+
+	for i := range manager.game.players {
+		a = append(a, manager.game.players[i].id)
+	}
+
+	rand.Seed(time.Now().UnixNano())
+
+	// shuffle
+	for i := range a {
+		j := rand.Intn(i + 1)
+		a[i], a[j] = a[j], a[i]
+	}
+
+	manager.playersOrder = a
+}
+
 func (manager *Manager) PlayerConnected(ip string) *Player {
 	newPlayer := NewPlayer("New Player", manager.game.gameMap.fields[0][0])
 	newPlayer.SetIP(ip)
@@ -33,7 +65,10 @@ func (manager *Manager) PlayerConnected(ip string) *Player {
 }
 
 func (manager *Manager) GameState() string {
-	return manager.game.gameMap.toString()
+	gameState := manager.game.gameMap.toString()
+	gameState += "\n"
+	gameState += fmt.Sprintf("Runde: %d\n", manager.game.currentRound)
+	return gameState
 }
 
 func (manager *Manager) MessageReceived(tcpMessage *tcpmessage.TCPMessage) {
