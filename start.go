@@ -117,7 +117,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	clientIP := helper.IpFromAddr(conn)
 
 	mutex.Lock()
-	newPlayer := gameManager.PlayerConnected(clientIP)
+	newPlayer := gameManager.PlayerConnected(clientIP, conn)
 	mutex.Unlock()
 
 	if gameManager.PlayersCount() >= maximumPlayers {
@@ -145,7 +145,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
 
 			// if message is "quit" server will close connection
-			if _, b := handleMessage(messageString); b == false {
+			if messageString == "quit" {
 				conn.Close()
 				return
 			} else {
@@ -157,9 +157,9 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 				// game.channel <- gameChannelMessage
 			}
 
-			if messageString == "l" {
-				conn.Write([]byte(gameManager.GameState()))
-			}
+			// if messageString == "l" {
+			// 	conn.Write([]byte(gameManager.GameState()))
+			// }
 
 			// else {
 			// 	switch m {
@@ -225,7 +225,7 @@ func handleMessage(message string) (string, bool) {
 		break
 
 	default:
-		fmt.Printf("invalid command: %d", len(message))
+		fmt.Printf("invalid command: %d", message)
 		break
 	}
 

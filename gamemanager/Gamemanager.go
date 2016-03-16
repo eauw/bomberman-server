@@ -5,6 +5,7 @@ import (
 	"fmt"
 	// "log"
 	"math/rand"
+	"net"
 	"time"
 )
 
@@ -14,12 +15,14 @@ type Manager struct {
 	mainChannel   chan string
 	currentPlayer *Player
 	playersOrder  []string
+	playersConn   map[string]net.Conn
 }
 
 func NewManager() *Manager {
 	return &Manager{
 		game:         NewGame(),
 		playersOrder: []string{},
+		playersConn:  map[string]net.Conn{},
 	}
 }
 
@@ -33,6 +36,7 @@ func (manager *Manager) Start() {
 	manager.setCurrentPlayer(manager.game.getPlayerByID(manager.playersOrder[0]))
 
 	manager.mainChannel <- fmt.Sprintf("first player: %s", manager.currentPlayer.id)
+	manager.notifyCurrentPlayer()
 }
 
 func (manager *Manager) GetCurrentPlayer() *Player {
@@ -70,10 +74,12 @@ func (manager *Manager) generatePlayersOrder() {
 	manager.playersOrder = a
 }
 
-func (manager *Manager) PlayerConnected(ip string) *Player {
+func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	newPlayer := NewPlayer("New Player", manager.game.gameMap.fields[0][0])
 	newPlayer.SetIP(ip)
 	manager.game.addPlayer(newPlayer)
+
+	manager.playersConn[newPlayer.id] = conn
 
 	return newPlayer
 }
@@ -82,6 +88,7 @@ func (manager *Manager) GameState() string {
 	gameState := manager.game.gameMap.toString()
 	gameState += "\n"
 	gameState += fmt.Sprintf("Runde: %d\n", manager.game.currentRound)
+
 	return gameState
 }
 
@@ -112,7 +119,23 @@ func (manager *Manager) MessageReceived(tcpMessage *tcpmessage.TCPMessage) {
 		manager.game.ExplodeBomb()
 		break
 
+	case "l":
+		manager.gameStateRequestedByPlayer(player)
+
 	case "end":
 		break
 	}
+}
+
+func (manager *Manager) gameStateRequestedByPlayer(p *Player) {
+	conn := manager.playersConn[p.id]
+	conn.Write([]byte(manager.GameState()))
+}
+
+func (manager *Manager) notifyCurrentPlayer() {
+	if manager.currentPlayer != nil {
+		conn := manager.playersConn[manager.currentPlayer.id]
+		conn.Write([]byte("Your turn\n"))
+	}
+
 }

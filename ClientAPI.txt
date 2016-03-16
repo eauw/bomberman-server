@@ -1,3 +1,5 @@
+# Befehle von Client zu Server
+
 Player geht ein Feld nach oben:			"move up","w"
 
 Player geht ein Feld nach unten:		"move down","s"
@@ -11,3 +13,7 @@ Player wirft Bombe:				 		"bomb","b"
 Player beendet seine Züge für diese Runde: "end"
 
 Game State: "l"
+
+# Befehle von Server an Client:
+"Your turn" => Wenn der Spieler dran ist.
+
