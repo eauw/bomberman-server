@@ -13,7 +13,6 @@ type Game struct {
 	players      map[string]*Player
 	rounds       int
 	currentRound int
-	started      bool
 }
 
 func NewGame() *Game {
@@ -26,7 +25,6 @@ func NewGame() *Game {
 		players:      make(map[string]*Player),
 		currentRound: 1,
 		rounds:       20,
-		started:      false,
 	}
 
 	gm.game = newGame
@@ -35,7 +33,6 @@ func NewGame() *Game {
 }
 
 func (game *Game) start() {
-	game.started = true
 	go game.handleGameChannel()
 }
 
