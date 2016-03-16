@@ -152,29 +152,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 				mutex.Lock()
 				gameManager.MessageReceived(tcpMessage)
 				mutex.Unlock()
-				//mainChannel <- game.getPlayerByIP(tcpMessage.senderIP).id
-				// gameChannelMessage := NewGameChannelMessageFromTCPMessage(tcpMessage, game)
-				// game.channel <- gameChannelMessage
 			}
-
-			// if messageString == "l" {
-			// 	conn.Write([]byte(gameManager.GameState()))
-			// }
-
-			// else {
-			// 	switch m {
-			// 	case "game":
-			// 		gameChannelMessage := NewGameChannelMessage()
-			// 		gameChannelMessage.tcpMessage = tcpMessage
-			// 		game.channel <- gameChannelMessage
-			// 		break
-
-			// 	case "main":
-			// 		//game.mainChannel <- messageString
-			// 		break
-			// 	}
-
-			// }
 
 			// sample process for string received
 			newMessage := strings.ToUpper(messageString)

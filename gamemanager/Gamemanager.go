@@ -93,38 +93,48 @@ func (manager *Manager) GameState() string {
 }
 
 func (manager *Manager) MessageReceived(tcpMessage *tcpmessage.TCPMessage) {
-	player := manager.game.getPlayerByIP(tcpMessage.SenderIP)
-	switch tcpMessage.Text {
-	case "d":
-		manager.game.PlayerMovesToRight(player)
-		break
+	if manager.game.started {
+		player := manager.game.getPlayerByIP(tcpMessage.SenderIP)
 
-	case "a":
-		manager.game.PlayerMovesToLeft(player)
-		break
+		if player.id == manager.currentPlayer.id {
+			switch tcpMessage.Text {
+			case "d":
+				manager.game.PlayerMovesToRight(player)
+				break
 
-	case "w":
-		manager.game.PlayerMovesToUp(player)
-		break
+			case "a":
+				manager.game.PlayerMovesToLeft(player)
+				break
 
-	case "s":
-		manager.game.PlayerMovesToDown(player)
-		break
+			case "w":
+				manager.game.PlayerMovesToUp(player)
+				break
 
-	case "b":
-		manager.game.PlayerPlacesBomb(player)
-		break
+			case "s":
+				manager.game.PlayerMovesToDown(player)
+				break
 
-	case "x":
-		manager.game.ExplodeBomb()
-		break
+			case "b":
+				manager.game.PlayerPlacesBomb(player)
+				break
 
-	case "l":
-		manager.gameStateRequestedByPlayer(player)
+			case "x":
+				manager.game.ExplodeBomb()
+				break
 
-	case "end":
-		break
+			case "l":
+				manager.gameStateRequestedByPlayer(player)
+
+			case "end":
+				break
+			}
+		} else {
+			conn := manager.playersConn[player.id]
+			conn.Write([]byte("not your turn"))
+		}
+
 	}
+
 }
 
 func (manager *Manager) gameStateRequestedByPlayer(p *Player) {
