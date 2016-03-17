@@ -13,9 +13,9 @@ type Player struct {
 	name         string
 	points       int
 	currentField *Field
-	hasSpecial   bool // wenn true dann hat er ein special eingesammelt und kann währenddessen irgendwas besonderes
 	isParalyzed  bool
 	isFox        bool
+	bombs        []*Bomb
 }
 
 // NewPlayer function is the players constructor
@@ -27,8 +27,8 @@ func NewPlayer(n string, f *Field) *Player {
 		name:         n,
 		currentField: f,
 		isParalyzed:  false,
-		hasSpecial:   false,
 		isFox:        false,
+		bombs:        []*Bomb{NewBomb()},
 	}
 }
 

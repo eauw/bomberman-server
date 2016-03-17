@@ -177,8 +177,9 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 		return
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	if nextField.special != nil {
-		player.hasSpecial = true
+		// TODO: special auf player anwenden
 		nextField.special = nil
 	}
 
@@ -209,8 +210,9 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 		return
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	if nextField.special != nil {
-		player.hasSpecial = true
+		// TODO: special auf player anwenden
 		nextField.special = nil
 	}
 
@@ -241,10 +243,11 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 	}
 
 	if nextField.special != nil {
-		player.hasSpecial = true
+		// TODO: special auf player anwenden
 		nextField.special = nil
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -273,10 +276,11 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	}
 
 	if nextField.special != nil {
-		player.hasSpecial = true
+		// TODO: special auf player anwenden
 		nextField.special = nil
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 

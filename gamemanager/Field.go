@@ -69,7 +69,8 @@ func (field *Field) setWall(destructible bool) {
 }
 
 func (field *Field) addNewBomb(player *Player) *Bomb {
-	bomb := NewBomb(player, field)
+	bomb := NewBomb()
+	bomb.field = field
 	field.bombs = append(field.bombs, bomb)
 
 	return bomb

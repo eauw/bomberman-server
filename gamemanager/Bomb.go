@@ -2,14 +2,11 @@ package gamemanager
 
 type Bomb struct {
 	owner *Player
-	field *Field
+	field *Field // das Feld auf das die Bombe geworfen wurde
 }
 
-func NewBomb(p *Player, f *Field) *Bomb {
-	return &Bomb{
-		owner: p,
-		field: f,
-	}
+func NewBomb() *Bomb {
+	return &Bomb{}
 }
 
 func (bomb *Bomb) explode(gameMap *GameMap) {
