@@ -3,10 +3,15 @@ package gamemanager
 type Bomb struct {
 	owner *Player
 	field *Field // das Feld auf das die Bombe geworfen wurde
+	reach int    // Reichweite der Bombe
+	timer int    // Zeit/Runden die die Bombe braucht zum explodieren
 }
 
 func NewBomb() *Bomb {
-	return &Bomb{}
+	return &Bomb{
+		reach: 1,
+		timer: 3,
+	}
 }
 
 func (bomb *Bomb) explode(gameMap *GameMap) {
