@@ -15,5 +15,6 @@ Player beendet seine Züge für diese Runde: "n"
 Game State: "l"
 
 # Befehle von Server an Client:
-"Your turn" => Wenn der Spieler dran ist.
+"yt" => Wenn der Spieler dran ist.
 
+"nyt" => Wenn der Spieler nicht dran ist.

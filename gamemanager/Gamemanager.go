@@ -3,7 +3,7 @@ package gamemanager
 import (
 	// "bomberman-server/tcpmessage"
 	"fmt"
-	// "log"
+	"log"
 	"math/rand"
 	"net"
 	"time"
@@ -21,7 +21,7 @@ type Manager struct {
 func NewManager() *Manager {
 	return &Manager{
 		game:               NewGame(),
-		playersOrder:       []string{},
+		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
 	}
@@ -37,7 +37,7 @@ func (manager *Manager) Start() {
 	manager.currentPlayerIndex = 0
 	// manager.setCurrentPlayer(manager.game.getPlayerByID(manager.playersOrder[0]))
 	currentPlayer := manager.GetCurrentPlayer()
-
+	manager.game.start()
 	manager.mainChannel <- fmt.Sprintf("first player: %s", currentPlayer.id)
 	manager.notifyCurrentPlayer()
 }
@@ -102,43 +102,48 @@ func (manager *Manager) GameState() string {
 }
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
-	currentPlayer := manager.GetCurrentPlayer()
-	if player.id == currentPlayer.id {
-		switch message {
-		case "d":
-			manager.game.PlayerMovesToRight(player)
-			break
+	if manager.game.started {
+		currentPlayer := manager.GetCurrentPlayer()
+		if player.id == currentPlayer.id {
+			switch message {
+			case "d":
+				manager.game.PlayerMovesToRight(player)
+				break
 
-		case "a":
-			manager.game.PlayerMovesToLeft(player)
-			break
+			case "a":
+				manager.game.PlayerMovesToLeft(player)
+				break
 
-		case "w":
-			manager.game.PlayerMovesToUp(player)
-			break
+			case "w":
+				manager.game.PlayerMovesToUp(player)
+				break
 
-		case "s":
-			manager.game.PlayerMovesToDown(player)
-			break
+			case "s":
+				manager.game.PlayerMovesToDown(player)
+				break
 
-		case "b":
-			manager.game.PlayerPlacesBomb(player)
-			break
+			case "b":
+				manager.game.PlayerPlacesBomb(player)
+				break
 
-		case "x":
-			manager.game.ExplodeBomb()
-			break
+			case "x":
+				manager.game.ExplodeBomb()
+				break
 
-		case "l":
-			manager.gameStateRequestedByPlayer(player)
+			case "l":
+				manager.gameStateRequestedByPlayer(player)
 
-		case "n":
-			manager.setNextPlayer()
-			break
+			case "n":
+				manager.setNextPlayer()
+				break
+			}
+		} else {
+			conn := manager.playersConn[player.id]
+			conn.Write([]byte("nyt: not your turn!\n"))
 		}
 	} else {
 		conn := manager.playersConn[player.id]
-		conn.Write([]byte("not your turn!"))
+		conn.Write([]byte("Game waiting for more players.\n"))
 	}
 }
 
@@ -151,7 +156,7 @@ func (manager *Manager) notifyCurrentPlayer() {
 	currentPlayer := manager.GetCurrentPlayer()
 	if currentPlayer != nil {
 		conn := manager.playersConn[currentPlayer.id]
-		conn.Write([]byte("Your turn\n"))
+		conn.Write([]byte("yt: Your turn\n"))
 	}
 
 }
