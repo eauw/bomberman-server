@@ -16,8 +16,6 @@ const (
 	maximumPlayers = 2
 )
 
-// var game *game.Game
-// var gameChannel chan *GameChannelMessage
 var httpServer *HTTPServer
 var httpChannel chan string
 var mainChannel chan string
@@ -42,11 +40,6 @@ func main() {
 	// create game
 	gameManager := gamemanager.NewManager()
 	gameManager.SetMainChannel(mainChannel)
-	// game = NewGame()
-	// gameChannel = game.channel
-	// game.mainChannel = mainChannel
-
-	// mainChannel <- game.gameMap.toString()
 
 	for {
 		// accept connection on port
@@ -149,29 +142,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 				mutex.Lock()
 				gameManager.MessageReceived(messageString, newPlayer)
 				mutex.Unlock()
-				//mainChannel <- game.getPlayerByIP(tcpMessage.senderIP).id
-				// gameChannelMessage := NewGameChannelMessageFromTCPMessage(tcpMessage, game)
-				// game.channel <- gameChannelMessage
 			}
-
-			// if messageString == "l" {
-			// 	conn.Write([]byte(gameManager.GameState()))
-			// }
-
-			// else {
-			// 	switch m {
-			// 	case "game":
-			// 		gameChannelMessage := NewGameChannelMessage()
-			// 		gameChannelMessage.tcpMessage = tcpMessage
-			// 		game.channel <- gameChannelMessage
-			// 		break
-
-			// 	case "main":
-			// 		//game.mainChannel <- messageString
-			// 		break
-			// 	}
-
-			// }
 
 			// sample process for string received
 			newMessage := strings.ToUpper(messageString)
