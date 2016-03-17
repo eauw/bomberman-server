@@ -3,7 +3,9 @@ package gamemanager
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"sync"
+	"time"
 )
 
 type Game struct {
@@ -16,9 +18,9 @@ type Game struct {
 	started      bool
 }
 
-func NewGame() *Game {
+func NewGame(xSize int, ySize int) *Game {
 	ch := make(chan *GameChannelMessage)
-	gm := NewGameMap(20, 10)
+	gm := NewGameMap(xSize, ySize)
 
 	newGame := &Game{
 		channel:      ch,
@@ -36,6 +38,8 @@ func NewGame() *Game {
 
 func (game *Game) start() {
 	game.started = true
+	game.pickRandomPlayer().isFox = true
+
 	go game.handleGameChannel()
 }
 
@@ -93,6 +97,13 @@ func (game *Game) getPlayerByIP(ip string) *Player {
 
 func (game *Game) getPlayerByID(id string) *Player {
 	return game.players[id]
+}
+
+func (game *Game) pickRandomPlayer() *Player {
+	rand.Seed(time.Now().UnixNano())
+	i := rand.Intn(len(game.players))
+	pArr := game.GetPlayersArray()
+	return pArr[i]
 }
 
 func handleGameChannelMessage(gcm *GameChannelMessage) {

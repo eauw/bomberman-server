@@ -5,8 +5,10 @@ import (
 	"bomberman-server/helper"
 	"bufio"
 	"fmt"
+	// "log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,7 +22,64 @@ var httpServer *HTTPServer
 var httpChannel chan string
 var mainChannel chan string
 
+var rounds = 20
+var xSize = 20
+var ySize = 20
+
 var mutex = &sync.Mutex{}
+
+// check commandline arguments on program start
+func handleArgs() {
+	// only check if there is an parameter given
+	if len(os.Args) > 1 {
+		// ignore first parameter because its the programs name
+		for i, v := range os.Args {
+			if i > 0 {
+				switch v {
+
+				// show help
+				case "-h":
+					// show help
+					helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
+					helpString += "Commands:\n"
+					helpString += "  -w              starts with http server\n"
+					helpString += "  -r [int]        set number of rounds\n"
+					helpString += "  -s [int] [int]  set map size (x,y)"
+					fmt.Print(helpString)
+					os.Exit(0)
+					break
+
+				// start with http server
+				case "-w":
+					fmt.Println("Launching http server...")
+					httpServer = NewHTTPServer()
+					httpChannel = httpServer.channel
+					httpServer.mainChannel = mainChannel
+					// httpServer.game = game
+					go httpServer.start()
+					fmt.Printf("Listening http on port %s\n", httpServer.port)
+					break
+
+				case "-r":
+					rounds, _ = strconv.Atoi(os.Args[i+1])
+					break
+
+				case "-s":
+					xSize, _ = strconv.Atoi(os.Args[i+1])
+					ySize, _ = strconv.Atoi(os.Args[i+2])
+					return
+					break
+
+				default:
+					fmt.Println("invalid commandline parameter")
+					os.Exit(0)
+					break
+
+				}
+			}
+		}
+	}
+}
 
 func main() {
 	// create main channel
@@ -38,55 +97,17 @@ func main() {
 	fmt.Printf("Listening tcp on port %d\n", tcpPort)
 
 	// create game
+	mutex.Lock()
 	gameManager := gamemanager.NewManager()
+	gameManager.Start(rounds, xSize, ySize)
 	gameManager.SetMainChannel(mainChannel)
+	mutex.Unlock()
 
 	for {
 		// accept connection on port
 		conn, _ := ln.Accept()
 		if conn != nil {
 			go newClientConnected(conn, gameManager)
-		}
-	}
-}
-
-// check commandline arguments on program start
-func handleArgs() {
-	// only check if there is an parameter given
-	if len(os.Args) > 1 {
-		// ignore first parameter because its the programs name
-		for i, v := range os.Args {
-			if i > 0 {
-				switch v {
-
-				default:
-					fmt.Println("invalid commandline parameter")
-					os.Exit(0)
-					break
-
-				// show help
-				case "-h":
-					// show help
-					helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
-					helpString += "Commands:\n\n"
-					helpString += "\t-w\tstarts with http server\n\n"
-					fmt.Print(helpString)
-					os.Exit(0)
-					break
-
-				// start with http server
-				case "-w":
-					fmt.Println("Launching http server...")
-					httpServer = NewHTTPServer()
-					httpChannel = httpServer.channel
-					httpServer.mainChannel = mainChannel
-					// httpServer.game = game
-					go httpServer.start()
-					fmt.Printf("Listening http on port %s\n", httpServer.port)
-					break
-
-				}
-			}
 		}
 	}
 }
@@ -113,7 +134,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	mutex.Unlock()
 
 	if gameManager.PlayersCount() >= maximumPlayers {
-		gameManager.Start()
+		gameManager.GameStart()
 	}
 
 	conn.Write([]byte("Your ID: "))

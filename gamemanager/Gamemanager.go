@@ -3,7 +3,7 @@ package gamemanager
 import (
 	// "bomberman-server/tcpmessage"
 	"fmt"
-	// "log"
+	"log"
 	"math/rand"
 	"net"
 	"time"
@@ -21,7 +21,6 @@ type Manager struct {
 
 func NewManager() *Manager {
 	return &Manager{
-		game:               NewGame(),
 		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
@@ -33,18 +32,22 @@ func (manager *Manager) SetMainChannel(ch chan string) {
 	manager.mainChannel = ch
 }
 
-func (manager *Manager) Start() {
-	manager.generatePlayersOrder()
-	// log.Print(manager.playersOrder)
-	manager.currentPlayerIndex = 0
-	// manager.setCurrentPlayer(manager.game.getPlayerByID(manager.playersOrder[0]))
-	currentPlayer := manager.GetCurrentPlayer()
+func (manager *Manager) Start(rounds int, xSize int, ySize int) {
+	// manager.generatePlayersOrder()
+
+	// manager.currentPlayerIndex = 0
+
+	// currentPlayer := manager.GetCurrentPlayer()
+
+	// manager.mainChannel <- fmt.Sprintf("first player: %s", currentPlayer.id)
+	// manager.notifyCurrentPlayer()
+
+	manager.game = NewGame(xSize, ySize)
+	log.Println(manager.GameState())
+}
+
+func (manager *Manager) GameStart() {
 	manager.game.start()
-
-	manager.pickRandomPlayer().isFox = true
-
-	manager.mainChannel <- fmt.Sprintf("first player: %s", currentPlayer.id)
-	manager.notifyCurrentPlayer()
 }
 
 func (manager *Manager) GetCurrentPlayer() *Player {
@@ -86,13 +89,6 @@ func (manager *Manager) generatePlayersOrder() {
 	}
 
 	manager.playersOrder = a
-}
-
-func (manager *Manager) pickRandomPlayer() *Player {
-	rand.Seed(time.Now().UnixNano())
-	i := rand.Intn(len(manager.game.players))
-	pArr := manager.game.GetPlayersArray()
-	return pArr[i]
 }
 
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
