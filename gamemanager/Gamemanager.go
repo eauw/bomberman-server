@@ -10,19 +10,20 @@ import (
 )
 
 type Manager struct {
-	game          *Game
-	channel       chan *GameChannelMessage
-	mainChannel   chan string
-	currentPlayer *Player
-	playersOrder  []string
-	playersConn   map[string]net.Conn
+	game               *Game
+	channel            chan *GameChannelMessage
+	mainChannel        chan string
+	currentPlayerIndex int
+	playersOrder       []string
+	playersConn        map[string]net.Conn
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		game:         NewGame(),
-		playersOrder: []string{},
-		playersConn:  map[string]net.Conn{},
+		game:               NewGame(),
+		playersOrder:       []string{},
+		playersConn:        map[string]net.Conn{},
+		currentPlayerIndex: 0,
 	}
 }
 
@@ -33,18 +34,26 @@ func (manager *Manager) SetMainChannel(ch chan string) {
 func (manager *Manager) Start() {
 	manager.generatePlayersOrder()
 	// log.Print(manager.playersOrder)
-	manager.setCurrentPlayer(manager.game.getPlayerByID(manager.playersOrder[0]))
+	manager.currentPlayerIndex = 0
+	// manager.setCurrentPlayer(manager.game.getPlayerByID(manager.playersOrder[0]))
+	currentPlayer := manager.GetCurrentPlayer()
 
-	manager.mainChannel <- fmt.Sprintf("first player: %s", manager.currentPlayer.id)
+	manager.mainChannel <- fmt.Sprintf("first player: %s", currentPlayer.id)
 	manager.notifyCurrentPlayer()
 }
 
 func (manager *Manager) GetCurrentPlayer() *Player {
-	return manager.currentPlayer
+	currentPlayer := manager.game.getPlayerByID(manager.playersOrder[manager.currentPlayerIndex])
+	return currentPlayer
 }
 
-func (manager *Manager) setCurrentPlayer(p *Player) {
-	manager.currentPlayer = p
+func (manager *Manager) setNextPlayer() {
+	if manager.currentPlayerIndex == len(manager.game.players)-1 {
+		manager.currentPlayerIndex = 0
+	} else {
+		manager.currentPlayerIndex += 1
+	}
+
 }
 
 func (manager *Manager) PlayersCount() int {
@@ -93,7 +102,8 @@ func (manager *Manager) GameState() string {
 }
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
-	if player.id == manager.currentPlayer.id {
+	currentPlayer := manager.GetCurrentPlayer()
+	if player.id == currentPlayer.id {
 		switch message {
 		case "d":
 			manager.game.PlayerMovesToRight(player)
@@ -122,7 +132,8 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 		case "l":
 			manager.gameStateRequestedByPlayer(player)
 
-		case "end":
+		case "n":
+			manager.setNextPlayer()
 			break
 		}
 	} else {
@@ -137,8 +148,9 @@ func (manager *Manager) gameStateRequestedByPlayer(p *Player) {
 }
 
 func (manager *Manager) notifyCurrentPlayer() {
-	if manager.currentPlayer != nil {
-		conn := manager.playersConn[manager.currentPlayer.id]
+	currentPlayer := manager.GetCurrentPlayer()
+	if currentPlayer != nil {
+		conn := manager.playersConn[currentPlayer.id]
 		conn.Write([]byte("Your turn\n"))
 	}
 

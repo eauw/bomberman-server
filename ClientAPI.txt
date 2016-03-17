@@ -10,7 +10,7 @@ Player geht ein Feld nach rechts:		"move right","d"
 
 Player wirft Bombe:				 		"bomb","b"
 
-Player beendet seine Züge für diese Runde: "end"
+Player beendet seine Züge für diese Runde: "n"
 
 Game State: "l"
 
