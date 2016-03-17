@@ -154,7 +154,7 @@ func createFields(size int) [][]*Field {
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
-		fields[randomRow][randomColumn].special = NewSpecial(0)
+		fields[randomRow][randomColumn].special = RandomSpecial()
 	}
 
 	return fields
@@ -170,16 +170,30 @@ func (gm *GameMap) toString() string {
 			// v := f.verticalFieldCode
 
 			if len(f.players) > 0 {
-				// fmt.Printf("P")
-				mapString += "P"
+				// print players
+				if len(f.players) > 1 {
+					mapString += "P"
+				} else {
+					mapString += "p"
+				}
+
 			} else if len(f.bombs) > 0 {
+				// print bombs
+
 				mapString += "B"
+
 			} else if f.wall != nil {
-				// fmt.Printf("W")
-				mapString += "W"
+				// print walls
+				if f.wall.isDestructible {
+					mapString += "w"
+				} else {
+					mapString += "W"
+				}
+
 			} else if f.special != nil {
-				// fmt.Printf("S")
-				mapString += "S"
+				// print specials
+				mapString += f.special.powerType
+
 			} else {
 				//fmt.Printf("_") //fmt.Printf("i %d, j %d", h, v) //fmt.Print(h + v)
 				mapString += "_"

@@ -41,7 +41,7 @@ w: zerstörbare Wand (es könnte ein Special darunter liegen)
 W: unzerstörbare Wand
 b: Anzahl Bomben erhöhen
 r: Reichweite erhöhen
-a: Aluhut
+h: Aluhut
 *: Explosion
 _: frei
 |: Trennstrich

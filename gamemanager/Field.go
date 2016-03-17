@@ -58,7 +58,7 @@ func (field *Field) removePlayer(player *Player) {
 	delete(field.players, player.id)
 }
 
-func (field *Field) setSpecial(powerType int) {
+func (field *Field) setSpecial(powerType string) {
 	field.special = NewSpecial(powerType)
 }
 
@@ -104,30 +104,4 @@ func cleanFieldNumber(number int) string {
 	}
 
 	return n
-}
-
-/* Wall */
-
-type Wall struct {
-	isDestructible bool
-}
-
-func NewWall(destructible bool) *Wall {
-	return &Wall{
-		isDestructible: destructible,
-	}
-}
-
-/* Special */
-
-// TODO: specialtypen implementieren
-
-type Special struct {
-	powerType int
-}
-
-func NewSpecial(powerType int) *Special {
-	return &Special{
-		powerType: powerType,
-	}
 }
