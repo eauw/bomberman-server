@@ -18,7 +18,7 @@ type Game struct {
 
 func NewGame() *Game {
 	ch := make(chan *GameChannelMessage)
-	gm := NewGameMap(10)
+	gm := NewGameMap(20, 10)
 
 	newGame := &Game{
 		channel:      ch,
@@ -162,7 +162,7 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 	currentField := player.currentField
 
 	// prüfen ob der Spieler sich am Spielfeldrand befindet
-	if currentField.column == (game.gameMap.size - 1) {
+	if currentField.column == (game.gameMap.xSize - 1) {
 		return
 	}
 
@@ -225,7 +225,7 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	currentField := player.currentField
 
 	// prüfen ob der Spieler sich am Spielfeldrand befindet
-	if currentField.row == (game.gameMap.size - 1) {
+	if currentField.row == (game.gameMap.ySize - 1) {
 		return
 	}
 

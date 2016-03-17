@@ -111,7 +111,7 @@ func (manager *Manager) GameState() string {
 	infos := "\n"
 	infos += fmt.Sprintf("Runde: %d, ", manager.game.currentRound)
 	infos += fmt.Sprintf("Spieleranzahl: %d, ", len(manager.game.players))
-	infos += fmt.Sprintf("Spielfeldgröße: %d, ", manager.game.gameMap.size)
+	infos += fmt.Sprintf("Spielfeldgröße: x %d y %d, ", manager.game.gameMap.xSize, manager.game.gameMap.ySize)
 	infos += fmt.Sprintf("Cmd-Timeout: %d, ", manager.commandTimeout)
 	infos += "\n"
 

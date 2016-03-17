@@ -6,16 +6,18 @@ import "bomberman-server/helper"
 
 type GameMap struct {
 	game   *Game
-	size   int
+	xSize  int
+	ySize  int
 	fields [][]*Field
 	bombs  []*Bomb
 }
 
-func NewGameMap(size int) *GameMap {
-	f := createFields(size)
+func NewGameMap(xSize int, ySize int) *GameMap {
+	f := createFields(xSize, ySize)
 
 	return &GameMap{
-		size:   size,
+		xSize:  xSize,
+		ySize:  ySize,
 		fields: f,
 		bombs:  []*Bomb{},
 	}
@@ -110,13 +112,13 @@ func (gameMap *GameMap) removeBomb(b *Bomb) {
 	}
 }
 
-func createFields(size int) [][]*Field {
+func createFields(xSize int, ySize int) [][]*Field {
 	//horizontalFieldCodes := []string{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}
 	//verticalFieldCodes := []string{"01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26"}
 
-	fields := make([][]*Field, size)
+	fields := make([][]*Field, xSize)
 	for i := range fields {
-		fields[i] = make([]*Field, size)
+		fields[i] = make([]*Field, ySize)
 		for j := range fields[i] {
 			fields[i][j] = NewField(i, j)
 		}
@@ -129,8 +131,8 @@ func createFields(size int) [][]*Field {
 
 	// place walls
 	for i := 0; i <= walls; i++ {
-		randomRow := helper.RandomNumber(0, size)
-		randomColumn := helper.RandomNumber(0, size)
+		randomRow := helper.RandomNumber(0, xSize)
+		randomColumn := helper.RandomNumber(0, ySize)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
@@ -139,8 +141,8 @@ func createFields(size int) [][]*Field {
 
 	// place destructible walls
 	for i := 0; i <= destructibleWalls; i++ {
-		randomRow := helper.RandomNumber(0, size)
-		randomColumn := helper.RandomNumber(0, size)
+		randomRow := helper.RandomNumber(0, xSize)
+		randomColumn := helper.RandomNumber(0, ySize)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
@@ -149,8 +151,8 @@ func createFields(size int) [][]*Field {
 
 	// place specials
 	for i := 0; i <= specials; i++ {
-		randomRow := helper.RandomNumber(0, size)
-		randomColumn := helper.RandomNumber(0, size)
+		randomRow := helper.RandomNumber(0, xSize)
+		randomColumn := helper.RandomNumber(0, ySize)
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
