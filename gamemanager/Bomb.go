@@ -20,10 +20,14 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 
 	for i := range fields {
 		// Wände werden durch Explosionsstrahl zerstört
-		fields[i].containsWall = false
+		if fields[i].wall != nil {
+			if fields[i].wall.isDestructible {
+				fields[i].wall = nil
+			}
+		}
 
 		// Specials werden durch Explosionsstrahl zerstört
-		fields[i].containsSpecial = false
+		fields[i].wall = nil
 
 		// Spieler werden durch Explosionsstrahl gelähmt
 		for _, v := range fields[i].players {

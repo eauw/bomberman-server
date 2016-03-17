@@ -126,44 +126,44 @@ func (manager *Manager) GameState() string {
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
 	if manager.game.started {
-		currentPlayer := manager.GetCurrentPlayer()
-		if player.id == currentPlayer.id {
-			switch message {
-			case "d":
-				manager.game.PlayerMovesToRight(player)
-				break
+		// currentPlayer := manager.GetCurrentPlayer()
+		// if player.id == currentPlayer.id {
+		switch message {
+		case "d":
+			manager.game.PlayerMovesToRight(player)
+			break
 
-			case "a":
-				manager.game.PlayerMovesToLeft(player)
-				break
+		case "a":
+			manager.game.PlayerMovesToLeft(player)
+			break
 
-			case "w":
-				manager.game.PlayerMovesToUp(player)
-				break
+		case "w":
+			manager.game.PlayerMovesToUp(player)
+			break
 
-			case "s":
-				manager.game.PlayerMovesToDown(player)
-				break
+		case "s":
+			manager.game.PlayerMovesToDown(player)
+			break
 
-			case "b":
-				manager.game.PlayerPlacesBomb(player)
-				break
+		case "b":
+			manager.game.PlayerPlacesBomb(player)
+			break
 
-			case "x":
-				manager.game.ExplodeBomb()
-				break
+		case "x":
+			manager.game.ExplodeBomb()
+			break
 
-			case "l":
-				manager.gameStateRequestedByPlayer(player)
+		case "l":
+			manager.gameStateRequestedByPlayer(player)
 
-			case "n":
-				manager.setNextPlayer()
-				break
-			}
-		} else {
-			conn := manager.playersConn[player.id]
-			conn.Write([]byte("nyt: not your turn!\n"))
+		case "n":
+			manager.setNextPlayer()
+			break
 		}
+		// } else {
+		// 	conn := manager.playersConn[player.id]
+		// 	conn.Write([]byte("nyt: not your turn!\n"))
+		// }
 	} else {
 		conn := manager.playersConn[player.id]
 		conn.Write([]byte("Game waiting for more players.\n"))

@@ -7,28 +7,26 @@ import (
 )
 
 type Field struct {
-	id              string
-	row             int // horizontal
-	column          int // vertical
-	containsSpecial bool
-	containsWall    bool
-	explodes        bool
-	players         map[string]*Player
-	bombs           []*Bomb
+	id       string
+	row      int // horizontal
+	column   int // vertical
+	special  *Special
+	wall     *Wall
+	explodes bool
+	players  map[string]*Player
+	bombs    []*Bomb
 }
 
 func NewField(row int, column int) *Field {
 	fieldID := strconv.Itoa(row) + strconv.Itoa(column)
 
 	return &Field{
-		id:              fieldID,
-		row:             row,
-		column:          column,
-		containsSpecial: false,
-		containsWall:    false,
-		explodes:        false,
-		players:         make(map[string]*Player),
-		bombs:           make([]*Bomb, 0),
+		id:       fieldID,
+		row:      row,
+		column:   column,
+		explodes: false,
+		players:  make(map[string]*Player),
+		bombs:    make([]*Bomb, 0),
 	}
 }
 
@@ -60,12 +58,14 @@ func (field *Field) removePlayer(player *Player) {
 	delete(field.players, player.id)
 }
 
-func (field *Field) setSpecial(b bool) {
-	field.containsSpecial = b
+func (field *Field) setSpecial(powerType int) {
+	field.special = NewSpecial(powerType)
 }
 
-func (field *Field) setWall(b bool) {
-	field.containsWall = b
+func (field *Field) setWall(destructible bool) {
+	if destructible {
+		field.wall = NewWall(destructible)
+	}
 }
 
 func (field *Field) addNewBomb(player *Player) *Bomb {
@@ -104,4 +104,30 @@ func cleanFieldNumber(number int) string {
 	}
 
 	return n
+}
+
+/* Wall */
+
+type Wall struct {
+	isDestructible bool
+}
+
+func NewWall(destructible bool) *Wall {
+	return &Wall{
+		isDestructible: destructible,
+	}
+}
+
+/* Special */
+
+// TODO: specialtypen implementieren
+
+type Special struct {
+	powerType int
+}
+
+func NewSpecial(powerType int) *Special {
+	return &Special{
+		powerType: powerType,
+	}
 }

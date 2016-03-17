@@ -124,6 +124,7 @@ func createFields(size int) [][]*Field {
 
 	// place walls and specials on the game map
 	walls := 20
+	destructibleWalls := 5
 	specials := 5
 
 	// place walls
@@ -133,7 +134,17 @@ func createFields(size int) [][]*Field {
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
-		fields[randomRow][randomColumn].setWall(true)
+		fields[randomRow][randomColumn].wall = NewWall(true)
+	}
+
+	// place destructible walls
+	for i := 0; i <= destructibleWalls; i++ {
+		randomRow := helper.RandomNumber(0, size)
+		randomColumn := helper.RandomNumber(0, size)
+
+		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
+
+		fields[randomRow][randomColumn].wall = NewWall(false)
 	}
 
 	// place specials
@@ -143,7 +154,7 @@ func createFields(size int) [][]*Field {
 
 		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
 
-		fields[randomRow][randomColumn].setSpecial(true)
+		fields[randomRow][randomColumn].special = NewSpecial(0)
 	}
 
 	return fields
@@ -163,10 +174,10 @@ func (gm *GameMap) toString() string {
 				mapString += "P"
 			} else if len(f.bombs) > 0 {
 				mapString += "B"
-			} else if f.containsWall == true {
+			} else if f.wall != nil {
 				// fmt.Printf("W")
 				mapString += "W"
-			} else if f.containsSpecial == true {
+			} else if f.special != nil {
 				// fmt.Printf("S")
 				mapString += "S"
 			} else {

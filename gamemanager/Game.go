@@ -137,13 +137,13 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 	nextField := game.gameMap.fields[currentField.row][currentField.column-1]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.containsWall {
+	if nextField.wall != nil {
 		return
 	}
 
-	if nextField.containsSpecial {
+	if nextField.special != nil {
 		player.hasSpecial = true
-		nextField.containsSpecial = false
+		nextField.special = nil
 	}
 
 	nextField.addPlayer(player)
@@ -169,13 +169,13 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 	nextField := game.gameMap.fields[currentField.row][currentField.column+1]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.containsWall {
+	if nextField.wall != nil {
 		return
 	}
 
-	if nextField.containsSpecial {
+	if nextField.special != nil {
 		player.hasSpecial = true
-		nextField.containsSpecial = false
+		nextField.special = nil
 	}
 
 	nextField.addPlayer(player)
@@ -200,13 +200,13 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 	nextField := game.gameMap.fields[currentField.row-1][currentField.column]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.containsWall {
+	if nextField.wall != nil {
 		return
 	}
 
-	if nextField.containsSpecial {
+	if nextField.special != nil {
 		player.hasSpecial = true
-		nextField.containsSpecial = false
+		nextField.special = nil
 	}
 
 	nextField.addPlayer(player)
@@ -232,13 +232,13 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	nextField := game.gameMap.fields[currentField.row+1][currentField.column]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.containsWall {
+	if nextField.wall != nil {
 		return
 	}
 
-	if nextField.containsSpecial {
+	if nextField.special != nil {
 		player.hasSpecial = true
-		nextField.containsSpecial = false
+		nextField.special = nil
 	}
 
 	nextField.addPlayer(player)
