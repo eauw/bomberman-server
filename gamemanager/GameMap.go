@@ -168,8 +168,8 @@ func (gm *GameMap) toString() string {
 	for i := range gm.fields {
 		for j := range gm.fields[i] {
 			f := gm.fields[i][j]
-			// h := f.horizontalFieldCode
-			// v := f.verticalFieldCode
+
+			// TODO: Fuchs darstellen
 
 			if len(f.players) > 0 {
 				// print players

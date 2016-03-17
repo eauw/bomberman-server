@@ -1,6 +1,7 @@
 package gamemanager
 
 import (
+	"bomberman-server/helper"
 	"fmt"
 	"log"
 	"math/rand"
@@ -39,6 +40,7 @@ func NewGame(xSize int, ySize int) *Game {
 func (game *Game) start() {
 	game.started = true
 	game.pickRandomPlayer().isFox = true
+	game.placePlayers()
 
 	go game.handleGameChannel()
 }
@@ -48,6 +50,29 @@ func (game *Game) handleGameChannel() {
 	for {
 		var gameChannelMessage = <-game.channel
 		handleGameChannelMessage(gameChannelMessage)
+	}
+}
+
+func (game *Game) placePlayers() {
+
+	for _, p := range game.players {
+
+		isWall := true
+
+		for isWall {
+			randomX := helper.RandomNumber(0, game.gameMap.xSize-1)
+			randomY := helper.RandomNumber(0, game.gameMap.ySize-1)
+
+			field := game.gameMap.fields[randomX][randomY]
+
+			if field.wall == nil {
+				isWall = false
+				p.currentField.removePlayer(p)
+				field.addPlayer(p)
+				p.currentField = field
+			}
+		}
+
 	}
 }
 
