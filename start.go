@@ -3,7 +3,6 @@ package main
 import (
 	"bomberman-server/gamemanager"
 	"bomberman-server/helper"
-	"bomberman-server/tcpmessage"
 	"bufio"
 	"fmt"
 	"net"
@@ -134,8 +133,6 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 		if err == nil {
 			messageString := string(messageBytes)
 
-			tcpMessage := tcpmessage.NewTCPMessage(messageString, clientIP)
-
 			// output message received
 			fmt.Println("----------------")
 			timeStamp := time.Now()
@@ -150,7 +147,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 				return
 			} else {
 				mutex.Lock()
-				gameManager.MessageReceived(tcpMessage)
+				gameManager.MessageReceived(messageString, newPlayer)
 				mutex.Unlock()
 				//mainChannel <- game.getPlayerByIP(tcpMessage.senderIP).id
 				// gameChannelMessage := NewGameChannelMessageFromTCPMessage(tcpMessage, game)

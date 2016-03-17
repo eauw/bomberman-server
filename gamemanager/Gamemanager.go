@@ -1,7 +1,7 @@
 package gamemanager
 
 import (
-	"bomberman-server/tcpmessage"
+	// "bomberman-server/tcpmessage"
 	"fmt"
 	// "log"
 	"math/rand"
@@ -92,38 +92,42 @@ func (manager *Manager) GameState() string {
 	return gameState
 }
 
-func (manager *Manager) MessageReceived(tcpMessage *tcpmessage.TCPMessage) {
-	player := manager.game.getPlayerByIP(tcpMessage.SenderIP)
-	switch tcpMessage.Text {
-	case "d":
-		manager.game.PlayerMovesToRight(player)
-		break
+func (manager *Manager) MessageReceived(message string, player *Player) {
+	if player.id == manager.currentPlayer.id {
+		switch message {
+		case "d":
+			manager.game.PlayerMovesToRight(player)
+			break
 
-	case "a":
-		manager.game.PlayerMovesToLeft(player)
-		break
+		case "a":
+			manager.game.PlayerMovesToLeft(player)
+			break
 
-	case "w":
-		manager.game.PlayerMovesToUp(player)
-		break
+		case "w":
+			manager.game.PlayerMovesToUp(player)
+			break
 
-	case "s":
-		manager.game.PlayerMovesToDown(player)
-		break
+		case "s":
+			manager.game.PlayerMovesToDown(player)
+			break
 
-	case "b":
-		manager.game.PlayerPlacesBomb(player)
-		break
+		case "b":
+			manager.game.PlayerPlacesBomb(player)
+			break
 
-	case "x":
-		manager.game.ExplodeBomb()
-		break
+		case "x":
+			manager.game.ExplodeBomb()
+			break
 
-	case "l":
-		manager.gameStateRequestedByPlayer(player)
+		case "l":
+			manager.gameStateRequestedByPlayer(player)
 
-	case "end":
-		break
+		case "end":
+			break
+		}
+	} else {
+		conn := manager.playersConn[player.id]
+		conn.Write([]byte("not your turn!"))
 	}
 }
 
