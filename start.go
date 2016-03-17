@@ -226,8 +226,8 @@ func showCommandlineHelp() {
 	helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
 	helpString += "Commands:\n"
 	helpString += "  -w                  starts with http server\n"
-	helpString += "  -r [int]            set number of rounds\n"
-	helpString += "  -s [x int] [y int]  set map size (x,y)\n"
+	helpString += fmt.Sprintf("  -r [int]            set number of rounds, default: %d\n", rounds)
+	helpString += fmt.Sprintf("  -s [x int] [y int]  set map size, default: x %d y%d\n", xSize, ySize)
 	helpString += "\n"
 	fmt.Print(helpString)
 	os.Exit(0)
