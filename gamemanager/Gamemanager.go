@@ -3,7 +3,7 @@ package gamemanager
 import (
 	// "bomberman-server/tcpmessage"
 	"fmt"
-	"log"
+	// "log"
 	"math/rand"
 	"net"
 	"time"
@@ -16,6 +16,7 @@ type Manager struct {
 	currentPlayerIndex int
 	playersOrder       []string
 	playersConn        map[string]net.Conn
+	commandTimeout     int
 }
 
 func NewManager() *Manager {
@@ -24,6 +25,7 @@ func NewManager() *Manager {
 		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
+		commandTimeout:     1,
 	}
 }
 
@@ -38,6 +40,9 @@ func (manager *Manager) Start() {
 	// manager.setCurrentPlayer(manager.game.getPlayerByID(manager.playersOrder[0]))
 	currentPlayer := manager.GetCurrentPlayer()
 	manager.game.start()
+
+	manager.pickRandomPlayer().isFox = true
+
 	manager.mainChannel <- fmt.Sprintf("first player: %s", currentPlayer.id)
 	manager.notifyCurrentPlayer()
 }
@@ -83,6 +88,13 @@ func (manager *Manager) generatePlayersOrder() {
 	manager.playersOrder = a
 }
 
+func (manager *Manager) pickRandomPlayer() *Player {
+	rand.Seed(time.Now().UnixNano())
+	i := rand.Intn(len(manager.game.players))
+	pArr := manager.game.GetPlayersArray()
+	return pArr[i]
+}
+
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	newPlayer := NewPlayer("New Player", manager.game.gameMap.fields[0][0])
 	newPlayer.SetIP(ip)
@@ -94,9 +106,20 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 }
 
 func (manager *Manager) GameState() string {
-	gameState := manager.game.gameMap.toString()
+	gameMap := manager.game.gameMap.toString()
+
+	infos := "\n"
+	infos += fmt.Sprintf("Runde: %d, ", manager.game.currentRound)
+	infos += fmt.Sprintf("Spieleranzahl: %d, ", len(manager.game.players))
+	infos += fmt.Sprintf("Spielfeldgröße: %d, ", manager.game.gameMap.size)
+	infos += fmt.Sprintf("Cmd-Timeout: %d, ", manager.commandTimeout)
+	infos += "\n"
+
+	gameState := "\n"
+	gameState += infos
 	gameState += "\n"
-	gameState += fmt.Sprintf("Runde: %d\n", manager.game.currentRound)
+	gameState += gameMap
+	gameState += "\n"
 
 	return gameState
 }

@@ -1,20 +1,54 @@
 # Befehle von Client zu Server
 
-Player geht ein Feld nach oben:			"move up","w"
+beim anmelden: "player rob" / "spec eugen" (auf spec wird nicht gewartet und hat keinen einfluss, spec kann jederzeit einsteigen, spieler nur am anfang. server antwortet "ack" oder "nack")
 
-Player geht ein Feld nach unten:		"move down","s"
+Player geht ein Feld nach oben:			"w"
 
-Player geht ein Feld nach links:		"move left","a"
+Player geht ein Feld nach unten:		"s"
 
-Player geht ein Feld nach rechts:		"move right","d"
+Player geht ein Feld nach links:		"a"
 
-Player wirft Bombe:				 		"bomb","b"
+Player geht ein Feld nach rechts:		"d"
 
-Player beendet seine Züge für diese Runde: "n"
+Player wirft Bombe:				 		"W0" "W5": 5 Felder nach oben
 
-Game State: "l"
+Player macht gar nix: "n"
+
+
+
+
 
 # Befehle von Server an Client:
-"yt" => Wenn der Spieler dran ist.
 
-"nyt" => Wenn der Spieler nicht dran ist.
+Game State:
+- Rundennummer, Spieleranzahl, Spielfeldgröße, Befehlstimeout, 
+- komplette Map mit Inhalten als Ascii-Grafik:
+
+P|_|B|_|_|W|_|_|_|_|
+_|_|P|_|_|_|_|W|_|_|
+W|_|S|_|_|_|S|_|_|_|
+_|_|_|_|W|_|_|_|_|_|
+_|W|_|_|_|_|W|_|S|W|
+_|_|_|_|_|W|_|_|_|_|
+W|_|S|_|_|_|_|S|_|_|
+W|_|_|_|_|_|_|*|_|W|
+_|_|W|_|W|W|*|*|*|_|
+_|_|_|W|_|W|_|*|_|_|
+
+P: min. 1 Spieler
+B: Bombe
+w: zerstörbare Wand (es könnte ein Special darunter liegen)
+W: unzerstörbare Wand
+b: Anzahl Bomben erhöhen
+r: Reichweite erhöhen
+a: Aluhut
+*: Explosion
+_: frei
+|: Trennstrich
+
+- als Liste Positionen der Spieler (Fuchs als erster in der Liste) mit Name und Punktzahl: Rob(18)=3,5;Eugen...
+
+Befehle der Spieler werden in ihre Spielqueue aufgenommen und zur gegebenen Zeit abgearbeitet.
+
+Wenn alle dran waren sendet der Server den Game state an alle.
+

@@ -15,6 +15,7 @@ type Player struct {
 	currentField *Field
 	hasSpecial   bool // wenn true dann hat er ein special eingesammelt und kann währenddessen irgendwas besonderes
 	isParalyzed  bool
+	isFox        bool
 }
 
 // NewPlayer function is the players constructor
@@ -27,6 +28,7 @@ func NewPlayer(n string, f *Field) *Player {
 		currentField: f,
 		isParalyzed:  false,
 		hasSpecial:   false,
+		isFox:        false,
 	}
 }
 
