@@ -40,13 +40,11 @@ func handleArgs() {
 				// show help
 				case "-h":
 					// show help
-					helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
-					helpString += "Commands:\n"
-					helpString += "  -w              starts with http server\n"
-					helpString += "  -r [int]        set number of rounds\n"
-					helpString += "  -s [int] [int]  set map size (x,y)"
-					fmt.Print(helpString)
-					os.Exit(0)
+					showCommandlineHelp()
+					break
+
+				case "help":
+					showCommandlineHelp()
 					break
 
 				// start with http server
@@ -222,4 +220,15 @@ func handleMessage(message string) (string, bool) {
 	mainChannel <- fmt.Sprintf(printMessage)
 
 	return "", true
+}
+
+func showCommandlineHelp() {
+	helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
+	helpString += "Commands:\n"
+	helpString += "  -w                  starts with http server\n"
+	helpString += "  -r [int]            set number of rounds\n"
+	helpString += "  -s [x int] [y int]  set map size (x,y)\n"
+	helpString += "\n"
+	fmt.Print(helpString)
+	os.Exit(0)
 }
