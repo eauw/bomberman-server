@@ -175,7 +175,11 @@ func (gm *GameMap) toString() string {
 				// print players
 				if len(f.players) > 1 {
 					mapString += "P"
+				} else if f.players[0].isFox {
+					// Fuchs
+					mapString += "f"
 				} else {
+					// normaler Spieler
 					mapString += "p"
 				}
 

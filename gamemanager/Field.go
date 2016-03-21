@@ -13,7 +13,7 @@ type Field struct {
 	special  *Special
 	wall     *Wall
 	explodes bool
-	players  map[string]*Player
+	players  []*Player //map[string]*Player
 	bombs    []*Bomb
 }
 
@@ -25,7 +25,7 @@ func NewField(row int, column int) *Field {
 		row:      row,
 		column:   column,
 		explodes: false,
-		players:  make(map[string]*Player),
+		players:  make([]*Player, 0), //make(map[string]*Player),
 		bombs:    make([]*Bomb, 0),
 	}
 }
@@ -50,12 +50,36 @@ func (field *Field) toString() string {
 // }
 
 func (field *Field) addPlayer(player *Player) {
-	field.players[player.id] = player
+	// field.players ist eine map
+	// field.players[player.id] = player
+	// player.currentField = field
+
+	// field.players ist ein array
+	field.players = append(field.players, player)
 	player.currentField = field
 }
 
 func (field *Field) removePlayer(player *Player) {
-	delete(field.players, player.id)
+	// löschen bei map
+	// delete(field.players, player.id)
+
+	// löschen bei array
+	index := -1
+
+	for i := range field.players {
+		if field.players[i].id == player.id {
+			index = i
+		}
+	}
+
+	if index > -1 {
+		slice1 := field.players[:index]
+		slice2 := field.players[index+1:]
+
+		newArray := append(slice1, slice2...)
+
+		field.players = newArray
+	}
 }
 
 func (field *Field) setSpecial(powerType string) {
@@ -85,7 +109,7 @@ func (field *Field) removeBomb(bomb *Bomb) {
 		}
 	}
 
-	if index > 0 {
+	if index > -1 {
 		slice1 := field.bombs[:index]
 		slice2 := field.bombs[index+1:]
 
