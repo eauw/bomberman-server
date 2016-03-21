@@ -16,6 +16,7 @@ type Player struct {
 	isParalyzed  bool
 	isFox        bool
 	bombs        []*Bomb
+	throwrange   int
 }
 
 // NewPlayer function is the players constructor
@@ -29,6 +30,7 @@ func NewPlayer(n string, f *Field) *Player {
 		isParalyzed:  false,
 		isFox:        false,
 		bombs:        []*Bomb{NewBomb()},
+		throwrange:   1,
 	}
 }
 

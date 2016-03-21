@@ -195,7 +195,13 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 	var destinationField *Field
 
+	// Prüfen ob der Player weiter werfen will als er darf
+	if distance > player.throwrange {
+		distance = player.throwrange
+	}
+
 	switch direction {
+	// Norden
 	case "n":
 		destinationField, _ = manager.game.gameMap.getField(pRow-distance, pCol)
 		for destinationField == nil {
@@ -205,6 +211,7 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 		break
 
+	// Osten
 	case "o":
 		destinationField, _ = manager.game.gameMap.getField(pRow, pCol+distance)
 		for destinationField == nil {
@@ -213,6 +220,7 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 		}
 		break
 
+	// Süden
 	case "s":
 		destinationField, _ = manager.game.gameMap.getField(pRow+distance, pCol)
 		for destinationField == nil {
@@ -221,6 +229,7 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 		}
 		break
 
+	// Westen
 	case "w":
 		destinationField, _ = manager.game.gameMap.getField(pRow, pCol-distance)
 		for destinationField == nil {
