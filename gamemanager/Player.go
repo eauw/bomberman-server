@@ -62,6 +62,15 @@ func (player *Player) SetCurrentField(field *Field) {
 	player.currentField = field
 }
 
+func (player *Player) applySpecial(special *Special) {
+	switch special.powerType {
+	case "r":
+		player.throwrange += 1
+		break
+
+	}
+}
+
 func (player *Player) toString() string {
 	idString := ""
 	ipString := ""
