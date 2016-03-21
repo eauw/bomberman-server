@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -122,8 +124,16 @@ func (manager *Manager) GameState() string {
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
 	if manager.game.started {
-		// currentPlayer := manager.GetCurrentPlayer()
-		// if player.id == currentPlayer.id {
+
+		messageSlice := strings.Split(message, "")
+
+		if len(messageSlice) > 0 {
+			if messageSlice[0] == "b" {
+				field := manager.destinationField(player, messageSlice)
+				manager.game.PlayerPlacesBomb(player, field)
+			}
+		}
+
 		switch message {
 		case "d":
 			manager.game.PlayerMovesToRight(player)
@@ -139,10 +149,6 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 
 		case "s":
 			manager.game.PlayerMovesToDown(player)
-			break
-
-		case "b":
-			manager.game.PlayerPlacesBomb(player)
 			break
 
 		case "x":
@@ -178,4 +184,34 @@ func (manager *Manager) notifyCurrentPlayer() {
 		conn.Write([]byte("yt: Your turn\n"))
 	}
 
+}
+
+func (manager *Manager) destinationField(player *Player, destination []string) *Field {
+	distance, _ := strconv.Atoi(destination[1])
+	direction := destination[2]
+
+	pRow := player.currentField.row
+	pCol := player.currentField.column
+
+	var destinationField *Field
+
+	switch direction {
+	case "n":
+		destinationField = manager.game.gameMap.fields[pRow-distance][pCol]
+		break
+
+	case "o":
+		destinationField = manager.game.gameMap.fields[pRow][pCol+distance]
+		break
+
+	case "s":
+		destinationField = manager.game.gameMap.fields[pRow+distance][pCol]
+		break
+
+	case "w":
+		destinationField = manager.game.gameMap.fields[pRow][pCol-distance]
+		break
+	}
+
+	return destinationField
 }

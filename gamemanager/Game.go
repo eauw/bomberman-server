@@ -286,13 +286,14 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 
 }
 
-func (game *Game) PlayerPlacesBomb(player *Player) {
+// TODO: destinationField berücksichtigen
+func (game *Game) PlayerPlacesBomb(player *Player, destinationField *Field) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	currentField := player.currentField
+	// currentField := player.currentField
 
-	bomb := currentField.addNewBomb(player)
+	bomb := destinationField.addNewBomb(player)
 	game.gameMap.addBomb(bomb)
 }
 
