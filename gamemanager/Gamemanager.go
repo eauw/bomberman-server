@@ -137,22 +137,27 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 		switch message {
 		case "d":
 			manager.game.PlayerMovesToRight(player)
+			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "a":
 			manager.game.PlayerMovesToLeft(player)
+			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "w":
 			manager.game.PlayerMovesToUp(player)
+			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "s":
 			manager.game.PlayerMovesToDown(player)
+			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "x":
 			manager.game.ExplodeBomb()
+			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "l":
