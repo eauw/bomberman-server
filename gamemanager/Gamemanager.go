@@ -131,6 +131,7 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 			if messageSlice[0] == "b" {
 				field := manager.destinationField(player, messageSlice)
 				manager.game.PlayerPlacesBomb(player, field)
+				manager.gameStateRequestedByPlayer(player)
 			}
 		}
 
