@@ -17,6 +17,7 @@ type Player struct {
 	isFox        bool
 	bombs        []*Bomb
 	throwrange   int
+	protection   bool
 }
 
 // NewPlayer function is the players constructor
@@ -31,6 +32,7 @@ func NewPlayer(n string, f *Field) *Player {
 		isFox:        false,
 		bombs:        make([]*Bomb, 0),
 		throwrange:   1,
+		protection:   false,
 	}
 }
 
@@ -72,6 +74,9 @@ func (player *Player) applySpecial(special *Special) {
 		player.addBomb()
 		break
 
+	case "h":
+		player.protection = true
+		break
 	}
 }
 

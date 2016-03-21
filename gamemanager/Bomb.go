@@ -35,7 +35,9 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 
 		// Spieler werden durch Explosionsstrahl gelähmt
 		for _, v := range fields[i].players {
-			v.isParalyzed = true
+			if v.protection == false {
+				v.isParalyzed = true
+			}
 		}
 	}
 
