@@ -286,18 +286,21 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 
 }
 
-// TODO: destinationField berücksichtigen
 func (game *Game) PlayerPlacesBomb(player *Player, destinationField *Field) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	// currentField := player.currentField
-
-	bomb := destinationField.addNewBomb(player)
+	// TODO: nicht eine neue Bombe erstellen sondern eine freie Bombe vom Spieler auswählen
+	// bomb := destinationField.addNewBomb(player)
+	bomb := player.getAvailableBomb()
+	destinationField.addBomb(bomb)
+	bomb.field = destinationField
 	game.gameMap.addBomb(bomb)
+
+	bomb.isPlaced = true
 }
 
-func (game *Game) ExplodeBomb() {
+func (game *Game) ExplodeBombs() {
 	game.gameMap.bombs = []*Bomb{}
 
 	//var fields []*Field
@@ -312,6 +315,14 @@ func (game *Game) ExplodeBomb() {
 
 			game.gameMap.fields[i][j].bombs = []*Bomb{}
 
+		}
+	}
+}
+
+func (game *Game) ExplodePlayersBombs(player *Player) {
+	for i := range player.bombs {
+		if player.bombs[i].isPlaced {
+			player.bombs[i].explode(game.gameMap)
 		}
 	}
 }

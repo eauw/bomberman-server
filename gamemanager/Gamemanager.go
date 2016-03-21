@@ -96,6 +96,7 @@ func (manager *Manager) generatePlayersOrder() {
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	newPlayer := NewPlayer("New Player", manager.game.gameMap.fields[0][0])
 	newPlayer.SetIP(ip)
+	newPlayer.addBomb()
 	manager.game.addPlayer(newPlayer)
 
 	manager.playersConn[newPlayer.id] = conn
@@ -128,10 +129,21 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 		messageSlice := strings.Split(message, "")
 
 		if len(messageSlice) > 0 {
+			// prüfen ob Spieler ein Bombe werfen will
 			if messageSlice[0] == "b" {
-				field := manager.destinationField(player, messageSlice)
-				manager.game.PlayerPlacesBomb(player, field)
-				manager.gameStateRequestedByPlayer(player)
+				// prüfen ob Spieler aktuell überhaupt verfügbare Bomben hat
+				available := 0
+				for i := range player.bombs {
+					if player.bombs[i].isPlaced == false {
+						available += 1
+					}
+				}
+				if available > 0 {
+					field := manager.destinationField(player, messageSlice)
+					manager.game.PlayerPlacesBomb(player, field)
+					manager.gameStateRequestedByPlayer(player)
+				}
+
 			}
 		}
 
@@ -157,7 +169,7 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 			break
 
 		case "x":
-			manager.game.ExplodeBomb()
+			manager.game.ExplodePlayersBombs(player)
 			manager.gameStateRequestedByPlayer(player)
 			break
 
@@ -192,6 +204,7 @@ func (manager *Manager) notifyCurrentPlayer() {
 
 }
 
+// Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
 func (manager *Manager) destinationField(player *Player, destination []string) *Field {
 	distance, _ := strconv.Atoi(destination[1])
 	direction := destination[2]

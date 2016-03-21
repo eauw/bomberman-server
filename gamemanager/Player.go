@@ -29,7 +29,7 @@ func NewPlayer(n string, f *Field) *Player {
 		currentField: f,
 		isParalyzed:  false,
 		isFox:        false,
-		bombs:        []*Bomb{NewBomb()},
+		bombs:        make([]*Bomb, 0),
 		throwrange:   1,
 	}
 }
@@ -68,7 +68,27 @@ func (player *Player) applySpecial(special *Special) {
 		player.throwrange += 1
 		break
 
+	case "b":
+		player.addBomb()
+		break
+
 	}
+}
+
+func (player *Player) addBomb() {
+	newBomb := NewBomb()
+	newBomb.owner = player
+	player.bombs = append(player.bombs, newBomb)
+}
+
+func (player *Player) getAvailableBomb() *Bomb {
+	for i := range player.bombs {
+		if player.bombs[i].isPlaced == false {
+			return player.bombs[i]
+		}
+	}
+
+	return nil
 }
 
 func (player *Player) toString() string {
