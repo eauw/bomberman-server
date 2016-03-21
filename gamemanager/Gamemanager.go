@@ -197,19 +197,36 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 	switch direction {
 	case "n":
-		destinationField = manager.game.gameMap.fields[pRow-distance][pCol]
+		destinationField, _ = manager.game.gameMap.getField(pRow-distance, pCol)
+		for destinationField == nil {
+			distance -= 1
+			destinationField, _ = manager.game.gameMap.getField(pRow-distance, pCol)
+		}
+
 		break
 
 	case "o":
-		destinationField = manager.game.gameMap.fields[pRow][pCol+distance]
+		destinationField, _ = manager.game.gameMap.getField(pRow, pCol+distance)
+		for destinationField == nil {
+			distance -= 1
+			destinationField, _ = manager.game.gameMap.getField(pRow, pCol+distance)
+		}
 		break
 
 	case "s":
-		destinationField = manager.game.gameMap.fields[pRow+distance][pCol]
+		destinationField, _ = manager.game.gameMap.getField(pRow+distance, pCol)
+		for destinationField == nil {
+			distance -= 1
+			destinationField, _ = manager.game.gameMap.getField(pRow+distance, pCol)
+		}
 		break
 
 	case "w":
-		destinationField = manager.game.gameMap.fields[pRow][pCol-distance]
+		destinationField, _ = manager.game.gameMap.getField(pRow, pCol-distance)
+		for destinationField == nil {
+			distance -= 1
+			destinationField, _ = manager.game.gameMap.getField(pRow, pCol-distance)
+		}
 		break
 	}
 
