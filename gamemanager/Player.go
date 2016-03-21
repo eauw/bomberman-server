@@ -96,6 +96,13 @@ func (player *Player) getAvailableBomb() *Bomb {
 	return nil
 }
 
+func (player *Player) resetSpecials() {
+	player.throwrange = 1
+	player.protection = false
+	player.bombs = []*Bomb{}
+	player.addBomb()
+}
+
 func (player *Player) toString() string {
 	idString := ""
 	ipString := ""

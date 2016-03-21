@@ -129,12 +129,12 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 		messageSlice := strings.Split(message, "")
 
 		if len(messageSlice) > 0 {
-			// prüfen ob Spieler ein Bombe werfen will
+			// prüfen ob Spieler eine Bombe werfen will
 			if messageSlice[0] == "b" {
 				// prüfen ob Spieler aktuell überhaupt verfügbare Bomben hat
 				available := 0
-				for i := range player.bombs {
-					if player.bombs[i].isPlaced == false {
+				for _, b := range player.bombs {
+					if b.isPlaced == false {
 						available += 1
 					}
 				}

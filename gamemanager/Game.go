@@ -290,7 +290,6 @@ func (game *Game) PlayerPlacesBomb(player *Player, destinationField *Field) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	// TODO: nicht eine neue Bombe erstellen sondern eine freie Bombe vom Spieler auswählen
 	// bomb := destinationField.addNewBomb(player)
 	bomb := player.getAvailableBomb()
 	destinationField.addBomb(bomb)

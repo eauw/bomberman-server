@@ -38,6 +38,8 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 			if v.protection == false {
 				v.isParalyzed = true
 			}
+
+			v.resetSpecials()
 		}
 	}
 
