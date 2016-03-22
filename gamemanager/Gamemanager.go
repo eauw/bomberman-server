@@ -63,21 +63,27 @@ func (manager *Manager) Start(rounds int, xSize int, ySize int) {
 
 func (manager *Manager) GameStart() {
 	manager.game.start()
-}
 
-func (manager *Manager) GetCurrentPlayer() *Player {
-	currentPlayer := manager.game.getPlayerByID(manager.playersOrder[manager.currentPlayerIndex])
-	return currentPlayer
-}
-
-func (manager *Manager) setNextPlayer() {
-	if manager.currentPlayerIndex == len(manager.game.players)-1 {
-		manager.currentPlayerIndex = 0
-	} else {
-		manager.currentPlayerIndex += 1
+	for _, p := range manager.game.players {
+		manager.sendGameStateToPlayer(p)
 	}
 
+	log.Println(manager.GameState())
 }
+
+// func (manager *Manager) GetCurrentPlayer() *Player {
+// 	currentPlayer := manager.game.getPlayerByID(manager.playersOrder[manager.currentPlayerIndex])
+// 	return currentPlayer
+// }
+
+// func (manager *Manager) setNextPlayer() {
+// 	if manager.currentPlayerIndex == len(manager.game.players)-1 {
+// 		manager.currentPlayerIndex = 0
+// 	} else {
+// 		manager.currentPlayerIndex += 1
+// 	}
+
+// }
 
 func (manager *Manager) PlayersCount() int {
 	if manager.game.players != nil {
@@ -159,7 +165,6 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 	}
 }
 
-// TODO: einfach von MessageReceived() kopiert. Aufraumen!
 func (manager *Manager) ProcessCommands(round *Round) {
 	log.Printf("Processing Round %d\n", round.id)
 
@@ -181,7 +186,6 @@ func (manager *Manager) ProcessCommands(round *Round) {
 				if available > 0 {
 					field := manager.destinationField(player, messageSlice)
 					manager.game.PlayerPlacesBomb(player, field)
-					manager.gameStateRequestedByPlayer(player)
 				}
 
 			}
@@ -190,37 +194,38 @@ func (manager *Manager) ProcessCommands(round *Round) {
 		switch command {
 		case "d":
 			manager.game.PlayerMovesToRight(player)
-			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "a":
 			manager.game.PlayerMovesToLeft(player)
-			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "w":
 			manager.game.PlayerMovesToUp(player)
-			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "s":
 			manager.game.PlayerMovesToDown(player)
-			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "x":
 			manager.game.ExplodePlayersBombs(player)
-			manager.gameStateRequestedByPlayer(player)
 			break
 
 		case "l":
-			manager.gameStateRequestedByPlayer(player)
+			manager.sendGameStateToPlayer(player)
 
 		case "n":
 			// nothing
 			break
 		}
 	}
+
+	for _, p := range manager.game.players {
+		manager.sendGameStateToPlayer(p)
+	}
+
+	log.Println(manager.GameState())
 
 	roundIdx := round.id
 	if roundIdx+1 >= len(manager.rounds) {
@@ -231,19 +236,19 @@ func (manager *Manager) ProcessCommands(round *Round) {
 
 }
 
-func (manager *Manager) gameStateRequestedByPlayer(p *Player) {
+func (manager *Manager) sendGameStateToPlayer(p *Player) {
 	conn := manager.playersConn[p.id]
 	conn.Write([]byte(manager.GameState()))
 }
 
-func (manager *Manager) notifyCurrentPlayer() {
-	currentPlayer := manager.GetCurrentPlayer()
-	if currentPlayer != nil {
-		conn := manager.playersConn[currentPlayer.id]
-		conn.Write([]byte("yt: Your turn\n"))
-	}
+// func (manager *Manager) notifyCurrentPlayer() {
+// 	currentPlayer := manager.GetCurrentPlayer()
+// 	if currentPlayer != nil {
+// 		conn := manager.playersConn[currentPlayer.id]
+// 		conn.Write([]byte("yt: Your turn\n"))
+// 	}
 
-}
+// }
 
 // Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
 func (manager *Manager) destinationField(player *Player, destination []string) *Field {
