@@ -5,7 +5,7 @@ import (
 	"bomberman-server/helper"
 	"bufio"
 	"fmt"
-	// "log"
+	"log"
 	"net"
 	"os"
 	"strconv"
@@ -103,7 +103,11 @@ func main() {
 
 	for {
 		// accept connection on port
-		conn, _ := ln.Accept()
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Print(err)
+		}
+
 		if conn != nil {
 			go newClientConnected(conn, gameManager)
 		}

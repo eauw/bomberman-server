@@ -19,6 +19,7 @@ type Manager struct {
 	playersOrder       []string
 	playersConn        map[string]net.Conn
 	commandTimeout     int
+	rounds             []*Round
 }
 
 func NewManager() *Manager {
@@ -27,6 +28,7 @@ func NewManager() *Manager {
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
 		commandTimeout:     1,
+		rounds:             []*Round{},
 	}
 }
 
@@ -44,7 +46,18 @@ func (manager *Manager) Start(rounds int, xSize int, ySize int) {
 	// manager.mainChannel <- fmt.Sprintf("first player: %s", currentPlayer.id)
 	// manager.notifyCurrentPlayer()
 
+	if rounds < 1 {
+		rounds = 1
+	}
+
+	for i := 1; i <= rounds; i++ {
+		round := NewRound()
+		round.id = i
+		manager.rounds = append(manager.rounds, round)
+	}
+
 	manager.game = NewGame(xSize, ySize)
+	manager.game.currentRound = manager.rounds[0]
 	log.Println(manager.GameState())
 }
 
@@ -108,7 +121,7 @@ func (manager *Manager) GameState() string {
 	gameMap := manager.game.gameMap.toString()
 
 	infos := "\n"
-	infos += fmt.Sprintf("Runde: %d, ", manager.game.currentRound)
+	infos += fmt.Sprintf("Runde: %d, ", manager.game.currentRound.id)
 	infos += fmt.Sprintf("Spieleranzahl: %d, ", len(manager.game.players))
 	infos += fmt.Sprintf("Spielfeldgröße: x %d y %d, ", manager.game.gameMap.xSize, manager.game.gameMap.ySize)
 	infos += fmt.Sprintf("Cmd-Timeout: %d, ", manager.commandTimeout)
@@ -124,9 +137,36 @@ func (manager *Manager) GameState() string {
 }
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
+	log.Printf("Message >%s< received from player >%s<", message, player.id)
+
 	if manager.game.started {
 
-		messageSlice := strings.Split(message, "")
+		playerCommands := manager.game.currentRound.playerCommands
+		if _, alreadyExits := playerCommands[player.id]; alreadyExits {
+			conn := manager.playersConn[player.id]
+			conn.Write([]byte("Your already have send a message.\n"))
+		} else {
+			manager.game.currentRound.playerCommands[player.id] = message
+		}
+
+		if len(playerCommands) == len(manager.game.players) {
+			manager.ProcessCommands(manager.game.currentRound)
+		}
+
+	} else {
+		conn := manager.playersConn[player.id]
+		conn.Write([]byte("Game waiting for more players.\n"))
+	}
+}
+
+// TODO: einfach von MessageReceived() kopiert. Aufraumen!
+func (manager *Manager) ProcessCommands(round *Round) {
+	log.Printf("Processing Round %d\n", round.id)
+
+	for playerID, command := range round.playerCommands {
+		player := manager.game.getPlayerByID(playerID)
+
+		messageSlice := strings.Split(command, "")
 
 		if len(messageSlice) > 0 {
 			// prüfen ob Spieler eine Bombe werfen will
@@ -147,7 +187,7 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 			}
 		}
 
-		switch message {
+		switch command {
 		case "d":
 			manager.game.PlayerMovesToRight(player)
 			manager.gameStateRequestedByPlayer(player)
@@ -177,17 +217,18 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 			manager.gameStateRequestedByPlayer(player)
 
 		case "n":
-			manager.setNextPlayer()
+			// nothing
 			break
 		}
-		// } else {
-		// 	conn := manager.playersConn[player.id]
-		// 	conn.Write([]byte("nyt: not your turn!\n"))
-		// }
-	} else {
-		conn := manager.playersConn[player.id]
-		conn.Write([]byte("Game waiting for more players.\n"))
 	}
+
+	roundIdx := round.id
+	if roundIdx+1 >= len(manager.rounds) {
+		manager.game.currentRound = manager.rounds[0]
+	} else {
+		manager.game.currentRound = manager.rounds[roundIdx+1]
+	}
+
 }
 
 func (manager *Manager) gameStateRequestedByPlayer(p *Player) {

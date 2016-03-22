@@ -15,7 +15,7 @@ type Game struct {
 	gameMap      *GameMap
 	players      map[string]*Player
 	rounds       int
-	currentRound int
+	currentRound *Round
 	started      bool
 }
 
@@ -24,12 +24,11 @@ func NewGame(xSize int, ySize int) *Game {
 	gm := NewGameMap(xSize, ySize)
 
 	newGame := &Game{
-		channel:      ch,
-		gameMap:      gm,
-		players:      make(map[string]*Player),
-		currentRound: 1,
-		rounds:       20,
-		started:      false,
+		channel: ch,
+		gameMap: gm,
+		players: make(map[string]*Player),
+		rounds:  20,
+		started: false,
 	}
 
 	gm.game = newGame
