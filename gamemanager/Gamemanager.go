@@ -192,6 +192,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 					}
 				}
 				if available > 0 {
+					// TODO: prüfen ob richtung korrekt angegeben ist also mit w,a,s oder d
 					field := manager.destinationField(player, messageSlice)
 					manager.game.PlayerPlacesBomb(player, field)
 				}

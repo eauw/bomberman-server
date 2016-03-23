@@ -2,7 +2,8 @@ package gamemanager
 
 import "bomberman-server/helper"
 
-// import "fmt"
+import "fmt"
+import "github.com/fatih/color"
 
 type GameMap struct {
 	game   *Game
@@ -165,6 +166,9 @@ func createFields(xSize int, ySize int) [][]*Field {
 func (gm *GameMap) toString() string {
 	mapString := "\n"
 	// fmt.Println()
+
+	red := color.New(color.BgRed).SprintFunc()
+
 	for i := range gm.fields {
 		for j := range gm.fields[i] {
 			f := gm.fields[i][j]
@@ -199,7 +203,8 @@ func (gm *GameMap) toString() string {
 				mapString += f.special.powerType
 
 			} else if f.explodes {
-				mapString += "*"
+
+				mapString += fmt.Sprintf("%s", red("_"))
 
 			} else {
 				//fmt.Printf("_") //fmt.Printf("i %d, j %d", h, v) //fmt.Print(h + v)
