@@ -180,7 +180,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 		messageSlice := strings.Split(command, "")
 
-		if len(messageSlice) > 0 {
+		if len(messageSlice) == 3 {
 			// prüfen ob Spieler eine Bombe werfen will
 			if messageSlice[0] == "b" {
 				// prüfen ob Spieler aktuell überhaupt verfügbare Bomben hat
@@ -196,6 +196,10 @@ func (manager *Manager) ProcessRound(round *Round) {
 					manager.game.PlayerPlacesBomb(player, field)
 				}
 
+			}
+		} else if len(messageSlice) > 0 {
+			if messageSlice[0] == "b" {
+				manager.game.PlayerPlacesBomb(player, player.currentField)
 			}
 		}
 
@@ -226,6 +230,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 		case "n":
 			// nothing
+			manager.sendGameStateToPlayer(player)
 			break
 
 		}
@@ -242,8 +247,8 @@ func (manager *Manager) ProcessRound(round *Round) {
 	manager.broadcastGamestate()
 
 	roundIdx := round.id
-	if roundIdx+1 >= len(manager.rounds) {
-		manager.game.currentRound = manager.rounds[0]
+	if roundIdx+1 > len(manager.rounds) {
+		manager.finishGame()
 	} else {
 		manager.game.currentRound = manager.rounds[roundIdx+1]
 	}
@@ -353,4 +358,13 @@ func (manager *Manager) playerQuit(player *Player) {
 	log.Printf("Player %s has left the game.\n", player.id)
 
 	conn.Close()
+}
+
+func (manager *Manager) finishGame() {
+	log.Println("Game is over.")
+
+	for _, conn := range manager.playersConn {
+		conn.Write([]byte("game is over\n"))
+		conn.Close()
+	}
 }
