@@ -284,6 +284,12 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 	distance, _ := strconv.Atoi(destination[1])
 	direction := destination[2]
 
+	// prüfen ob Richtung gültig ist
+	validDirections := "wasd"
+	if strings.Contains(validDirections, direction) == false {
+		return player.currentField
+	}
+
 	pRow := player.currentField.row
 	pCol := player.currentField.column
 
