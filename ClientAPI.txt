@@ -10,7 +10,7 @@ Player geht ein Feld nach links:		"a"
 
 Player geht ein Feld nach rechts:		"d"
 
-Player wirft Bombe:				 		"W0" "W5": 5 Felder nach oben
+Player wirft Bombe:				 		"b3w": 3 Felder nach oben
 
 Player macht gar nix: "n"
 

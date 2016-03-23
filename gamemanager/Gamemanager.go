@@ -274,7 +274,7 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 	switch direction {
 	// Norden
-	case "n":
+	case "w":
 		destinationField, _ = manager.game.gameMap.getField(pRow-distance, pCol)
 		for destinationField == nil {
 			distance -= 1
@@ -284,7 +284,7 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 		break
 
 	// Osten
-	case "o":
+	case "d":
 		destinationField, _ = manager.game.gameMap.getField(pRow, pCol+distance)
 		for destinationField == nil {
 			distance -= 1
@@ -302,7 +302,7 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 		break
 
 	// Westen
-	case "w":
+	case "a":
 		destinationField, _ = manager.game.gameMap.getField(pRow, pCol-distance)
 		for destinationField == nil {
 			distance -= 1
