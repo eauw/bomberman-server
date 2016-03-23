@@ -167,6 +167,61 @@ func (gm *GameMap) toString() string {
 	mapString := "\n"
 	// fmt.Println()
 
+	for i := range gm.fields {
+		for j := range gm.fields[i] {
+			f := gm.fields[i][j]
+
+			fieldChar := "_"
+
+			if f.explodes {
+
+				fieldChar = "*"
+
+			} else if len(f.players) > 0 {
+				// print players
+				if len(f.players) > 1 {
+					fieldChar = "P"
+				} else if f.players[0].isFox {
+					// Fuchs
+					fieldChar = "f"
+				} else {
+					// normaler Spieler
+					fieldChar = "p"
+				}
+
+			} else if len(f.bombs) > 0 {
+				// print bombs
+
+				fieldChar = "B"
+
+			} else if f.wall != nil {
+				// print walls
+				if f.wall.isDestructible {
+					fieldChar = "w"
+				} else {
+					fieldChar = "W"
+				}
+
+			} else if f.special != nil {
+				// print specials
+				fieldChar = f.special.powerType
+
+			}
+
+			// fmt.Print("|")
+			mapString += fieldChar + "|"
+		}
+		// fmt.Println()
+		mapString += "\n"
+	}
+
+	return mapString
+}
+
+func (gm *GameMap) toStringForServer() string {
+	mapString := "\n"
+	// fmt.Println()
+
 	red := color.New(color.BgRed).SprintFunc()
 
 	for i := range gm.fields {
@@ -218,16 +273,6 @@ func (gm *GameMap) toString() string {
 		// fmt.Println()
 		mapString += "\n"
 	}
-
-	//gm.game.mainChannel <- mapString
-
-	// for i := range gm.fields {
-	// 	for j := range gm.fields[i] {
-	// 		// f := gm.fields[i][j]
-	// 		mapString += fmt.Sprintf("%d %d|", i, j)
-	// 	}
-	// 	mapString += "\n"
-	// }
 
 	return mapString
 }

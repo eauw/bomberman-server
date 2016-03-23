@@ -58,7 +58,7 @@ func (manager *Manager) Start(rounds int, xSize int, ySize int) {
 
 	manager.game = NewGame(xSize, ySize)
 	manager.game.currentRound = manager.rounds[0]
-	log.Println(manager.GameState())
+	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
 }
 
 func (manager *Manager) GameStart() {
@@ -68,7 +68,7 @@ func (manager *Manager) GameStart() {
 		manager.sendGameStateToPlayer(p)
 	}
 
-	log.Println(manager.GameState())
+	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
 }
 
 // func (manager *Manager) GetCurrentPlayer() *Player {
@@ -123,8 +123,7 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	return newPlayer
 }
 
-func (manager *Manager) GameState() string {
-	gameMap := manager.game.gameMap.toString()
+func (manager *Manager) GameState(mapString string) string {
 
 	infos := "\n"
 	infos += fmt.Sprintf("Runde: %d, ", manager.game.currentRound.id)
@@ -136,7 +135,7 @@ func (manager *Manager) GameState() string {
 	gameState := "\n"
 	gameState += infos
 	gameState += "\n"
-	gameState += gameMap
+	gameState += mapString
 	gameState += "\n"
 
 	return gameState
@@ -263,12 +262,12 @@ func (manager *Manager) broadcastGamestate() {
 		manager.sendGameStateToPlayer(p)
 	}
 
-	log.Println(manager.GameState())
+	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
 }
 
 func (manager *Manager) sendGameStateToPlayer(p *Player) {
 	conn := manager.playersConn[p.id]
-	conn.Write([]byte(manager.GameState()))
+	conn.Write([]byte(manager.GameState(manager.game.gameMap.toString())))
 }
 
 // func (manager *Manager) notifyCurrentPlayer() {
