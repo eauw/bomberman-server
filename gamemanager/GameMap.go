@@ -173,46 +173,47 @@ func (gm *GameMap) toString() string {
 		for j := range gm.fields[i] {
 			f := gm.fields[i][j]
 
+			fieldChar := "_"
+
 			if len(f.players) > 0 {
 				// print players
 				if len(f.players) > 1 {
-					mapString += "P"
+					fieldChar = "P"
 				} else if f.players[0].isFox {
 					// Fuchs
-					mapString += "f"
+					fieldChar = "f"
 				} else {
 					// normaler Spieler
-					mapString += "p"
+					fieldChar = "p"
 				}
 
 			} else if len(f.bombs) > 0 {
 				// print bombs
 
-				mapString += "B"
+				fieldChar = "B"
 
 			} else if f.wall != nil {
 				// print walls
 				if f.wall.isDestructible {
-					mapString += "w"
+					fieldChar = "w"
 				} else {
-					mapString += "W"
+					fieldChar = "W"
 				}
 
 			} else if f.special != nil {
 				// print specials
-				mapString += f.special.powerType
+				fieldChar = f.special.powerType
 
-			} else if f.explodes {
+			}
+			//decorate with 'explodes'-state
+			if f.explodes {
 
-				mapString += fmt.Sprintf("%s", red("_"))
+				fieldChar = fmt.Sprintf("%s", red(fieldChar))
 
-			} else {
-				//fmt.Printf("_") //fmt.Printf("i %d, j %d", h, v) //fmt.Print(h + v)
-				mapString += "_"
 			}
 
 			// fmt.Print("|")
-			mapString += "|"
+			mapString += fieldChar + "|"
 		}
 		// fmt.Println()
 		mapString += "\n"
