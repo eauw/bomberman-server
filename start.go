@@ -172,9 +172,14 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			// send new string back to client
 			conn.Write([]byte(newMessage + "\n"))
 		} else {
-			fmt.Printf("Connection Error: %s\n", err)
-			fmt.Println("Client disconnected.")
-			conn.Close()
+			if strings.Contains(err.Error(), "use of closed network connection") {
+				fmt.Printf("Client %s disconnected.\n", newPlayer.GetID())
+			} else {
+				fmt.Printf("Connection Error: %s\n", err)
+				fmt.Println("Client disconnected.")
+				conn.Close()
+			}
+
 			return
 		}
 	}

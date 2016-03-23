@@ -145,27 +145,32 @@ func (manager *Manager) GameState() string {
 func (manager *Manager) MessageReceived(message string, player *Player) {
 	log.Printf("Message >%s< received from player >%s<", message, player.id)
 
-	if manager.game.started {
-
-		playerCommands := manager.game.currentRound.playerCommands
-		if _, alreadyExits := playerCommands[player.id]; alreadyExits {
-			conn := manager.playersConn[player.id]
-			conn.Write([]byte("Your already have send a message.\n"))
-		} else {
-			manager.game.currentRound.playerCommands[player.id] = message
-		}
-
-		if len(playerCommands) == len(manager.game.players) {
-			manager.ProcessCommands(manager.game.currentRound)
-		}
-
+	if message == "q" {
+		manager.playerQuit(player)
 	} else {
-		conn := manager.playersConn[player.id]
-		conn.Write([]byte("Game waiting for more players.\n"))
+		if manager.game.started {
+
+			playerCommands := manager.game.currentRound.playerCommands
+			if _, alreadyExits := playerCommands[player.id]; alreadyExits {
+				conn := manager.playersConn[player.id]
+				conn.Write([]byte("Your already have send a message.\n"))
+			} else {
+				manager.game.currentRound.playerCommands[player.id] = message
+			}
+
+			if len(playerCommands) == len(manager.game.players) {
+				manager.ProcessRound(manager.game.currentRound)
+			}
+
+		} else {
+			conn := manager.playersConn[player.id]
+			conn.Write([]byte("Game waiting for more players.\n"))
+		}
 	}
+
 }
 
-func (manager *Manager) ProcessCommands(round *Round) {
+func (manager *Manager) ProcessRound(round *Round) {
 	log.Printf("Processing Round %d\n", round.id)
 
 	for playerID, command := range round.playerCommands {
@@ -214,10 +219,12 @@ func (manager *Manager) ProcessCommands(round *Round) {
 
 		case "l":
 			manager.sendGameStateToPlayer(player)
+			break
 
 		case "n":
 			// nothing
 			break
+
 		}
 	}
 
@@ -305,4 +312,17 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 	}
 
 	return destinationField
+}
+
+func (manager *Manager) playerQuit(player *Player) {
+
+	conn := manager.playersConn[player.id]
+	conn.Write([]byte("good bye\n"))
+
+	delete(manager.playersConn, player.id)
+	manager.game.removePlayer(player)
+
+	log.Printf("Player %s has left the game.\n", player.id)
+
+	conn.Close()
 }

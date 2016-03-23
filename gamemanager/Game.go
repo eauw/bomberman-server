@@ -94,7 +94,7 @@ func (game *Game) addPlayer(player *Player) {
 }
 
 func (game *Game) removePlayer(player *Player) {
-
+	delete(game.players, player.id)
 }
 
 func (game *Game) printPlayers() string {
