@@ -41,9 +41,12 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 
 			v.resetSpecials()
 		}
+
+		fields[i].explodes = true
 	}
 
 	// Bombe nach Explosion wieder verfügbar machen
 	bomb.isPlaced = false
 	bomb.field.bombs = []*Bomb{}
+	gameMap.removeBomb(bomb)
 }

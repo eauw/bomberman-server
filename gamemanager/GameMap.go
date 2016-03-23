@@ -169,8 +169,6 @@ func (gm *GameMap) toString() string {
 		for j := range gm.fields[i] {
 			f := gm.fields[i][j]
 
-			// TODO: Fuchs darstellen
-
 			if len(f.players) > 0 {
 				// print players
 				if len(f.players) > 1 {
@@ -199,6 +197,9 @@ func (gm *GameMap) toString() string {
 			} else if f.special != nil {
 				// print specials
 				mapString += f.special.powerType
+
+			} else if f.explodes {
+				mapString += "*"
 
 			} else {
 				//fmt.Printf("_") //fmt.Printf("i %d, j %d", h, v) //fmt.Print(h + v)

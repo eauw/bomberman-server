@@ -171,6 +171,9 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 }
 
 func (manager *Manager) ProcessRound(round *Round) {
+	fields := manager.game.gameMap.fields
+	bombs := manager.game.gameMap.bombs
+
 	log.Printf("Processing Round %d\n", round.id)
 
 	for playerID, command := range round.playerCommands {
@@ -228,11 +231,15 @@ func (manager *Manager) ProcessRound(round *Round) {
 		}
 	}
 
-	for _, p := range manager.game.players {
-		manager.sendGameStateToPlayer(p)
+	for _, b := range bombs {
+		b.timer -= 1
+		if b.timer == 0 {
+			b.explode(manager.game.gameMap)
+
+		}
 	}
 
-	log.Println(manager.GameState())
+	manager.broadcastGamestate()
 
 	roundIdx := round.id
 	if roundIdx+1 >= len(manager.rounds) {
@@ -241,6 +248,21 @@ func (manager *Manager) ProcessRound(round *Round) {
 		manager.game.currentRound = manager.rounds[roundIdx+1]
 	}
 
+	// Neue Runde konfigurieren
+	for i := range fields {
+		for j := range fields[i] {
+			f := fields[i][j]
+			f.explodes = false
+		}
+	}
+}
+
+func (manager *Manager) broadcastGamestate() {
+	for _, p := range manager.game.players {
+		manager.sendGameStateToPlayer(p)
+	}
+
+	log.Println(manager.GameState())
 }
 
 func (manager *Manager) sendGameStateToPlayer(p *Player) {
