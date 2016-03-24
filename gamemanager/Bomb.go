@@ -53,4 +53,12 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 	bomb.isPlaced = false
 	bomb.field.bombs = []*Bomb{}
 	gameMap.removeBomb(bomb)
+
+	for _, f := range fields {
+		if len(f.bombs) > 0 {
+			for _, b := range f.bombs {
+				b.explode(gameMap)
+			}
+		}
+	}
 }
