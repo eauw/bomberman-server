@@ -126,6 +126,28 @@ func (manager *Manager) GameState(mapString string) string {
 	gameState += "\n"
 	gameState += mapString
 	gameState += "\n"
+
+	// gamestatetable
+	if manager.game.started {
+		// Tabelle erstellen mit dem Fuchs an erster Stelle
+		playersTable := make([]*Player, len(manager.game.players))
+		i := 1
+		for _, p := range manager.game.players {
+			if p.isFox {
+				playersTable[0] = p
+			} else {
+				playersTable[i] = p
+				i += 1
+			}
+		}
+
+		gameStateTable := "Name:\t\tPunkte:\tFeld:\n"
+		for _, p := range playersTable {
+			gameStateTable += fmt.Sprintf("%s\t%d\t%s\n", p.id, p.points, p.currentField.toString())
+		}
+		gameState += gameStateTable
+	}
+	gameState += "\n"
 	gameState += "***********************************************************"
 	gameState += "\n"
 
@@ -233,6 +255,13 @@ func (manager *Manager) ProcessRound(round *Round) {
 		if b.timer == 0 {
 			b.explode(manager.game.gameMap)
 
+		}
+	}
+
+	// Punkte des Fuchses erhöhen
+	for _, p := range manager.game.players {
+		if p.isFox {
+			p.points += 1
 		}
 	}
 

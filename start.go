@@ -4,91 +4,58 @@ import (
 	"bomberman-server/gamemanager"
 	"bomberman-server/helper"
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-const (
-	maximumPlayers = 2
-)
-
 var httpServer *HTTPServer
+var httpServerBool bool
 var httpChannel chan string
 var mainChannel chan string
 
 var rounds = 20
+var minPlayers int
 var xSize = 20
 var ySize = 20
 
 var mutex *sync.Mutex
 
-// check commandline arguments on program start
-func handleArgs() {
-	// only check if there is an parameter given
-	if len(os.Args) > 1 {
-		// ignore first parameter because its the programs name
-		for i, v := range os.Args {
-			if i > 0 {
-				switch v {
+func init() {
+	flag.IntVar(&minPlayers, "p", 2, "set min. players")
+	flag.IntVar(&rounds, "r", 20, "set max. rounds")
+	flag.IntVar(&xSize, "x", 20, "set maps x size")
+	flag.IntVar(&ySize, "y", 20, "set maps y size")
+	flag.BoolVar(&httpServerBool, "w", false, "start http server")
+	flag.Parse()
+}
 
-				// show help
-				case "-h":
-					// show help
-					showCommandlineHelp()
-					break
-
-				case "help":
-					showCommandlineHelp()
-					break
-
-				// start with http server
-				case "-w":
-					fmt.Println("Launching http server...")
-					httpServer = NewHTTPServer()
-					httpChannel = httpServer.channel
-					httpServer.mainChannel = mainChannel
-					// httpServer.game = game
-					go httpServer.start()
-					fmt.Printf("Listening http on port %s\n", httpServer.port)
-					break
-
-				case "-r":
-					rounds, _ = strconv.Atoi(os.Args[i+1])
-					return
-					break
-
-				case "-s":
-					xSize, _ = strconv.Atoi(os.Args[i+1])
-					ySize, _ = strconv.Atoi(os.Args[i+2])
-					return
-					break
-
-				default:
-					fmt.Println("invalid commandline parameter")
-					os.Exit(0)
-					break
-
-				}
-			}
-		}
-	}
+func startHttpServer() {
+	fmt.Println("Launching http server...")
+	httpServer = NewHTTPServer()
+	httpChannel = httpServer.channel
+	httpServer.mainChannel = mainChannel
+	// httpServer.game = game
+	go httpServer.start()
+	fmt.Printf("Listening http on port %s\n", httpServer.port)
 }
 
 func main() {
 	mutex = &sync.Mutex{}
 
+	// handle command line arguments
+	if httpServerBool {
+		startHttpServer()
+	}
+
 	// create main channel
 	mainChannel = make(chan string)
 	go handleMainChannel()
-
-	// handle command line arguments
-	handleArgs()
 
 	tcpPort := 5000
 	fmt.Println("\n\n\n\nLaunching tcp server...")
@@ -138,7 +105,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	newPlayer := gameManager.PlayerConnected(clientIP, conn)
 	mutex.Unlock()
 
-	if gameManager.PlayersCount() >= maximumPlayers {
+	if gameManager.PlayersCount() >= minPlayers {
 		gameManager.GameStart()
 	}
 
