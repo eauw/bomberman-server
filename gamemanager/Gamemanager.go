@@ -177,8 +177,8 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 		messageSlice := strings.Split(command, "")
 
-		if len(messageSlice) == 3 {
-			// prüfen ob Spieler eine Bombe werfen will
+		// prüfen ob Spieler eine Bombe werfen will
+		if len(messageSlice) > 0 {
 			if messageSlice[0] == "b" {
 				// prüfen ob Spieler aktuell überhaupt verfügbare Bomben hat
 				available := 0
@@ -188,15 +188,10 @@ func (manager *Manager) ProcessRound(round *Round) {
 					}
 				}
 				if available > 0 {
-					// TODO: prüfen ob richtung korrekt angegeben ist also mit w,a,s oder d
+					// Bomben sind verfügbar
 					field := manager.destinationField(player, messageSlice)
 					manager.game.PlayerPlacesBomb(player, field)
 				}
-
-			}
-		} else if len(messageSlice) > 0 {
-			if messageSlice[0] == "b" {
-				manager.game.PlayerPlacesBomb(player, player.currentField)
 			}
 		}
 
@@ -290,8 +285,16 @@ func (manager *Manager) sendGameStateToPlayer(p *Player) {
 
 // Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
 func (manager *Manager) destinationField(player *Player, destination []string) *Field {
-	distance, _ := strconv.Atoi(destination[1])
-	direction := destination[2]
+
+	var distance int
+	var direction string
+
+	if len(destination) < 3 {
+		return player.currentField
+	} else {
+		distance, _ = strconv.Atoi(destination[1])
+		direction = destination[2]
+	}
 
 	// prüfen ob Richtung gültig ist
 	validDirections := "wasd"
