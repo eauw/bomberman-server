@@ -40,12 +40,12 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 		fields[i].special = nil
 
 		// Spieler werden durch Explosionsstrahl gelähmt
-		for _, v := range fields[i].players {
-			if v.protection == false {
-				v.isParalyzed = true
+		for _, p := range fields[i].players {
+			if p.protection == 0 {
+				p.isParalyzed = true
 			}
 
-			v.resetSpecials()
+			p.resetSpecials()
 		}
 	}
 

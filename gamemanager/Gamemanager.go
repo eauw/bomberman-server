@@ -258,10 +258,13 @@ func (manager *Manager) ProcessRound(round *Round) {
 		}
 	}
 
-	// Punkte des Fuchses erhöhen
+	// Punkte des Fuchses erhöhen und Schutz abziehen falls nötig
 	for _, p := range manager.game.players {
 		if p.isFox {
 			p.points += 1
+		}
+		if p.protection > 0 {
+			p.protection -= 1
 		}
 	}
 
