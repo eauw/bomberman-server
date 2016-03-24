@@ -157,15 +157,9 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
 			mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
 
-			// if message is "quit" server will close connection
-			if messageString == "quit" {
-				conn.Close()
-				return
-			} else {
-				mutex.Lock()
-				gameManager.MessageReceived(messageString, newPlayer)
-				mutex.Unlock()
-			}
+			mutex.Lock()
+			gameManager.MessageReceived(messageString, newPlayer)
+			mutex.Unlock()
 
 			// sample process for string received
 			newMessage := strings.ToUpper(messageString)
@@ -183,52 +177,6 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			return
 		}
 	}
-}
-
-// handles the message sent by a client. returns a converted message and true. if message is "quit" or "exit" it returns false.
-func handleMessage(message string) (string, bool) {
-	printMessage := ""
-
-	switch message {
-	case "a":
-		printMessage = "go left"
-		break
-
-	case "d":
-		printMessage = "go right"
-		break
-
-	case "w":
-		printMessage = "go up"
-		break
-
-	case "s":
-		printMessage = "go down"
-		break
-
-	case "quit":
-		return "", false
-
-	case "exit":
-		return "", false
-
-	case "game state":
-		// mainChannel <- game.gameMap.toString()
-		break
-
-	case "show players":
-		// printMessage = game.printPlayers()
-		break
-
-	default:
-		fmt.Printf("invalid command: %d", message)
-		break
-	}
-
-	printMessage += "\n"
-	mainChannel <- fmt.Sprintf(printMessage)
-
-	return "", true
 }
 
 func showCommandlineHelp() {

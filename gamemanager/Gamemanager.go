@@ -247,6 +247,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 	manager.broadcastGamestate()
 
 	roundIdx := round.id
+	log.Printf("roundIdx: %d\n", roundIdx)
 	if roundIdx+1 > len(manager.rounds) {
 		manager.finishGame()
 	} else {
