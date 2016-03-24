@@ -10,13 +10,11 @@ import (
 )
 
 type Game struct {
-	channel      chan *GameChannelMessage
-	mainChannel  chan string
-	gameMap      *GameMap
-	players      map[string]*Player
-	rounds       int
-	currentRound *Round
-	started      bool
+	channel     chan *GameChannelMessage
+	mainChannel chan string
+	gameMap     *GameMap
+	players     map[string]*Player
+	started     bool
 }
 
 func NewGame(xSize int, ySize int) *Game {
@@ -27,7 +25,6 @@ func NewGame(xSize int, ySize int) *Game {
 		channel: ch,
 		gameMap: gm,
 		players: make(map[string]*Player),
-		rounds:  20,
 		started: false,
 	}
 

@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,8 @@ type Manager struct {
 	playersConn        map[string]net.Conn
 	commandTimeout     int
 	rounds             []*Round
+	mutex              *sync.Mutex
+	currentRound       *Round
 }
 
 func NewManager() *Manager {
@@ -29,6 +32,7 @@ func NewManager() *Manager {
 		currentPlayerIndex: 0,
 		commandTimeout:     1,
 		rounds:             []*Round{},
+		mutex:              &sync.Mutex{},
 	}
 }
 
@@ -37,14 +41,6 @@ func (manager *Manager) SetMainChannel(ch chan string) {
 }
 
 func (manager *Manager) Start(rounds int, xSize int, ySize int) {
-	// manager.generatePlayersOrder()
-
-	// manager.currentPlayerIndex = 0
-
-	// currentPlayer := manager.GetCurrentPlayer()
-
-	// manager.mainChannel <- fmt.Sprintf("first player: %s", currentPlayer.id)
-	// manager.notifyCurrentPlayer()
 
 	if rounds < 1 {
 		rounds = 1
@@ -57,7 +53,7 @@ func (manager *Manager) Start(rounds int, xSize int, ySize int) {
 	}
 
 	manager.game = NewGame(xSize, ySize)
-	manager.game.currentRound = manager.rounds[0]
+	manager.currentRound = manager.rounds[0]
 	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
 }
 
@@ -70,20 +66,6 @@ func (manager *Manager) GameStart() {
 
 	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
 }
-
-// func (manager *Manager) GetCurrentPlayer() *Player {
-// 	currentPlayer := manager.game.getPlayerByID(manager.playersOrder[manager.currentPlayerIndex])
-// 	return currentPlayer
-// }
-
-// func (manager *Manager) setNextPlayer() {
-// 	if manager.currentPlayerIndex == len(manager.game.players)-1 {
-// 		manager.currentPlayerIndex = 0
-// 	} else {
-// 		manager.currentPlayerIndex += 1
-// 	}
-
-// }
 
 func (manager *Manager) PlayersCount() int {
 	if manager.game.players != nil {
@@ -126,16 +108,25 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 func (manager *Manager) GameState(mapString string) string {
 
 	infos := "\n"
-	infos += fmt.Sprintf("Runde: %d, ", manager.game.currentRound.id)
+	if manager.game.started {
+		infos += fmt.Sprintf("Runde: %d/%d, ", manager.currentRound.id, len(manager.rounds))
+	} else {
+		infos += fmt.Sprintf("Runden: %d, ", len(manager.rounds))
+	}
+
 	infos += fmt.Sprintf("Spieleranzahl: %d, ", len(manager.game.players))
 	infos += fmt.Sprintf("Spielfeldgröße: x %d y %d, ", manager.game.gameMap.xSize, manager.game.gameMap.ySize)
 	infos += fmt.Sprintf("Cmd-Timeout: %d, ", manager.commandTimeout)
 	infos += "\n"
 
 	gameState := "\n"
+	gameState += "***********************************************************"
+	gameState += "\n"
 	gameState += infos
 	gameState += "\n"
 	gameState += mapString
+	gameState += "\n"
+	gameState += "***********************************************************"
 	gameState += "\n"
 
 	return gameState
@@ -143,26 +134,29 @@ func (manager *Manager) GameState(mapString string) string {
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
 	log.Printf("Message >%s< received from player >%s<", message, player.id)
+	conn := manager.playersConn[player.id]
 
+	// mit q verlässt der Spieler den Server
 	if message == "q" {
 		manager.playerQuit(player)
 	} else {
+
+		// Befehle werden erst entgegengenommen wenn das Spiel gestartet wurde
 		if manager.game.started {
 
-			playerCommands := manager.game.currentRound.playerCommands
+			playerCommands := manager.currentRound.playerCommands
+
 			if _, alreadyExits := playerCommands[player.id]; alreadyExits {
-				conn := manager.playersConn[player.id]
 				conn.Write([]byte("Your already have send a message.\n"))
 			} else {
-				manager.game.currentRound.playerCommands[player.id] = message
+				manager.currentRound.playerCommands[player.id] = message
 			}
 
 			if len(playerCommands) == len(manager.game.players) {
-				manager.ProcessRound(manager.game.currentRound)
+				manager.ProcessRound(manager.currentRound)
 			}
 
 		} else {
-			conn := manager.playersConn[player.id]
 			conn.Write([]byte("Game waiting for more players.\n"))
 		}
 	}
@@ -170,6 +164,9 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 }
 
 func (manager *Manager) ProcessRound(round *Round) {
+	manager.mutex.Lock()
+	defer manager.mutex.Unlock()
+
 	fields := manager.game.gameMap.fields
 	bombs := manager.game.gameMap.bombs
 
@@ -246,15 +243,21 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	manager.broadcastGamestate()
 
+	// nächste Runde setzen
 	roundIdx := round.id
 	log.Printf("roundIdx: %d\n", roundIdx)
-	if roundIdx+1 > len(manager.rounds) {
+	// prüfen ob die letzte Runde erreicht ist
+	if roundIdx >= len(manager.rounds) {
+		// dann beenden
 		manager.finishGame()
 	} else {
-		manager.game.currentRound = manager.rounds[roundIdx+1]
+		// sonst nächste Runde
+		manager.currentRound = manager.rounds[roundIdx]
 	}
 
 	// Neue Runde konfigurieren
+
+	// explodierte Bomben zurücksetzen
 	for i := range fields {
 		for j := range fields[i] {
 			f := fields[i][j]

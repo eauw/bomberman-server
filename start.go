@@ -26,7 +26,7 @@ var rounds = 20
 var xSize = 20
 var ySize = 20
 
-var mutex = &sync.Mutex{}
+var mutex *sync.Mutex
 
 // check commandline arguments on program start
 func handleArgs() {
@@ -60,6 +60,7 @@ func handleArgs() {
 
 				case "-r":
 					rounds, _ = strconv.Atoi(os.Args[i+1])
+					return
 					break
 
 				case "-s":
@@ -80,6 +81,8 @@ func handleArgs() {
 }
 
 func main() {
+	mutex = &sync.Mutex{}
+
 	// create main channel
 	mainChannel = make(chan string)
 	go handleMainChannel()
