@@ -162,9 +162,9 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			mutex.Unlock()
 
 			// sample process for string received
-			newMessage := strings.ToUpper(messageString)
+			// newMessage := strings.ToUpper(messageString)
 			// send new string back to client
-			conn.Write([]byte(newMessage + "\n"))
+			conn.Write([]byte(messageString + "\n"))
 		} else {
 			if strings.Contains(err.Error(), "use of closed network connection") {
 				fmt.Printf("Client %s disconnected.\n", newPlayer.GetID())
