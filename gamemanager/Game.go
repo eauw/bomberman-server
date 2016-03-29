@@ -179,6 +179,18 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 		nextField.special = nil
 	}
 
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				break
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -212,6 +224,18 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 		nextField.special = nil
 	}
 
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				break
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 }
@@ -238,12 +262,24 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 		return
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	if nextField.special != nil {
 		player.applySpecial(nextField.special)
 		nextField.special = nil
 	}
 
-	// prüfen ob das nächste Feld ein Special hat
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				break
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -271,12 +307,24 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 		return
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	if nextField.special != nil {
 		player.applySpecial(nextField.special)
 		nextField.special = nil
 	}
 
-	// prüfen ob das nächste Feld ein Special hat
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				break
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
