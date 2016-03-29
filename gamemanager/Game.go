@@ -35,7 +35,7 @@ func NewGame(xSize int, ySize int) *Game {
 
 func (game *Game) start() {
 	game.started = true
-	game.pickRandomPlayer().isFox = true
+	game.pickRandomPlayer().isFox = 1
 	game.placePlayers()
 
 	go game.handleGameChannel()

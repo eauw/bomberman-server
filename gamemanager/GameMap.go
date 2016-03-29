@@ -181,7 +181,7 @@ func (gm *GameMap) toString() string {
 				// print players
 				if len(f.players) > 1 {
 					fieldChar = "P"
-				} else if f.players[0].isFox {
+				} else if f.players[0].isFox > 0 {
 					// Fuchs
 					fieldChar = "f"
 				} else {
@@ -234,7 +234,7 @@ func (gm *GameMap) toStringForServer() string {
 				// print players
 				if len(f.players) > 1 {
 					fieldChar = "P"
-				} else if f.players[0].isFox {
+				} else if f.players[0].isFox > 0 {
 					// Fuchs
 					fieldChar = "f"
 				} else {

@@ -14,7 +14,7 @@ type Player struct {
 	points       int
 	currentField *Field
 	isParalyzed  bool
-	isFox        bool
+	isFox        int
 	bombs        []*Bomb
 	throwrange   int
 	protection   int // Dauer des Schutzes falls meinen welchen eingesammelt hat
@@ -29,7 +29,7 @@ func NewPlayer(n string, f *Field) *Player {
 		name:         n,
 		currentField: f,
 		isParalyzed:  false,
-		isFox:        false,
+		isFox:        0,
 		bombs:        make([]*Bomb, 0),
 		throwrange:   1,
 		protection:   0,
@@ -54,6 +54,14 @@ func (player *Player) GetID() string {
 
 func (player *Player) SetID(id string) {
 	player.id = id
+}
+
+func (player *Player) GetName() string {
+	return player.name
+}
+
+func (player *Player) SetName(name string) {
+	player.name = name
 }
 
 func (player *Player) GetCurrentField() *Field {

@@ -112,6 +112,9 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	conn.Write([]byte("Your ID: "))
 	conn.Write([]byte(newPlayer.GetID()))
 	conn.Write([]byte("\n"))
+	conn.Write([]byte("Your Name: "))
+	conn.Write([]byte(newPlayer.GetName()))
+	conn.Write([]byte("\n"))
 
 	// run loop forever (or until ctrl-c)
 	for {

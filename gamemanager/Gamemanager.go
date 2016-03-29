@@ -99,6 +99,7 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	newPlayer.SetIP(ip)
 	newPlayer.addBomb()
 	manager.game.addPlayer(newPlayer)
+	newPlayer.name = "Player" + strconv.Itoa(len(manager.game.players))
 
 	manager.playersConn[newPlayer.id] = conn
 
@@ -133,7 +134,7 @@ func (manager *Manager) GameState(mapString string) string {
 		playersTable := make([]*Player, len(manager.game.players))
 		i := 1
 		for _, p := range manager.game.players {
-			if p.isFox {
+			if p.isFox > 0 {
 				playersTable[0] = p
 			} else {
 				playersTable[i] = p
@@ -141,9 +142,9 @@ func (manager *Manager) GameState(mapString string) string {
 			}
 		}
 
-		gameStateTable := "Name:\t\tPunkte:\tFeld:\n"
+		gameStateTable := "Name:\tPunkte:\tFeld:\n"
 		for _, p := range playersTable {
-			gameStateTable += fmt.Sprintf("%s\t%d\t%s\n", p.id, p.points, p.currentField.toString())
+			gameStateTable += fmt.Sprintf("%s\t%d\t%s\n", p.name, p.points, p.currentField.toString())
 		}
 		gameState += gameStateTable
 	}
@@ -155,7 +156,7 @@ func (manager *Manager) GameState(mapString string) string {
 }
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
-	log.Printf("Message >%s< received from player >%s<", message, player.id)
+	log.Printf("Message >%s< received from player >%s<", message, player.name)
 	conn := manager.playersConn[player.id]
 
 	// mit q verlässt der Spieler den Server
@@ -260,8 +261,9 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	// Punkte des Fuchses erhöhen und Schutz abziehen falls nötig
 	for _, p := range manager.game.players {
-		if p.isFox {
-			p.points += 1
+		if p.isFox > 0 {
+			p.isFox += 1
+			p.points += p.isFox
 		}
 		if p.protection > 0 {
 			p.protection -= 1
