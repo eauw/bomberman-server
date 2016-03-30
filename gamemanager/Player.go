@@ -36,10 +36,6 @@ func NewPlayer(n string, f *Field) *Player {
 	}
 }
 
-// func (player *Player) setPosition(x int, y int) {
-// 	player.position.setPosition(x, y)
-// }
-
 func (player *Player) GetIP() string {
 	return player.ip
 }

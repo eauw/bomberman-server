@@ -186,7 +186,8 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 			if p.isFox > 0 {
 				p.isFox = 0
 				player.isFox += 1
-				break
+				game.teleportPlayer(player)
+				return
 			}
 		}
 	}
@@ -231,7 +232,8 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 			if p.isFox > 0 {
 				p.isFox = 0
 				player.isFox += 1
-				break
+				game.teleportPlayer(player)
+				return
 			}
 		}
 	}
@@ -275,7 +277,8 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 			if p.isFox > 0 {
 				p.isFox = 0
 				player.isFox += 1
-				break
+				game.teleportPlayer(player)
+				return
 			}
 		}
 	}
@@ -320,7 +323,8 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 			if p.isFox > 0 {
 				p.isFox = 0
 				player.isFox += 1
-				break
+				game.teleportPlayer(player)
+				return
 			}
 		}
 	}
@@ -368,6 +372,42 @@ func (game *Game) ExplodePlayersBombs(player *Player) {
 			player.bombs[i].explode(game.gameMap)
 		}
 	}
+}
+
+func (game *Game) teleportPlayer(player *Player) {
+
+	// isWall := true
+
+	// for isWall {
+	// 	randomX := helper.RandomNumber(0, game.gameMap.xSize-1)
+	// 	randomY := helper.RandomNumber(0, game.gameMap.ySize-1)
+
+	// 	field := game.gameMap.fields[randomX][randomY]
+
+	// 	if field.wall == nil {
+	// 		isWall = false
+	// 		player.currentField.removePlayer(p)
+	// 		field.addPlayer(player)
+	// 		player.currentField = field
+	// 	}
+	// }
+
+	gameMap := game.gameMap
+
+	randomX := helper.RandomNumber(0, gameMap.xSize-1)
+	randomY := helper.RandomNumber(0, gameMap.ySize-1)
+
+	field := game.gameMap.fields[randomX][randomY]
+
+	// den Spieler nur platzieren wenn das Feld keine Wand hat und kein anderer Spieler dort steht
+	if field.wall != nil || len(field.players) > 0 {
+		game.teleportPlayer(player)
+	} else {
+		player.currentField.removePlayer(player)
+		field.addPlayer(player)
+		player.currentField = field
+	}
+
 }
 
 // func (game *Game) placePlayers() {
