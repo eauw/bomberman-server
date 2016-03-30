@@ -23,10 +23,16 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 	fields = append(fields, bomb.field)
 
 	for i := range fields {
+		// Feld als "gerade am explodieren" markieren
+		fields[i].explodes = true
+
 		// Wände werden durch Explosionsstrahl zerstört
 		if fields[i].wall != nil {
 			if fields[i].wall.isDestructible {
 				fields[i].wall = nil
+				fields[i].explodes = true
+			} else {
+				fields[i].explodes = false
 			}
 		}
 
@@ -34,16 +40,25 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 		fields[i].special = nil
 
 		// Spieler werden durch Explosionsstrahl gelähmt
-		for _, v := range fields[i].players {
-			if v.protection == false {
-				v.isParalyzed = true
+		for _, p := range fields[i].players {
+			if p.protection == 0 {
+				p.isParalyzed = true
 			}
 
-			v.resetSpecials()
+			p.resetSpecials()
 		}
 	}
 
 	// Bombe nach Explosion wieder verfügbar machen
 	bomb.isPlaced = false
 	bomb.field.bombs = []*Bomb{}
+	gameMap.removeBomb(bomb)
+
+	for _, f := range fields {
+		if len(f.bombs) > 0 {
+			for _, b := range f.bombs {
+				b.explode(gameMap)
+			}
+		}
+	}
 }

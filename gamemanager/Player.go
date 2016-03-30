@@ -14,10 +14,10 @@ type Player struct {
 	points       int
 	currentField *Field
 	isParalyzed  bool
-	isFox        bool
+	isFox        int
 	bombs        []*Bomb
 	throwrange   int
-	protection   bool
+	protection   int // Dauer des Schutzes falls meinen welchen eingesammelt hat
 }
 
 // NewPlayer function is the players constructor
@@ -29,16 +29,12 @@ func NewPlayer(n string, f *Field) *Player {
 		name:         n,
 		currentField: f,
 		isParalyzed:  false,
-		isFox:        false,
+		isFox:        0,
 		bombs:        make([]*Bomb, 0),
 		throwrange:   1,
-		protection:   false,
+		protection:   0,
 	}
 }
-
-// func (player *Player) setPosition(x int, y int) {
-// 	player.position.setPosition(x, y)
-// }
 
 func (player *Player) GetIP() string {
 	return player.ip
@@ -54,6 +50,14 @@ func (player *Player) GetID() string {
 
 func (player *Player) SetID(id string) {
 	player.id = id
+}
+
+func (player *Player) GetName() string {
+	return player.name
+}
+
+func (player *Player) SetName(name string) {
+	player.name = name
 }
 
 func (player *Player) GetCurrentField() *Field {
@@ -75,7 +79,7 @@ func (player *Player) applySpecial(special *Special) {
 		break
 
 	case "h":
-		player.protection = true
+		player.protection = 5
 		break
 	}
 }
@@ -98,7 +102,7 @@ func (player *Player) getAvailableBomb() *Bomb {
 
 func (player *Player) resetSpecials() {
 	player.throwrange = 1
-	player.protection = false
+	player.protection = 0
 	player.bombs = []*Bomb{}
 	player.addBomb()
 }

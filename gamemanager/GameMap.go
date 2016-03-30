@@ -2,7 +2,8 @@ package gamemanager
 
 import "bomberman-server/helper"
 
-// import "fmt"
+import "fmt"
+import "github.com/fatih/color"
 
 type GameMap struct {
 	game   *Game
@@ -165,62 +166,113 @@ func createFields(xSize int, ySize int) [][]*Field {
 func (gm *GameMap) toString() string {
 	mapString := "\n"
 	// fmt.Println()
+
 	for i := range gm.fields {
 		for j := range gm.fields[i] {
 			f := gm.fields[i][j]
 
-			// TODO: Fuchs darstellen
+			fieldChar := "_"
 
-			if len(f.players) > 0 {
+			if f.explodes {
+
+				fieldChar = "*"
+
+			} else if len(f.players) > 0 {
 				// print players
 				if len(f.players) > 1 {
-					mapString += "P"
-				} else if f.players[0].isFox {
+					fieldChar = "P"
+				} else if f.players[0].isFox > 0 {
 					// Fuchs
-					mapString += "f"
+					fieldChar = "f"
 				} else {
 					// normaler Spieler
-					mapString += "p"
+					fieldChar = "p"
 				}
 
 			} else if len(f.bombs) > 0 {
 				// print bombs
 
-				mapString += "B"
+				fieldChar = "B"
 
 			} else if f.wall != nil {
 				// print walls
 				if f.wall.isDestructible {
-					mapString += "w"
+					fieldChar = "w"
 				} else {
-					mapString += "W"
+					fieldChar = "W"
 				}
 
 			} else if f.special != nil {
 				// print specials
-				mapString += f.special.powerType
+				fieldChar = f.special.powerType
 
-			} else {
-				//fmt.Printf("_") //fmt.Printf("i %d, j %d", h, v) //fmt.Print(h + v)
-				mapString += "_"
 			}
 
 			// fmt.Print("|")
-			mapString += "|"
+			mapString += fieldChar + "|"
 		}
 		// fmt.Println()
 		mapString += "\n"
 	}
 
-	//gm.game.mainChannel <- mapString
+	return mapString
+}
 
-	// for i := range gm.fields {
-	// 	for j := range gm.fields[i] {
-	// 		// f := gm.fields[i][j]
-	// 		mapString += fmt.Sprintf("%d %d|", i, j)
-	// 	}
-	// 	mapString += "\n"
-	// }
+func (gm *GameMap) toStringForServer() string {
+	mapString := "\n"
+	// fmt.Println()
+
+	red := color.New(color.BgRed).SprintFunc()
+
+	for i := range gm.fields {
+		for j := range gm.fields[i] {
+			f := gm.fields[i][j]
+
+			fieldChar := "_"
+
+			if len(f.players) > 0 {
+				// print players
+				if len(f.players) > 1 {
+					fieldChar = "P"
+				} else if f.players[0].isFox > 0 {
+					// Fuchs
+					fieldChar = "f"
+				} else {
+					// normaler Spieler
+					fieldChar = "p"
+				}
+
+			} else if len(f.bombs) > 0 {
+				// print bombs
+
+				fieldChar = "B"
+
+			} else if f.wall != nil {
+				// print walls
+				if f.wall.isDestructible {
+					fieldChar = "w"
+				} else {
+					fieldChar = "W"
+				}
+
+			} else if f.special != nil {
+				// print specials
+				fieldChar = f.special.powerType
+
+			}
+			//decorate with 'explodes'-state
+			if f.explodes {
+
+				fieldChar = fmt.Sprintf("%s", red(fieldChar))
+
+			}
+
+			// fmt.Print("|")
+			mapString += fieldChar + "|"
+		}
+		// fmt.Println()
+		mapString += "\n"
+	}
 
 	return mapString
 }

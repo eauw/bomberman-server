@@ -10,13 +10,11 @@ import (
 )
 
 type Game struct {
-	channel      chan *GameChannelMessage
-	mainChannel  chan string
-	gameMap      *GameMap
-	players      map[string]*Player
-	rounds       int
-	currentRound int
-	started      bool
+	channel     chan *GameChannelMessage
+	mainChannel chan string
+	gameMap     *GameMap
+	players     map[string]*Player
+	started     bool
 }
 
 func NewGame(xSize int, ySize int) *Game {
@@ -24,12 +22,10 @@ func NewGame(xSize int, ySize int) *Game {
 	gm := NewGameMap(xSize, ySize)
 
 	newGame := &Game{
-		channel:      ch,
-		gameMap:      gm,
-		players:      make(map[string]*Player),
-		currentRound: 1,
-		rounds:       20,
-		started:      false,
+		channel: ch,
+		gameMap: gm,
+		players: make(map[string]*Player),
+		started: false,
 	}
 
 	gm.game = newGame
@@ -39,7 +35,7 @@ func NewGame(xSize int, ySize int) *Game {
 
 func (game *Game) start() {
 	game.started = true
-	game.pickRandomPlayer().isFox = true
+	game.pickRandomPlayer().isFox = 1
 	game.placePlayers()
 
 	go game.handleGameChannel()
@@ -95,7 +91,7 @@ func (game *Game) addPlayer(player *Player) {
 }
 
 func (game *Game) removePlayer(player *Player) {
-
+	delete(game.players, player.id)
 }
 
 func (game *Game) printPlayers() string {
@@ -183,6 +179,19 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 		nextField.special = nil
 	}
 
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				game.teleportPlayer(player)
+				return
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -216,6 +225,19 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 		nextField.special = nil
 	}
 
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				game.teleportPlayer(player)
+				return
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 }
@@ -242,12 +264,25 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 		return
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	if nextField.special != nil {
 		player.applySpecial(nextField.special)
 		nextField.special = nil
 	}
 
-	// prüfen ob das nächste Feld ein Special hat
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				game.teleportPlayer(player)
+				return
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -275,12 +310,25 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 		return
 	}
 
+	// prüfen ob das nächste Feld ein Special hat
 	if nextField.special != nil {
 		player.applySpecial(nextField.special)
 		nextField.special = nil
 	}
 
-	// prüfen ob das nächste Feld ein Special hat
+	// prüfen ob der Fuchs auf dem nächsten Feld steht
+	// nur wenn man selbst nicht der Fuchs ist
+	if player.isFox == 0 {
+		for _, p := range nextField.players {
+			if p.isFox > 0 {
+				p.isFox = 0
+				player.isFox += 1
+				game.teleportPlayer(player)
+				return
+			}
+		}
+	}
+
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
 
@@ -324,6 +372,42 @@ func (game *Game) ExplodePlayersBombs(player *Player) {
 			player.bombs[i].explode(game.gameMap)
 		}
 	}
+}
+
+func (game *Game) teleportPlayer(player *Player) {
+
+	// isWall := true
+
+	// for isWall {
+	// 	randomX := helper.RandomNumber(0, game.gameMap.xSize-1)
+	// 	randomY := helper.RandomNumber(0, game.gameMap.ySize-1)
+
+	// 	field := game.gameMap.fields[randomX][randomY]
+
+	// 	if field.wall == nil {
+	// 		isWall = false
+	// 		player.currentField.removePlayer(p)
+	// 		field.addPlayer(player)
+	// 		player.currentField = field
+	// 	}
+	// }
+
+	gameMap := game.gameMap
+
+	randomX := helper.RandomNumber(0, gameMap.xSize-1)
+	randomY := helper.RandomNumber(0, gameMap.ySize-1)
+
+	field := game.gameMap.fields[randomX][randomY]
+
+	// den Spieler nur platzieren wenn das Feld keine Wand hat und kein anderer Spieler dort steht
+	if field.wall != nil || len(field.players) > 0 {
+		game.teleportPlayer(player)
+	} else {
+		player.currentField.removePlayer(player)
+		field.addPlayer(player)
+		player.currentField = field
+	}
+
 }
 
 // func (game *Game) placePlayers() {

@@ -4,88 +4,58 @@ import (
 	"bomberman-server/gamemanager"
 	"bomberman-server/helper"
 	"bufio"
+	"flag"
 	"fmt"
-	// "log"
+	"log"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-const (
-	maximumPlayers = 2
-)
-
 var httpServer *HTTPServer
+var httpServerBool bool
 var httpChannel chan string
 var mainChannel chan string
 
 var rounds = 20
+var minPlayers int
 var xSize = 20
 var ySize = 20
 
-var mutex = &sync.Mutex{}
+var mutex *sync.Mutex
 
-// check commandline arguments on program start
-func handleArgs() {
-	// only check if there is an parameter given
-	if len(os.Args) > 1 {
-		// ignore first parameter because its the programs name
-		for i, v := range os.Args {
-			if i > 0 {
-				switch v {
+func init() {
+	flag.IntVar(&minPlayers, "p", 2, "set min. players")
+	flag.IntVar(&rounds, "r", 20, "set max. rounds")
+	flag.IntVar(&xSize, "x", 20, "set maps x size")
+	flag.IntVar(&ySize, "y", 20, "set maps y size")
+	flag.BoolVar(&httpServerBool, "w", false, "start http server")
+	flag.Parse()
+}
 
-				// show help
-				case "-h":
-					// show help
-					showCommandlineHelp()
-					break
-
-				case "help":
-					showCommandlineHelp()
-					break
-
-				// start with http server
-				case "-w":
-					fmt.Println("Launching http server...")
-					httpServer = NewHTTPServer()
-					httpChannel = httpServer.channel
-					httpServer.mainChannel = mainChannel
-					// httpServer.game = game
-					go httpServer.start()
-					fmt.Printf("Listening http on port %s\n", httpServer.port)
-					break
-
-				case "-r":
-					rounds, _ = strconv.Atoi(os.Args[i+1])
-					break
-
-				case "-s":
-					xSize, _ = strconv.Atoi(os.Args[i+1])
-					ySize, _ = strconv.Atoi(os.Args[i+2])
-					return
-					break
-
-				default:
-					fmt.Println("invalid commandline parameter")
-					os.Exit(0)
-					break
-
-				}
-			}
-		}
-	}
+func startHttpServer() {
+	fmt.Println("Launching http server...")
+	httpServer = NewHTTPServer()
+	httpChannel = httpServer.channel
+	httpServer.mainChannel = mainChannel
+	// httpServer.game = game
+	go httpServer.start()
+	fmt.Printf("Listening http on port %s\n", httpServer.port)
 }
 
 func main() {
+	mutex = &sync.Mutex{}
+
+	// handle command line arguments
+	if httpServerBool {
+		startHttpServer()
+	}
+
 	// create main channel
 	mainChannel = make(chan string)
 	go handleMainChannel()
-
-	// handle command line arguments
-	handleArgs()
 
 	tcpPort := 5000
 	fmt.Println("\n\n\n\nLaunching tcp server...")
@@ -103,7 +73,11 @@ func main() {
 
 	for {
 		// accept connection on port
-		conn, _ := ln.Accept()
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Print(err)
+		}
+
 		if conn != nil {
 			go newClientConnected(conn, gameManager)
 		}
@@ -131,12 +105,15 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	newPlayer := gameManager.PlayerConnected(clientIP, conn)
 	mutex.Unlock()
 
-	if gameManager.PlayersCount() >= maximumPlayers {
+	if gameManager.PlayersCount() >= minPlayers {
 		gameManager.GameStart()
 	}
 
 	conn.Write([]byte("Your ID: "))
 	conn.Write([]byte(newPlayer.GetID()))
+	conn.Write([]byte("\n"))
+	conn.Write([]byte("Your Name: "))
+	conn.Write([]byte(newPlayer.GetName()))
 	conn.Write([]byte("\n"))
 
 	// run loop forever (or until ctrl-c)
@@ -153,73 +130,26 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
 			mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
 
-			// if message is "quit" server will close connection
-			if messageString == "quit" {
-				conn.Close()
-				return
-			} else {
-				mutex.Lock()
-				gameManager.MessageReceived(messageString, newPlayer)
-				mutex.Unlock()
-			}
+			mutex.Lock()
+			gameManager.MessageReceived(messageString, newPlayer)
+			mutex.Unlock()
 
 			// sample process for string received
-			newMessage := strings.ToUpper(messageString)
+			// newMessage := strings.ToUpper(messageString)
 			// send new string back to client
-			conn.Write([]byte(newMessage + "\n"))
+			conn.Write([]byte(messageString + "\n"))
 		} else {
-			fmt.Printf("Connection Error: %s\n", err)
-			fmt.Println("Client disconnected.")
-			conn.Close()
+			if strings.Contains(err.Error(), "use of closed network connection") {
+				fmt.Printf("Client %s disconnected.\n", newPlayer.GetID())
+			} else {
+				fmt.Printf("Connection Error: %s\n", err)
+				fmt.Println("Client disconnected.")
+				conn.Close()
+			}
+
 			return
 		}
 	}
-}
-
-// handles the message sent by a client. returns a converted message and true. if message is "quit" or "exit" it returns false.
-func handleMessage(message string) (string, bool) {
-	printMessage := ""
-
-	switch message {
-	case "a":
-		printMessage = "go left"
-		break
-
-	case "d":
-		printMessage = "go right"
-		break
-
-	case "w":
-		printMessage = "go up"
-		break
-
-	case "s":
-		printMessage = "go down"
-		break
-
-	case "quit":
-		return "", false
-
-	case "exit":
-		return "", false
-
-	case "game state":
-		// mainChannel <- game.gameMap.toString()
-		break
-
-	case "show players":
-		// printMessage = game.printPlayers()
-		break
-
-	default:
-		fmt.Printf("invalid command: %d", message)
-		break
-	}
-
-	printMessage += "\n"
-	mainChannel <- fmt.Sprintf(printMessage)
-
-	return "", true
 }
 
 func showCommandlineHelp() {

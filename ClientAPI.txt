@@ -10,9 +10,11 @@ Player geht ein Feld nach links:		"a"
 
 Player geht ein Feld nach rechts:		"d"
 
-Player wirft Bombe:				 		"W0" "W5": 5 Felder nach oben
+Player wirft Bombe:				 		"b3w": 3 Felder nach oben
 
 Player macht gar nix: "n"
+
+Player verlässt das Spiel / den Server 	"q"
 
 
 
@@ -26,11 +28,11 @@ Game State:
 
 P|_|B|_|_|W|_|_|_|_|
 _|_|P|_|_|_|_|W|_|_|
-W|_|S|_|_|_|S|_|_|_|
+W|_|h|_|_|_|b|_|_|_|
 _|_|_|_|W|_|_|_|_|_|
 _|W|_|_|_|_|W|_|S|W|
 _|_|_|_|_|W|_|_|_|_|
-W|_|S|_|_|_|_|S|_|_|
+W|_|r|_|_|_|_|S|_|_|
 W|_|_|_|_|_|_|*|_|W|
 _|_|W|_|W|W|*|*|*|_|
 _|_|_|W|_|W|_|*|_|_|

@@ -1,6 +1,7 @@
 package gamemanager
 
 import "bomberman-server/helper"
+import "strings"
 
 /*
 
@@ -18,30 +19,24 @@ type Special struct {
 func NewSpecial(powerType string) *Special {
 	specials := specials()
 
-	counter := 0
-	for v := range specials {
-		if specials[v] == powerType {
-			counter += 1
-		}
-	}
-
-	if counter == 0 {
-		return nil
-	} else {
+	if strings.Contains(specials, powerType) {
 		return &Special{
 			powerType: powerType,
 		}
+	} else {
+		return nil
 	}
+
 }
 
 func RandomSpecial() *Special {
-	specials := specials()
+	specials := strings.Split(specials(), ",")
 
 	i := helper.RandomNumber(0, len(specials))
 
 	return NewSpecial(specials[i])
 }
 
-func specials() []string {
-	return []string{"r", "b", "h"}
+func specials() string {
+	return "r,b,h"
 }
