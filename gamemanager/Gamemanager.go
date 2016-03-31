@@ -251,6 +251,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 		}
 	}
 
+	// Bomben Timer runterzählen und ggf. explodieren lassen
 	for _, b := range bombs {
 		b.timer -= 1
 		if b.timer == 0 {
@@ -296,6 +297,8 @@ func (manager *Manager) ProcessRound(round *Round) {
 			f.explodes = false
 		}
 	}
+
+	// TODO: Specials respawn implementieren
 }
 
 func (manager *Manager) broadcastGamestate() {
