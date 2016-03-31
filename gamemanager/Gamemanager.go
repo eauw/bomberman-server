@@ -16,6 +16,7 @@ type Manager struct {
 	game               *Game
 	channel            chan *GameChannelMessage
 	mainChannel        chan string
+	specChannel        chan string
 	currentPlayerIndex int
 	playersOrder       []string
 	playersConn        map[string]net.Conn
@@ -38,6 +39,10 @@ func NewManager() *Manager {
 
 func (manager *Manager) SetMainChannel(ch chan string) {
 	manager.mainChannel = ch
+}
+
+func (manager *Manager) SetSpecChannel(ch chan string) {
+	manager.specChannel = ch
 }
 
 func (manager *Manager) Start(rounds int, xSize int, ySize int) {
@@ -278,7 +283,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	// nächste Runde setzen
 	roundIdx := round.id
-	log.Printf("roundIdx: %d\n", roundIdx)
+
 	// prüfen ob die letzte Runde erreicht ist
 	if roundIdx >= len(manager.rounds) {
 		// dann beenden
@@ -307,6 +312,8 @@ func (manager *Manager) broadcastGamestate() {
 	}
 
 	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
+
+	manager.specChannel <- manager.GameState(manager.game.gameMap.toStringForServer())
 }
 
 func (manager *Manager) sendGameStateToPlayer(p *Player) {

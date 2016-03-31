@@ -19,6 +19,10 @@ var httpServerBool bool
 var httpChannel chan string
 var mainChannel chan string
 
+var specChannel chan string
+
+var spectators []net.Conn = make([]net.Conn, 0)
+
 var rounds int
 var minPlayers int
 var xSize int
@@ -57,29 +61,57 @@ func main() {
 	mainChannel = make(chan string)
 	go handleMainChannel()
 
-	tcpPort := 5000
-	fmt.Println("\n\n\n\nLaunching tcp server...")
+	specChannel = make(chan string)
+	go handleSpecChannel()
+
+	tcpGamePort := 5000
+	tcpSpecPort := 5001
+	fmt.Println("\n\n\n\nLaunching tcp servers...")
 
 	// listen on all interfaces
-	ln, _ := net.Listen("tcp", fmt.Sprintf(":%d", tcpPort))
-	fmt.Printf("Listening tcp on port %d\n", tcpPort)
+	gameListener, _ := net.Listen("tcp", fmt.Sprintf(":%d", tcpGamePort))
+	fmt.Printf("tcp game port: %d\n", tcpGamePort)
+
+	specListener, _ := net.Listen("tcp", fmt.Sprintf(":%d", tcpSpecPort))
+	fmt.Printf("tcp spectator port: %d\n", tcpSpecPort)
 
 	// create game
 	mutex.Lock()
 	gameManager := gamemanager.NewManager()
 	gameManager.Start(rounds, xSize, ySize)
 	gameManager.SetMainChannel(mainChannel)
+	gameManager.SetSpecChannel(specChannel)
 	mutex.Unlock()
+
+	go handleSpecListener(specListener)
 
 	for {
 		// accept connection on port
-		conn, err := ln.Accept()
-		if err != nil {
-			log.Print(err)
+		gameConn, gameConnErr := gameListener.Accept()
+
+		if gameConnErr != nil {
+			log.Print(gameConnErr)
+		}
+
+		if gameConn != nil {
+			go newClientConnected(gameConn, gameManager)
+		}
+	}
+}
+
+func handleSpecListener(ln net.Listener) {
+	for {
+		// accept connection on port
+		conn, specConnErr := ln.Accept()
+
+		if specConnErr != nil {
+			log.Print(specConnErr)
 		}
 
 		if conn != nil {
-			go newClientConnected(conn, gameManager)
+			mutex.Lock()
+			spectators = append(spectators, conn)
+			mutex.Unlock()
 		}
 	}
 }
@@ -151,6 +183,28 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 		}
 	}
 }
+
+// called as goroutine
+func handleSpecChannel() {
+	for {
+		var x = <-specChannel
+
+		for _, conn := range spectators {
+			conn.Write([]byte(x))
+		}
+	}
+
+}
+
+// called as goroutine
+// func newSpectatorConnected(conn net.Conn) {
+// 	conn.Write([]byte("Hello Spectator\n"))
+
+// 	for {
+// 		var x = <-specChannel
+
+// 	}
+// }
 
 func showCommandlineHelp() {
 	helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
