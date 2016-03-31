@@ -19,16 +19,16 @@ var httpServerBool bool
 var httpChannel chan string
 var mainChannel chan string
 
-var rounds = 20
+var rounds int
 var minPlayers int
-var xSize = 20
-var ySize = 20
+var xSize int
+var ySize int
 
 var mutex *sync.Mutex
 
 func init() {
 	flag.IntVar(&minPlayers, "p", 2, "set min. players")
-	flag.IntVar(&rounds, "r", 20, "set max. rounds")
+	flag.IntVar(&rounds, "r", 1000, "set max. rounds")
 	flag.IntVar(&xSize, "x", 20, "set maps x size")
 	flag.IntVar(&ySize, "y", 20, "set maps y size")
 	flag.BoolVar(&httpServerBool, "w", false, "start http server")

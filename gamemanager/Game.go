@@ -155,7 +155,7 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 
@@ -201,7 +201,7 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 
@@ -246,7 +246,7 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 
@@ -292,7 +292,7 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 

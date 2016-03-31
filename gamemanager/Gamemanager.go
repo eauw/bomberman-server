@@ -268,6 +268,9 @@ func (manager *Manager) ProcessRound(round *Round) {
 		if p.protection > 0 {
 			p.protection -= 1
 		}
+		if p.isParalyzed > 0 {
+			p.isParalyzed -= 1
+		}
 	}
 
 	manager.broadcastGamestate()
