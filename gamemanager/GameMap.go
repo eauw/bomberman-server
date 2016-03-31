@@ -165,7 +165,6 @@ func createFields(xSize int, ySize int) [][]*Field {
 
 func (gm *GameMap) toString() string {
 	mapString := "\n"
-	// fmt.Println()
 
 	for i := range gm.fields {
 		for j := range gm.fields[i] {
