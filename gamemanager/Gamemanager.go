@@ -321,15 +321,6 @@ func (manager *Manager) sendGameStateToPlayer(p *Player) {
 	conn.Write([]byte(manager.GameState(manager.game.gameMap.toString())))
 }
 
-// func (manager *Manager) notifyCurrentPlayer() {
-// 	currentPlayer := manager.GetCurrentPlayer()
-// 	if currentPlayer != nil {
-// 		conn := manager.playersConn[currentPlayer.id]
-// 		conn.Write([]byte("yt: Your turn\n"))
-// 	}
-
-// }
-
 // Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
 func (manager *Manager) destinationField(player *Player, destination []string) *Field {
 
