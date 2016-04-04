@@ -142,25 +142,3 @@ func (player *Player) toString() string {
 
 	return playerString
 }
-
-// func (player *Player) moveLeft() {
-// 	player.currentField.horizontalFieldCode -= 1
-// 	player.currentField.players = append(player.currentField.players, player)
-// }
-
-// func (player *Player) moveRight() {
-// 	lastField := player.currentField
-
-// 	player.currentField = NewField(lastField.verticalFieldCode, lastField.horizontalFieldCode+1)
-// 	player.currentField.players = append(player.currentField.players, player)
-// }
-
-// func (player *Player) moveUp() {
-// 	player.currentField.verticalFieldCode -= 1
-// 	player.currentField.players = append(player.currentField.players, player)
-// }
-
-// func (player *Player) moveDown() {
-// 	player.currentField.verticalFieldCode += 1
-// 	player.currentField.players = append(player.currentField.players, player)
-// }
