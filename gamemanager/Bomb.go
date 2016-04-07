@@ -25,7 +25,7 @@ func NewBomb() *Bomb {
 }
 
 func (bomb *Bomb) explode(gameMap *GameMap) {
-	fields := gameMap.GetNOSWFieldsOfField(bomb.field)
+	fields := gameMap.GetNOSWFieldsOfFieldWithReach(bomb.field, bomb.owner.reach)
 
 	// Ausgangsfeld hinzufügen da die Methode GetNOSWFieldsOfField() nur die Felder links, oben, rechts und unten holt
 	fields = append(fields, bomb.field)
