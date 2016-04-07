@@ -17,6 +17,8 @@ type Game struct {
 	started     bool
 }
 
+var mutex = &sync.Mutex{}
+
 func NewGame(xSize int, ySize int) *Game {
 	ch := make(chan *GameChannelMessage)
 	gm := NewGameMap(xSize, ySize)
@@ -148,8 +150,6 @@ func handleGameChannelMessage(gcm *GameChannelMessage) {
 
 	}
 }
-
-var mutex = &sync.Mutex{}
 
 func (game *Game) PlayerMovesToLeft(player *Player) {
 	mutex.Lock()
@@ -338,41 +338,41 @@ func (game *Game) PlayerPlacesBomb(player *Player, destinationField *Field) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	// bomb := destinationField.addNewBomb(player)
 	bomb := player.getAvailableBomb()
-	destinationField.addBomb(bomb)
-	bomb.field = destinationField
-	game.gameMap.addBomb(bomb)
+	if bomb != nil {
+		destinationField.addBomb(bomb)
+		bomb.field = destinationField
+		game.gameMap.addBomb(bomb)
 
-	bomb.isPlaced = true
-}
-
-func (game *Game) ExplodeBombs() {
-	game.gameMap.bombs = []*Bomb{}
-
-	//var fields []*Field
-
-	for i := range game.gameMap.fields {
-		for j := range game.gameMap.fields[i] {
-			if len(game.gameMap.fields[i][j].bombs) > 0 {
-				for ib := range game.gameMap.fields[i][j].bombs {
-					game.gameMap.fields[i][j].bombs[ib].explode(game.gameMap)
-				}
-			}
-
-			game.gameMap.fields[i][j].bombs = []*Bomb{}
-
-		}
 	}
 }
 
-func (game *Game) ExplodePlayersBombs(player *Player) {
-	for i := range player.bombs {
-		if player.bombs[i].isPlaced {
-			player.bombs[i].explode(game.gameMap)
-		}
-	}
-}
+// func (game *Game) ExplodeBombs() {
+// 	game.gameMap.bombs = []*Bomb{}
+
+// 	fields := game.gameMap.fields
+
+// 	for i := range fields {
+// 		for j := range fields[i] {
+// 			if len(fields[i][j].bombs) > 0 {
+// 				for ib := range fields[i][j].bombs {
+// 					fields[i][j].bombs[ib].explode(game.gameMap)
+// 				}
+// 			}
+
+// 			fields[i][j].bombs = []*Bomb{}
+
+// 		}
+// 	}
+// }
+
+// func (game *Game) ExplodePlayersBombs(player *Player) {
+// 	for i := range player.bombs {
+// 		if player.bombs[i].isPlaced {
+// 			player.bombs[i].explode(game.gameMap)
+// 		}
+// 	}
+// }
 
 func (game *Game) teleportPlayer(player *Player) {
 

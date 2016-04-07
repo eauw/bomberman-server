@@ -220,10 +220,8 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 			} else {
 				conn.Write([]byte("Game waiting for more players.\n"))
 			}
-
 		}
 	}
-
 }
 
 func (manager *Manager) ProcessRound(round *Round) {
@@ -246,7 +244,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 				// prüfen ob Spieler aktuell überhaupt verfügbare Bomben hat
 				available := 0
 				for _, b := range player.bombs {
-					if b.isPlaced == false {
+					if b.field == nil {
 						available += 1
 					}
 				}
@@ -275,9 +273,9 @@ func (manager *Manager) ProcessRound(round *Round) {
 			manager.game.PlayerMovesToDown(player)
 			break
 
-		case "x":
-			manager.game.ExplodePlayersBombs(player)
-			break
+		// case "x":
+		// 	manager.game.ExplodePlayersBombs(player)
+		// 	break
 
 		case "l":
 			manager.sendGameStateToPlayer(player)
@@ -294,9 +292,8 @@ func (manager *Manager) ProcessRound(round *Round) {
 	// Bomben Timer runterzählen und ggf. explodieren lassen
 	for _, b := range bombs {
 		b.timer -= 1
-		if b.timer == 0 {
+		if b.field != nil && b.timer <= 0 {
 			b.explode(manager.game.gameMap)
-
 		}
 	}
 

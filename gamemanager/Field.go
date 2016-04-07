@@ -85,8 +85,8 @@ func (field *Field) addBomb(bomb *Bomb) {
 func (field *Field) removeBomb(bomb *Bomb) {
 	index := -1
 
-	for i := range field.bombs {
-		if field.bombs[i] == bomb {
+	for i, b := range field.bombs {
+		if b.id == bomb.id {
 			index = i
 		}
 	}
@@ -99,7 +99,6 @@ func (field *Field) removeBomb(bomb *Bomb) {
 
 		field.bombs = newArray
 	}
-
 }
 
 // mach aus 1 -> 01 usw bis 10, ab dann normal

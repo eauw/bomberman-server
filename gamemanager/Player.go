@@ -91,9 +91,9 @@ func (player *Player) addBomb() {
 }
 
 func (player *Player) getAvailableBomb() *Bomb {
-	for i := range player.bombs {
-		if player.bombs[i].isPlaced == false {
-			return player.bombs[i]
+	for _, b := range player.bombs {
+		if b.field == nil {
+			return b
 		}
 	}
 

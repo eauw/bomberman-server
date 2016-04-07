@@ -30,3 +30,7 @@ func RandomNumber(min, max int) int {
 func GeneratePlayerID() string {
 	return RandomString(8)
 }
+
+func GenerateBombID() string {
+	return RandomString(5)
+}
