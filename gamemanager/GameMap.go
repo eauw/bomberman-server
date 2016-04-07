@@ -7,18 +7,18 @@ import "github.com/fatih/color"
 
 type GameMap struct {
 	game   *Game
-	xSize  int
-	ySize  int
+	height int
+	width  int
 	fields [][]*Field
 	bombs  []*Bomb
 }
 
-func NewGameMap(xSize int, ySize int) *GameMap {
-	f := createFields(xSize, ySize)
+func NewGameMap(height int, width int) *GameMap {
+	f := createFields(height, width)
 
 	return &GameMap{
-		xSize:  xSize,
-		ySize:  ySize,
+		height: height,
+		width:  width,
 		fields: f,
 		bombs:  []*Bomb{},
 	}
@@ -34,46 +34,50 @@ func (gameMap *GameMap) getField(row int, column int) *Field {
 
 }
 
+// nw n ne
+// w  f e
+// sw s se
+
 // Liefert alle angrenzenden Felder eines Feldes als Array zurück. Das Ausgangsfeld ist nicht inbegriffen.
 func (gameMap *GameMap) GetFieldsAroundField(f *Field) []*Field {
 	arr := []*Field{}
 
-	newField1 := gameMap.getField(f.row-1, f.column-1)
+	newField1 := gameMap.northwesternFieldOfField(f)
 	if newField1 != nil {
 		arr = append(arr, newField1)
 	}
 
-	newField2 := gameMap.upperFieldOfField(f)
+	newField2 := gameMap.northernFieldOfField(f)
 	if newField2 != nil {
 		arr = append(arr, newField2)
 	}
 
-	newField3 := gameMap.getField(f.row-1, f.column+1)
+	newField3 := gameMap.northeasternFieldOfField(f)
 	if newField3 != nil {
 		arr = append(arr, newField3)
 	}
 
-	newField4 := gameMap.leftFieldOfField(f)
+	newField4 := gameMap.westernFieldOfField(f)
 	if newField4 != nil {
 		arr = append(arr, newField4)
 	}
 
-	newField6 := gameMap.rightFieldOfField(f)
+	newField6 := gameMap.easternFieldOfField(f)
 	if newField6 != nil {
 		arr = append(arr, newField6)
 	}
 
-	newField7 := gameMap.getField(f.row+1, f.column-1)
+	newField7 := gameMap.southwesternFieldOfField(f)
 	if newField7 != nil {
 		arr = append(arr, newField7)
 	}
 
-	newField8 := gameMap.lowerFieldOfField(f)
+	newField8 := gameMap.southernFieldOfField(f)
 	if newField8 != nil {
 		arr = append(arr, newField8)
 	}
 
-	newField9 := gameMap.getField(f.row+1, f.column+1)
+	newField9 := gameMap.southeasternFieldOfField(f)
 	if newField9 != nil {
 		arr = append(arr, newField9)
 	}
@@ -85,22 +89,22 @@ func (gameMap *GameMap) GetFieldsAroundField(f *Field) []*Field {
 func (gameMap *GameMap) GetNOSWFieldsOfField(f *Field) []*Field {
 	arr := []*Field{}
 
-	newField2 := gameMap.upperFieldOfField(f)
+	newField2 := gameMap.northernFieldOfField(f)
 	if newField2 != nil {
 		arr = append(arr, newField2)
 	}
 
-	newField4 := gameMap.leftFieldOfField(f)
+	newField4 := gameMap.westernFieldOfField(f)
 	if newField4 != nil {
 		arr = append(arr, newField4)
 	}
 
-	newField6 := gameMap.rightFieldOfField(f)
+	newField6 := gameMap.easternFieldOfField(f)
 	if newField6 != nil {
 		arr = append(arr, newField6)
 	}
 
-	newField8 := gameMap.lowerFieldOfField(f)
+	newField8 := gameMap.southernFieldOfField(f)
 	if newField8 != nil {
 		arr = append(arr, newField8)
 	}
@@ -115,7 +119,7 @@ func (gameMap *GameMap) GetNOSWFieldsOfFieldWithReach(f *Field, reach int) []*Fi
 
 	for i := 1; i <= reach; i++ {
 
-		field = gameMap.upperFieldOfField(field)
+		field = gameMap.northernFieldOfField(field)
 		if field != nil {
 			arr = append(arr, field)
 		}
@@ -125,7 +129,7 @@ func (gameMap *GameMap) GetNOSWFieldsOfFieldWithReach(f *Field, reach int) []*Fi
 
 	for i := 1; i <= reach; i++ {
 
-		field = gameMap.leftFieldOfField(field)
+		field = gameMap.westernFieldOfField(field)
 		if field != nil {
 			arr = append(arr, field)
 		}
@@ -135,7 +139,7 @@ func (gameMap *GameMap) GetNOSWFieldsOfFieldWithReach(f *Field, reach int) []*Fi
 
 	for i := 1; i <= reach; i++ {
 
-		field = gameMap.rightFieldOfField(field)
+		field = gameMap.easternFieldOfField(field)
 		if field != nil {
 			arr = append(arr, field)
 		}
@@ -145,7 +149,7 @@ func (gameMap *GameMap) GetNOSWFieldsOfFieldWithReach(f *Field, reach int) []*Fi
 
 	for i := 1; i <= reach; i++ {
 
-		field = gameMap.lowerFieldOfField(field)
+		field = gameMap.southernFieldOfField(field)
 		if field != nil {
 			arr = append(arr, field)
 		}
@@ -154,20 +158,36 @@ func (gameMap *GameMap) GetNOSWFieldsOfFieldWithReach(f *Field, reach int) []*Fi
 	return arr
 }
 
-func (gameMap *GameMap) leftFieldOfField(f *Field) *Field {
-	return gameMap.getField(f.row, f.column-1)
+func (gameMap *GameMap) northwesternFieldOfField(f *Field) *Field {
+	return gameMap.getField(f.row-1, f.column-1)
 }
 
-func (gameMap *GameMap) upperFieldOfField(f *Field) *Field {
+func (gameMap *GameMap) northernFieldOfField(f *Field) *Field {
 	return gameMap.getField(f.row-1, f.column)
 }
 
-func (gameMap *GameMap) rightFieldOfField(f *Field) *Field {
+func (gameMap *GameMap) northeasternFieldOfField(f *Field) *Field {
+	return gameMap.getField(f.row-1, f.column+1)
+}
+
+func (gameMap *GameMap) westernFieldOfField(f *Field) *Field {
+	return gameMap.getField(f.row, f.column-1)
+}
+
+func (gameMap *GameMap) easternFieldOfField(f *Field) *Field {
 	return gameMap.getField(f.row, f.column+1)
 }
 
-func (gameMap *GameMap) lowerFieldOfField(f *Field) *Field {
+func (gameMap *GameMap) southwesternFieldOfField(f *Field) *Field {
+	return gameMap.getField(f.row+1, f.column-1)
+}
+
+func (gameMap *GameMap) southernFieldOfField(f *Field) *Field {
 	return gameMap.getField(f.row+1, f.column)
+}
+
+func (gameMap *GameMap) southeasternFieldOfField(f *Field) *Field {
+	return gameMap.getField(f.row+1, f.column+1)
 }
 
 func (gameMap *GameMap) addBomb(b *Bomb) {

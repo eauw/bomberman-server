@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -25,16 +24,16 @@ var spectators []net.Conn = make([]net.Conn, 0)
 
 var rounds int
 var minPlayers int
-var xSize int
-var ySize int
+var height int
+var width int
 
 var mutex *sync.Mutex
 
 func init() {
-	flag.IntVar(&minPlayers, "p", 2, "set min. players")
-	flag.IntVar(&rounds, "r", 1000, "set max. rounds")
-	flag.IntVar(&xSize, "x", 20, "set maps x size")
-	flag.IntVar(&ySize, "y", 20, "set maps y size")
+	flag.IntVar(&minPlayers, "players", 2, "set min. players")
+	flag.IntVar(&rounds, "rounds", 1000, "set max. rounds")
+	flag.IntVar(&height, "height", 20, "set maps height")
+	flag.IntVar(&width, "width", 20, "set maps width")
 	flag.BoolVar(&httpServerBool, "w", false, "start http server")
 	flag.Parse()
 }
@@ -78,7 +77,7 @@ func main() {
 	// create game
 	mutex.Lock()
 	gameManager := gamemanager.NewManager()
-	gameManager.Start(rounds, xSize, ySize)
+	gameManager.Start(rounds, height, width)
 	gameManager.SetMainChannel(mainChannel)
 	gameManager.SetSpecChannel(specChannel)
 	mutex.Unlock()
@@ -212,14 +211,3 @@ func handleSpecChannel() {
 
 // 	}
 // }
-
-func showCommandlineHelp() {
-	helpString := "\nBomberman-Server is a game server for MICA 2016.\n\n"
-	helpString += "Commands:\n"
-	helpString += "  -w                  starts with http server\n"
-	helpString += fmt.Sprintf("  -r [int]            set number of rounds, default: %d\n", rounds)
-	helpString += fmt.Sprintf("  -s [x int] [y int]  set map size, default: x %d y%d\n", xSize, ySize)
-	helpString += "\n"
-	fmt.Print(helpString)
-	os.Exit(0)
-}

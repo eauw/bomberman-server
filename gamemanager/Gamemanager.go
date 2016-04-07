@@ -45,7 +45,7 @@ func (manager *Manager) SetSpecChannel(ch chan string) {
 	manager.specChannel = ch
 }
 
-func (manager *Manager) Start(rounds int, xSize int, ySize int) {
+func (manager *Manager) Start(rounds int, height int, width int) {
 
 	if rounds < 1 {
 		rounds = 1
@@ -57,7 +57,7 @@ func (manager *Manager) Start(rounds int, xSize int, ySize int) {
 		manager.rounds = append(manager.rounds, round)
 	}
 
-	manager.game = NewGame(xSize, ySize)
+	manager.game = NewGame(height, width)
 	manager.currentRound = manager.rounds[0]
 	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
 }
@@ -124,8 +124,8 @@ func (manager *Manager) GameState(mapString string) string {
 
 	infos += fmt.Sprintf("players:%d,", len(manager.game.players))
 
-	x := manager.game.gameMap.xSize
-	y := manager.game.gameMap.ySize
+	x := manager.game.gameMap.height
+	y := manager.game.gameMap.width
 
 	xString := strconv.Itoa(x)
 
