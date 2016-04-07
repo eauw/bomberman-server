@@ -120,8 +120,22 @@ func createFields(xSize int, ySize int) [][]*Field {
 	fields := make([][]*Field, xSize)
 	for i := range fields {
 		fields[i] = make([]*Field, ySize)
+
 		for j := range fields[i] {
-			fields[i][j] = NewField(i, j)
+			field := NewField(i, j)
+			fields[i][j] = field
+			if i == 0 {
+				field.wall = NewWall(false)
+			}
+			if i == xSize-1 {
+				field.wall = NewWall(false)
+			}
+			if j == 0 {
+				field.wall = NewWall(false)
+			}
+			if j == ySize-1 {
+				field.wall = NewWall(false)
+			}
 		}
 	}
 
@@ -135,9 +149,9 @@ func createFields(xSize int, ySize int) [][]*Field {
 		randomRow := helper.RandomNumber(0, xSize)
 		randomColumn := helper.RandomNumber(0, ySize)
 
-		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
-
-		fields[randomRow][randomColumn].wall = NewWall(true)
+		if fields[randomRow][randomColumn].wall == nil {
+			fields[randomRow][randomColumn].wall = NewWall(true)
+		}
 	}
 
 	// place destructible walls
@@ -145,9 +159,9 @@ func createFields(xSize int, ySize int) [][]*Field {
 		randomRow := helper.RandomNumber(0, xSize)
 		randomColumn := helper.RandomNumber(0, ySize)
 
-		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
-
-		fields[randomRow][randomColumn].wall = NewWall(false)
+		if fields[randomRow][randomColumn].wall == nil {
+			fields[randomRow][randomColumn].wall = NewWall(false)
+		}
 	}
 
 	// place specials
@@ -155,9 +169,16 @@ func createFields(xSize int, ySize int) [][]*Field {
 		randomRow := helper.RandomNumber(0, xSize)
 		randomColumn := helper.RandomNumber(0, ySize)
 
-		// TODO: prüfen ob auf dem Feld schon so ein Element liegt
-
-		fields[randomRow][randomColumn].special = RandomSpecial()
+		field := fields[randomRow][randomColumn]
+		if field.special == nil {
+			if field.wall == nil {
+				field.special = RandomSpecial()
+			} else {
+				if field.wall.isDestructible {
+					field.special = RandomSpecial()
+				}
+			}
+		}
 	}
 
 	return fields
