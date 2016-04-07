@@ -103,7 +103,7 @@ func (player *Player) getAvailableBomb() *Bomb {
 }
 
 func (player *Player) resetSpecials() {
-	player.throwrange = 1
+	player.reach = 1
 	player.protection = 0
 	player.bombs = []*Bomb{}
 	player.addBomb()
