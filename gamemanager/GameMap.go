@@ -43,7 +43,7 @@ func (gameMap *GameMap) GetFieldsAroundField(f *Field) []*Field {
 		arr = append(arr, newField1)
 	}
 
-	newField2 := gameMap.getField(f.row-1, f.column)
+	newField2 := gameMap.upperFieldOfField(f)
 	if newField2 != nil {
 		arr = append(arr, newField2)
 	}
@@ -53,12 +53,12 @@ func (gameMap *GameMap) GetFieldsAroundField(f *Field) []*Field {
 		arr = append(arr, newField3)
 	}
 
-	newField4 := gameMap.getField(f.row, f.column-1)
+	newField4 := gameMap.leftFieldOfField(f)
 	if newField4 != nil {
 		arr = append(arr, newField4)
 	}
 
-	newField6 := gameMap.getField(f.row, f.column+1)
+	newField6 := gameMap.rightFieldOfField(f)
 	if newField6 != nil {
 		arr = append(arr, newField6)
 	}
@@ -68,7 +68,7 @@ func (gameMap *GameMap) GetFieldsAroundField(f *Field) []*Field {
 		arr = append(arr, newField7)
 	}
 
-	newField8 := gameMap.getField(f.row+1, f.column)
+	newField8 := gameMap.lowerFieldOfField(f)
 	if newField8 != nil {
 		arr = append(arr, newField8)
 	}
