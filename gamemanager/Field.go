@@ -83,22 +83,7 @@ func (field *Field) addBomb(bomb *Bomb) {
 }
 
 func (field *Field) removeBomb(bomb *Bomb) {
-	index := -1
-
-	for i, b := range field.bombs {
-		if b.id == bomb.id {
-			index = i
-		}
-	}
-
-	if index > -1 {
-		slice1 := field.bombs[:index]
-		slice2 := field.bombs[index+1:]
-
-		newArray := append(slice1, slice2...)
-
-		field.bombs = newArray
-	}
+	field.bombs = RemoveBomb(field.bombs, bomb)
 }
 
 // mach aus 1 -> 01 usw bis 10, ab dann normal

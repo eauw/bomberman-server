@@ -91,27 +91,7 @@ func (gameMap *GameMap) addBomb(b *Bomb) {
 }
 
 func (gameMap *GameMap) removeBomb(b *Bomb) {
-	index := -1
-
-	if len(gameMap.bombs) > 1 {
-		for i, bomb := range gameMap.bombs {
-			if bomb.id == b.id {
-				index = i
-			}
-		}
-
-		if index > 0 {
-			slice1 := gameMap.bombs[:index]
-			slice2 := gameMap.bombs[index+1:]
-
-			newArray := append(slice1, slice2...)
-
-			gameMap.bombs = newArray
-
-		}
-	} else {
-		gameMap.bombs = []*Bomb{}
-	}
+	gameMap.bombs = RemoveBomb(gameMap.bombs, b)
 
 }
 
