@@ -42,7 +42,7 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 		// Spieler werden durch Explosionsstrahl gelähmt
 		for _, p := range fields[i].players {
 			if p.protection == 0 {
-				p.isParalyzed = true
+				p.isParalyzed = 3
 			}
 
 			p.resetSpecials()

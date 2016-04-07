@@ -13,7 +13,7 @@ type Player struct {
 	name         string
 	points       int
 	currentField *Field
-	isParalyzed  bool
+	isParalyzed  int
 	isFox        int
 	bombs        []*Bomb
 	throwrange   int
@@ -28,7 +28,7 @@ func NewPlayer(n string, f *Field) *Player {
 		id:           playerID,
 		name:         n,
 		currentField: f,
-		isParalyzed:  false,
+		isParalyzed:  0,
 		isFox:        0,
 		bombs:        make([]*Bomb, 0),
 		throwrange:   1,
@@ -142,25 +142,3 @@ func (player *Player) toString() string {
 
 	return playerString
 }
-
-// func (player *Player) moveLeft() {
-// 	player.currentField.horizontalFieldCode -= 1
-// 	player.currentField.players = append(player.currentField.players, player)
-// }
-
-// func (player *Player) moveRight() {
-// 	lastField := player.currentField
-
-// 	player.currentField = NewField(lastField.verticalFieldCode, lastField.horizontalFieldCode+1)
-// 	player.currentField.players = append(player.currentField.players, player)
-// }
-
-// func (player *Player) moveUp() {
-// 	player.currentField.verticalFieldCode -= 1
-// 	player.currentField.players = append(player.currentField.players, player)
-// }
-
-// func (player *Player) moveDown() {
-// 	player.currentField.verticalFieldCode += 1
-// 	player.currentField.players = append(player.currentField.players, player)
-// }

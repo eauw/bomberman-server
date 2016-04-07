@@ -155,7 +155,7 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 
@@ -201,7 +201,7 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 
@@ -246,7 +246,7 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 
@@ -292,7 +292,7 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if player.isParalyzed {
+	if player.isParalyzed > 0 {
 		return
 	}
 
@@ -376,22 +376,6 @@ func (game *Game) ExplodePlayersBombs(player *Player) {
 
 func (game *Game) teleportPlayer(player *Player) {
 
-	// isWall := true
-
-	// for isWall {
-	// 	randomX := helper.RandomNumber(0, game.gameMap.xSize-1)
-	// 	randomY := helper.RandomNumber(0, game.gameMap.ySize-1)
-
-	// 	field := game.gameMap.fields[randomX][randomY]
-
-	// 	if field.wall == nil {
-	// 		isWall = false
-	// 		player.currentField.removePlayer(p)
-	// 		field.addPlayer(player)
-	// 		player.currentField = field
-	// 	}
-	// }
-
 	gameMap := game.gameMap
 
 	randomX := helper.RandomNumber(0, gameMap.xSize-1)
@@ -409,9 +393,3 @@ func (game *Game) teleportPlayer(player *Player) {
 	}
 
 }
-
-// func (game *Game) placePlayers() {
-// 	for p := range game.players {
-//
-// 	}
-// }

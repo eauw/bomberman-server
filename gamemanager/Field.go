@@ -13,7 +13,7 @@ type Field struct {
 	special  *Special
 	wall     *Wall
 	explodes bool
-	players  []*Player //map[string]*Player
+	players  []*Player
 	bombs    []*Bomb
 }
 
@@ -38,32 +38,18 @@ func (field *Field) toString() string {
 
 	j = strconv.Itoa(field.column)
 
-	fieldString := fmt.Sprintf("i%s j%s", i, j)
+	fieldString := fmt.Sprintf("x:%sy:%s", j, i)
 
 	return fieldString
 
 }
 
-// func (field *Field) addPlayer(player *Player) {
-// 	field.players = append(field.players, player)
-// 	player.currentField = field
-// }
-
 func (field *Field) addPlayer(player *Player) {
-	// field.players ist eine map
-	// field.players[player.id] = player
-	// player.currentField = field
-
-	// field.players ist ein array
 	field.players = append(field.players, player)
 	player.currentField = field
 }
 
 func (field *Field) removePlayer(player *Player) {
-	// löschen bei map
-	// delete(field.players, player.id)
-
-	// löschen bei array
 	index := -1
 
 	for i := range field.players {
@@ -91,14 +77,6 @@ func (field *Field) setWall(destructible bool) {
 		field.wall = NewWall(destructible)
 	}
 }
-
-// func (field *Field) addNewBomb(player *Player) *Bomb {
-// 	bomb := NewBomb()
-// 	bomb.field = field
-// 	field.bombs = append(field.bombs, bomb)
-
-// 	return bomb
-// }
 
 func (field *Field) addBomb(bomb *Bomb) {
 	field.bombs = append(field.bombs, bomb)
