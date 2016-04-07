@@ -143,7 +143,7 @@ func (manager *Manager) GameState(mapString string) string {
 	infos += fmt.Sprintf("timeout:%d,", manager.commandTimeout)
 	infos += "\n"
 
-	gameState := "\n"
+	gameState := "\033[H\033[2J"
 	gameState += "***********************************************************"
 	gameState += "\n"
 	gameState += infos
