@@ -175,11 +175,11 @@ func (manager *Manager) GameState(mapString string) string {
 	}
 	gameState += "\n"
 
-	gameState += "bombs:\n"
+	// gameState += "bombs:\n"
 
-	for _, p := range manager.game.players {
-		gameState += fmt.Sprintf("player: %s, bombs: %s\n", p.name, p.bombs)
-	}
+	// for _, p := range manager.game.players {
+	// 	gameState += fmt.Sprintf("player: %s, bombs: %s\n", p.name, p.bombs)
+	// }
 
 	gameState += "***********************************************************"
 	gameState += "\n"
