@@ -63,8 +63,6 @@ func (gameMap *GameMap) GetFieldsAroundField(f *Field) []*Field {
 		arr = append(arr, newField9)
 	}
 
-	// arr := []*Field{newField1, newField2, newField3, newField4, newField6, newField7, newField8, newField9}
-
 	return arr
 }
 
@@ -85,8 +83,6 @@ func (gameMap *GameMap) GetNOSWFieldsOfField(f *Field) []*Field {
 		arr = append(arr, newField8)
 	}
 
-	// arr := []*Field{newField2, newField4, newField6, newField8}
-
 	return arr
 }
 
@@ -97,26 +93,29 @@ func (gameMap *GameMap) addBomb(b *Bomb) {
 func (gameMap *GameMap) removeBomb(b *Bomb) {
 	index := -1
 
-	for i := range gameMap.bombs {
-		if gameMap.bombs[i] == b {
-			index = i
+	if len(gameMap.bombs) > 1 {
+		for i, bomb := range gameMap.bombs {
+			if bomb.id == b.id {
+				index = i
+			}
 		}
+
+		if index > 0 {
+			slice1 := gameMap.bombs[:index]
+			slice2 := gameMap.bombs[index+1:]
+
+			newArray := append(slice1, slice2...)
+
+			gameMap.bombs = newArray
+
+		}
+	} else {
+		gameMap.bombs = []*Bomb{}
 	}
 
-	if index > 0 {
-		slice1 := gameMap.bombs[:index]
-		slice2 := gameMap.bombs[index+1:]
-
-		newArray := append(slice1, slice2...)
-
-		gameMap.bombs = newArray
-	}
 }
 
 func createFields(xSize int, ySize int) [][]*Field {
-	//horizontalFieldCodes := []string{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}
-	//verticalFieldCodes := []string{"01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26"}
-
 	fields := make([][]*Field, xSize)
 	for i := range fields {
 		fields[i] = make([]*Field, ySize)
@@ -142,7 +141,7 @@ func createFields(xSize int, ySize int) [][]*Field {
 	// place walls and specials on the game map
 	walls := 20
 	destructibleWalls := 5
-	specials := 5
+	specials := 10
 
 	// place walls
 	for i := 0; i <= walls; i++ {
@@ -228,10 +227,9 @@ func (gm *GameMap) toString() string {
 
 			}
 
-			// fmt.Print("|")
 			mapString += fieldChar + "|"
 		}
-		// fmt.Println()
+
 		mapString += "\n"
 	}
 
@@ -240,7 +238,6 @@ func (gm *GameMap) toString() string {
 
 func (gm *GameMap) toStringForServer() string {
 	mapString := "\n"
-	// fmt.Println()
 
 	red := color.New(color.BgRed).SprintFunc()
 
@@ -287,12 +284,19 @@ func (gm *GameMap) toStringForServer() string {
 
 			}
 
-			// fmt.Print("|")
 			mapString += fieldChar + "|"
 		}
-		// fmt.Println()
+
 		mapString += "\n"
 	}
+
+	// mapString += "bombs:\n"
+
+	// for _, b := range gm.bombs {
+	// 	mapString += fmt.Sprintf("%s\n\n", b)
+	// }
+
+	// mapString += "\n"
 
 	return mapString
 }
