@@ -138,13 +138,20 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	mutex.Unlock()
 
 	if gameManager.PlayersCount() >= minPlayers {
-		gameManager.GameStart()
+		timer := time.NewTimer(time.Second)
+		go func() {
+			<-timer.C
+			mutex.Lock()
+			gameManager.GameStart()
+			mutex.Unlock()
+		}()
+
 	}
 
-	conn.Write([]byte("Your ID: "))
+	conn.Write([]byte("YourID:"))
 	conn.Write([]byte(newPlayer.GetID()))
 	conn.Write([]byte("\n"))
-	conn.Write([]byte("Your Name: "))
+	conn.Write([]byte("YourName:"))
 	conn.Write([]byte(newPlayer.GetName()))
 	conn.Write([]byte("\n"))
 

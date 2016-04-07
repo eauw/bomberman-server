@@ -25,3 +25,8 @@ func RandomNumber(min, max int) int {
 	rand.Seed(int64(time.Now().Nanosecond()))
 	return rand.Intn(max-min) + min
 }
+
+// Erzeugt eine 8-stellige PlayerID
+func GeneratePlayerID() string {
+	return RandomString(8)
+}

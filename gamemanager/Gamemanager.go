@@ -24,7 +24,6 @@ type Manager struct {
 	rounds             []*Round
 	mutex              *sync.Mutex
 	currentRound       *Round
-	ready              bool
 }
 
 func NewManager() *Manager {
@@ -182,13 +181,11 @@ func (manager *Manager) GameState(mapString string) string {
 }
 
 func (manager *Manager) MessageReceived(message string, player *Player) {
+	// mutex.Lock()
+	// defer mutex.Unlock()
+
 	log.Printf("Message >%s< received from player >%s<", message, player.name)
 	conn := manager.playersConn[player.id]
-
-	if strings.Contains(message, "name:") {
-		name := strings.TrimPrefix(message, "name:")
-		player.SetName(name)
-	}
 
 	// mit q verlässt der Spieler den Server
 	if message == "q" {
@@ -211,7 +208,19 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 			}
 
 		} else {
-			conn.Write([]byte("Game waiting for more players.\n"))
+			if strings.Contains(message, "name:") {
+				name := strings.TrimPrefix(message, "name:")
+				player.SetName(name)
+				conn.Write([]byte("YourID:"))
+				conn.Write([]byte(player.GetID()))
+				conn.Write([]byte("\n"))
+				conn.Write([]byte("YourName:"))
+				conn.Write([]byte(player.GetName()))
+				conn.Write([]byte("\n"))
+			} else {
+				conn.Write([]byte("Game waiting for more players.\n"))
+			}
+
 		}
 	}
 

@@ -22,7 +22,7 @@ type Player struct {
 
 // NewPlayer function is the players constructor
 func NewPlayer(n string, f *Field) *Player {
-	playerID := helper.RandomString(8)
+	playerID := helper.GeneratePlayerID()
 
 	return &Player{
 		id:           playerID,
