@@ -19,9 +19,9 @@ type Game struct {
 
 var mutex = &sync.Mutex{}
 
-func NewGame(xSize int, ySize int) *Game {
+func NewGame(height int, width int) *Game {
 	ch := make(chan *GameChannelMessage)
-	gm := NewGameMap(xSize, ySize)
+	gm := NewGameMap(height, width)
 
 	newGame := &Game{
 		channel: ch,
@@ -58,8 +58,8 @@ func (game *Game) placePlayers() {
 		isWall := true
 
 		for isWall {
-			randomX := helper.RandomNumber(0, game.gameMap.xSize-1)
-			randomY := helper.RandomNumber(0, game.gameMap.ySize-1)
+			randomX := helper.RandomNumber(0, game.gameMap.height-1)
+			randomY := helper.RandomNumber(0, game.gameMap.width-1)
 
 			field := game.gameMap.fields[randomX][randomY]
 
@@ -208,7 +208,7 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 	currentField := player.currentField
 
 	// prüfen ob der Spieler sich am Spielfeldrand befindet
-	if currentField.column == (game.gameMap.xSize - 1) {
+	if currentField.column == (game.gameMap.height - 1) {
 		return
 	}
 
@@ -299,7 +299,7 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	currentField := player.currentField
 
 	// prüfen ob der Spieler sich am Spielfeldrand befindet
-	if currentField.row == (game.gameMap.ySize - 1) {
+	if currentField.row == (game.gameMap.width - 1) {
 		return
 	}
 
@@ -378,8 +378,8 @@ func (game *Game) teleportPlayer(player *Player) {
 
 	gameMap := game.gameMap
 
-	randomX := helper.RandomNumber(0, gameMap.xSize-1)
-	randomY := helper.RandomNumber(0, gameMap.ySize-1)
+	randomX := helper.RandomNumber(0, gameMap.height-1)
+	randomY := helper.RandomNumber(0, gameMap.width-1)
 
 	field := game.gameMap.fields[randomX][randomY]
 
