@@ -2,8 +2,6 @@ package gamemanager
 
 import (
 	"bomberman-server/helper"
-	"fmt"
-	"log"
 )
 
 type Bomb struct {
@@ -27,7 +25,7 @@ func NewBomb() *Bomb {
 }
 
 func (bomb *Bomb) explode(gameMap *GameMap) {
-	fields := gameMap.GetNOSWFieldsOfField(bomb.field)
+	fields := gameMap.GetNOSWFieldsOfFieldWithReach(bomb.field, bomb.owner.reach)
 
 	// Ausgangsfeld hinzufügen da die Methode GetNOSWFieldsOfField() nur die Felder links, oben, rechts und unten holt
 	fields = append(fields, bomb.field)
@@ -64,9 +62,7 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 	bomb.timer = 5
 	bomb.field.bombs = []*Bomb{}
 	bomb.field = nil
-	log.Println(fmt.Sprintf("%s", gameMap.bombs))
 	gameMap.removeBomb(bomb)
-	log.Println(fmt.Sprintf("%s", gameMap.bombs))
 
 	for _, f := range fields {
 		for _, b := range f.bombs {

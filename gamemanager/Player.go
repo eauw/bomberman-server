@@ -16,6 +16,7 @@ type Player struct {
 	isParalyzed  int
 	isFox        int
 	bombs        []*Bomb
+	reach        int
 	throwrange   int
 	protection   int // Dauer des Schutzes falls meinen welchen eingesammelt hat
 }
@@ -31,6 +32,7 @@ func NewPlayer(n string, f *Field) *Player {
 		isParalyzed:  0,
 		isFox:        0,
 		bombs:        make([]*Bomb, 0),
+		reach:        1,
 		throwrange:   1,
 		protection:   0,
 	}
@@ -71,7 +73,7 @@ func (player *Player) SetCurrentField(field *Field) {
 func (player *Player) applySpecial(special *Special) {
 	switch special.powerType {
 	case "r":
-		player.throwrange += 1
+		player.reach += 1
 		break
 
 	case "b":
