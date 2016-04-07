@@ -69,10 +69,8 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 	log.Println(fmt.Sprintf("%s", gameMap.bombs))
 
 	for _, f := range fields {
-		if len(f.bombs) > 0 {
-			for _, b := range f.bombs {
-				b.explode(gameMap)
-			}
+		for _, b := range f.bombs {
+			b.explode(gameMap)
 		}
 	}
 }
