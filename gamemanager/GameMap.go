@@ -180,6 +180,8 @@ func (gameMap *GameMap) removeBomb(b *Bomb) {
 }
 
 func createFields(xSize int, ySize int) [][]*Field {
+	fieldsCount := xSize * ySize
+
 	fields := make([][]*Field, xSize)
 	for i := range fields {
 		fields[i] = make([]*Field, ySize)
@@ -187,6 +189,8 @@ func createFields(xSize int, ySize int) [][]*Field {
 		for j := range fields[i] {
 			field := NewField(i, j)
 			fields[i][j] = field
+
+			// Rand um das Spielfeld anlegen
 			if i == 0 {
 				field.wall = NewWall(false)
 			}
@@ -203,12 +207,12 @@ func createFields(xSize int, ySize int) [][]*Field {
 	}
 
 	// place walls and specials on the game map
-	walls := 20
-	destructibleWalls := 5
-	specials := 10
+	wallsCount := int(float64(fieldsCount) * 0.25)
+	destructibleWallsCount := int(float64(fieldsCount) * 0.05)
+	specialsCount := int(float64(fieldsCount) * 0.1)
 
 	// place walls
-	for i := 0; i <= walls; i++ {
+	for i := 0; i <= wallsCount; i++ {
 		randomRow := helper.RandomNumber(0, xSize)
 		randomColumn := helper.RandomNumber(0, ySize)
 
@@ -218,7 +222,7 @@ func createFields(xSize int, ySize int) [][]*Field {
 	}
 
 	// place destructible walls
-	for i := 0; i <= destructibleWalls; i++ {
+	for i := 0; i <= destructibleWallsCount; i++ {
 		randomRow := helper.RandomNumber(0, xSize)
 		randomColumn := helper.RandomNumber(0, ySize)
 
@@ -228,7 +232,7 @@ func createFields(xSize int, ySize int) [][]*Field {
 	}
 
 	// place specials
-	for i := 0; i <= specials; i++ {
+	for i := 0; i <= specialsCount; i++ {
 		randomRow := helper.RandomNumber(0, xSize)
 		randomColumn := helper.RandomNumber(0, ySize)
 
