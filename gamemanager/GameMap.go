@@ -252,23 +252,36 @@ func createFields(width int, height int) [][]*Field {
 	}
 
 	// place specials
-	for i := 0; i <= specialsCount; i++ {
-		randomRow := helper.RandomNumber(0, width)
-		randomColumn := helper.RandomNumber(0, height)
+	placeSpecials(specialsCount, width, height, fields)
 
-		field := fields[randomRow][randomColumn]
-		if field.special == nil {
-			if field.wall == nil {
-				field.special = RandomSpecial()
-			} else {
-				if field.wall.isDestructible {
-					field.special = RandomSpecial()
+	return fields
+}
+
+func placeSpecials(specialsCount int, width int, height int, fields [][]*Field) {
+	for i := 0; i <= specialsCount; i++ {
+
+		fieldIsSuitable := false
+
+		var field *Field
+
+		for fieldIsSuitable == false {
+			randomRow := helper.RandomNumber(0, width)
+			randomColumn := helper.RandomNumber(0, height)
+
+			field = fields[randomRow][randomColumn]
+			if field.special == nil {
+				if field.wall == nil {
+					fieldIsSuitable = true
+				} else {
+					if field.wall.isDestructible {
+						fieldIsSuitable = true
+					}
 				}
 			}
 		}
-	}
 
-	return fields
+		field.special = RandomSpecial()
+	}
 }
 
 func (gm *GameMap) toString() string {
