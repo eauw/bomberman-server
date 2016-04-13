@@ -199,12 +199,12 @@ func (gameMap *GameMap) removeBomb(b *Bomb) {
 
 }
 
-func createFields(xSize int, ySize int) [][]*Field {
-	fieldsCount := xSize * ySize
+func createFields(width int, height int) [][]*Field {
+	fieldsCount := width * height
 
-	fields := make([][]*Field, xSize)
+	fields := make([][]*Field, width)
 	for i := range fields {
-		fields[i] = make([]*Field, ySize)
+		fields[i] = make([]*Field, height)
 
 		for j := range fields[i] {
 			field := NewField(i, j)
@@ -214,13 +214,13 @@ func createFields(xSize int, ySize int) [][]*Field {
 			if i == 0 {
 				field.wall = NewWall(false)
 			}
-			if i == xSize-1 {
+			if i == width-1 {
 				field.wall = NewWall(false)
 			}
 			if j == 0 {
 				field.wall = NewWall(false)
 			}
-			if j == ySize-1 {
+			if j == height-1 {
 				field.wall = NewWall(false)
 			}
 		}
@@ -233,8 +233,8 @@ func createFields(xSize int, ySize int) [][]*Field {
 
 	// place walls
 	for i := 0; i <= wallsCount; i++ {
-		randomRow := helper.RandomNumber(0, xSize)
-		randomColumn := helper.RandomNumber(0, ySize)
+		randomRow := helper.RandomNumber(0, width)
+		randomColumn := helper.RandomNumber(0, height)
 
 		if fields[randomRow][randomColumn].wall == nil {
 			fields[randomRow][randomColumn].wall = NewWall(true)
@@ -243,8 +243,8 @@ func createFields(xSize int, ySize int) [][]*Field {
 
 	// place destructible walls
 	for i := 0; i <= destructibleWallsCount; i++ {
-		randomRow := helper.RandomNumber(0, xSize)
-		randomColumn := helper.RandomNumber(0, ySize)
+		randomRow := helper.RandomNumber(0, width)
+		randomColumn := helper.RandomNumber(0, height)
 
 		if fields[randomRow][randomColumn].wall == nil {
 			fields[randomRow][randomColumn].wall = NewWall(false)
@@ -253,8 +253,8 @@ func createFields(xSize int, ySize int) [][]*Field {
 
 	// place specials
 	for i := 0; i <= specialsCount; i++ {
-		randomRow := helper.RandomNumber(0, xSize)
-		randomColumn := helper.RandomNumber(0, ySize)
+		randomRow := helper.RandomNumber(0, width)
+		randomColumn := helper.RandomNumber(0, height)
 
 		field := fields[randomRow][randomColumn]
 		if field.special == nil {
