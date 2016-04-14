@@ -8,15 +8,13 @@ import (
 type GameChannelMessage struct {
 	text   string
 	player *Player
-	game   *Game
 }
 
-func NewGameChannelMessage(text string, player *Player, game *Game) *GameChannelMessage {
+func NewGameChannelMessage(text string, player *Player) GameChannelMessage {
 
-	return &GameChannelMessage{
+	return GameChannelMessage{
 		text:   text,
 		player: player,
-		game:   game,
 	}
 }
 
@@ -26,7 +24,6 @@ func NewGameChannelMessageFromTCPMessage(tcpMessage *tcpmessage.TCPMessage, game
 	return &GameChannelMessage{
 		text:   tcpMessage.Text,
 		player: p,
-		game:   game,
 	}
 }
 
@@ -36,10 +33,6 @@ func (self *GameChannelMessage) GetText() string {
 
 func (self *GameChannelMessage) GetPlayer() *Player {
 	return self.player
-}
-
-func (self *GameChannelMessage) GetGame() *Game {
-	return self.game
 }
 
 // func (gcm *GameChannelMessage) toString() {
