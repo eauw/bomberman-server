@@ -75,12 +75,12 @@ func main() {
 	fmt.Printf("tcp spectator port: %d\n", tcpSpecPort)
 
 	// create game
-	mutex.Lock()
+	// mutex.Lock()
 	gameManager := gamemanager.NewManager()
 	gameManager.Start(rounds, height, width)
 	gameManager.SetMainChannel(mainChannel)
 	gameManager.SetSpecChannel(specChannel)
-	mutex.Unlock()
+	// mutex.Unlock()
 
 	go handleSpecListener(specListener)
 
@@ -168,9 +168,12 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
 			mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
 
-			mutex.Lock()
-			gameManager.MessageReceived(messageString, newPlayer)
-			mutex.Unlock()
+			// mutex.Lock()
+			// gameManager.MessageReceived(messageString, newPlayer)
+			// mutex.Unlock()
+
+			gameMessage := gamemanager.NewGameChannelMessage(messageString, newPlayer)
+			gameManager.GetGameChannel() <- gameMessage
 
 			// sample process for string received
 			// newMessage := strings.ToUpper(messageString)

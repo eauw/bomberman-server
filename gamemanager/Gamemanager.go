@@ -8,13 +8,12 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
 type Manager struct {
 	game               *Game
-	channel            chan *GameChannelMessage
+	channel            chan GameChannelMessage
 	mainChannel        chan string
 	specChannel        chan string
 	currentPlayerIndex int
@@ -22,19 +21,27 @@ type Manager struct {
 	playersConn        map[string]net.Conn
 	commandTimeout     int
 	rounds             []*Round
-	mutex              *sync.Mutex
 	currentRound       *Round
 }
 
 func NewManager() *Manager {
-	return &Manager{
+	ch := make(chan GameChannelMessage)
+	manager := &Manager{
 		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
 		commandTimeout:     1,
 		rounds:             []*Round{},
-		mutex:              &sync.Mutex{},
+		channel:            ch,
 	}
+
+	go manager.channelHandler()
+
+	return manager
+}
+
+func (manager *Manager) GetGameChannel() chan GameChannelMessage {
+	return manager.channel
 }
 
 func (manager *Manager) SetMainChannel(ch chan string) {
@@ -72,6 +79,17 @@ func (manager *Manager) GameStart() {
 	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
 
 	manager.broadcastWaiting()
+
+	manager.timeout()
+}
+
+func (manager *Manager) timeout() {
+	timer := time.NewTimer(time.Duration(float64(time.Second) * 0.5))
+	go func() {
+		<-timer.C
+		gameChannelMessage := NewGameChannelMessage("processRound", nil)
+		manager.channel <- gameChannelMessage
+	}()
 }
 
 func (manager *Manager) PlayersCount() int {
@@ -187,10 +205,20 @@ func (manager *Manager) GameState(mapString string) string {
 	return gameState
 }
 
-func (manager *Manager) MessageReceived(message string, player *Player) {
-	// mutex.Lock()
-	// defer mutex.Unlock()
+func (manager *Manager) channelHandler() {
+	for {
+		gameChannelMessage := <-manager.channel
 
+		if gameChannelMessage.text == "processRound" {
+			manager.ProcessRound(manager.currentRound)
+		} else {
+			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player)
+		}
+
+	}
+}
+
+func (manager *Manager) messageReceived(message string, player *Player) {
 	log.Printf("Message >%s< received from player >%s<", message, player.name)
 	conn := manager.playersConn[player.id]
 
@@ -210,9 +238,9 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 				manager.currentRound.playerCommands[player.id] = message
 			}
 
-			if len(playerCommands) == len(manager.game.players) {
-				manager.ProcessRound(manager.currentRound)
-			}
+			// if len(playerCommands) == len(manager.game.players) {
+			// 	manager.ProcessRound(manager.currentRound)
+			// }
 
 		} else {
 			if strings.Contains(message, "name:") {
@@ -232,9 +260,6 @@ func (manager *Manager) MessageReceived(message string, player *Player) {
 }
 
 func (manager *Manager) ProcessRound(round *Round) {
-	manager.mutex.Lock()
-	defer manager.mutex.Unlock()
-
 	fields := manager.game.gameMap.fields
 	bombs := manager.game.gameMap.bombs
 
@@ -345,6 +370,8 @@ func (manager *Manager) ProcessRound(round *Round) {
 	// TODO: Specials respawn implementieren
 
 	manager.broadcastWaiting()
+
+	manager.timeout()
 
 }
 
