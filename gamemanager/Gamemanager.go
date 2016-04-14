@@ -19,7 +19,7 @@ type Manager struct {
 	currentPlayerIndex int
 	playersOrder       []string
 	playersConn        map[string]net.Conn
-	commandTimeout     int
+	commandTimeout     float64
 	rounds             []*Round
 	currentRound       *Round
 }
@@ -30,7 +30,7 @@ func NewManager() *Manager {
 		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
-		commandTimeout:     1,
+		commandTimeout:     0.5,
 		rounds:             []*Round{},
 		channel:            ch,
 	}
@@ -84,7 +84,7 @@ func (manager *Manager) GameStart() {
 }
 
 func (manager *Manager) timeout() {
-	timer := time.NewTimer(time.Duration(float64(time.Second) * 0.5))
+	timer := time.NewTimer(time.Duration(float64(time.Second) * manager.commandTimeout))
 	go func() {
 		<-timer.C
 		gameChannelMessage := NewGameChannelMessage("processRound", nil)
@@ -158,7 +158,7 @@ func (manager *Manager) GameState(mapString string) string {
 	}
 
 	infos += fmt.Sprintf("mapsize:x%sy%s,", xString, yString)
-	infos += fmt.Sprintf("timeout:%d,", manager.commandTimeout)
+	infos += fmt.Sprintf("timeout:%.2fs,", manager.commandTimeout)
 	infos += "\n"
 
 	gameState := "\033[H\033[2J"
