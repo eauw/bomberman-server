@@ -30,7 +30,6 @@ func NewManager() *Manager {
 		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
-		commandTimeout:     0.5,
 		rounds:             []*Round{},
 		channel:            ch,
 	}
@@ -52,7 +51,7 @@ func (manager *Manager) SetSpecChannel(ch chan string) {
 	manager.specChannel = ch
 }
 
-func (manager *Manager) Start(rounds int, height int, width int) {
+func (manager *Manager) Start(rounds int, height int, width int, timeout float64) {
 
 	if rounds < 1 {
 		rounds = 1
@@ -64,6 +63,7 @@ func (manager *Manager) Start(rounds int, height int, width int) {
 		manager.rounds = append(manager.rounds, round)
 	}
 
+	manager.commandTimeout = timeout
 	manager.game = NewGame(height, width)
 	manager.currentRound = manager.rounds[0]
 	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))

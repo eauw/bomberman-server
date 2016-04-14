@@ -26,6 +26,7 @@ var rounds int
 var minPlayers int
 var height int
 var width int
+var timeout float64
 
 var mutex *sync.Mutex
 
@@ -34,6 +35,7 @@ func init() {
 	flag.IntVar(&rounds, "rounds", 1000, "set max. rounds")
 	flag.IntVar(&height, "height", 20, "set maps height")
 	flag.IntVar(&width, "width", 20, "set maps width")
+	flag.Float64Var(&timeout, "timeout", 0.5, "command timeout")
 	flag.BoolVar(&httpServerBool, "w", false, "start http server")
 	flag.Parse()
 }
@@ -77,7 +79,7 @@ func main() {
 	// create game
 	// mutex.Lock()
 	gameManager := gamemanager.NewManager()
-	gameManager.Start(rounds, height, width)
+	gameManager.Start(rounds, height, width, timeout)
 	gameManager.SetMainChannel(mainChannel)
 	gameManager.SetSpecChannel(specChannel)
 	// mutex.Unlock()
