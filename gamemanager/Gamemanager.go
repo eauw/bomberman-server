@@ -186,7 +186,7 @@ func (manager *Manager) GameState(mapString string) string {
 
 		gameStateTable := "scoretable:\n"
 		for _, p := range playersTable {
-			gameStateTable += fmt.Sprintf("name:%s,score:%d,field:%s;\n", p.name, p.points, p.currentField.toString())
+			gameStateTable += fmt.Sprintf("name:%s,score:%d,%s;\n", p.name, p.points, p.currentField.toString())
 		}
 		gameStateTable += "/scoretable"
 		gameState += gameStateTable
