@@ -129,7 +129,7 @@ func handleMainChannel() {
 func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	fmt.Printf("\nclient %s connected\n", conn.RemoteAddr())
 	conn.Write([]byte("Successfully connected to Bomberman-Server\n"))
-	conn.Write([]byte("Enter quit or exit to disconnect.\n"))
+	conn.Write([]byte("Enter q to disconnect.\n"))
 
 	// get clients ip
 	clientIP := helper.IpFromAddr(conn)
