@@ -227,8 +227,11 @@ func createFields(width int, height int) [][]*Field {
 	}
 
 	// place walls and specials on the game map
+	// set amount of walls to place
 	wallsCount := int(float64(fieldsCount) * 0.25)
+	// set amount of destructibale walls to place
 	destructibleWallsCount := int(float64(fieldsCount) * 0.05)
+	// set amount of specials to place
 	specialsCount := int(float64(fieldsCount) * 0.1)
 
 	// place walls
