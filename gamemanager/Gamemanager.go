@@ -186,7 +186,7 @@ func (manager *Manager) GameState(mapString string) string {
 
 		gameStateTable := "scoretable:\n"
 		for _, p := range playersTable {
-			gameStateTable += fmt.Sprintf("name:%s,score:%d,field:%s;\n", p.name, p.points, p.currentField.toString())
+			gameStateTable += fmt.Sprintf("name:%s,score:%d,%s;\n", p.name, p.points, p.currentField.toString())
 		}
 		gameStateTable += "/scoretable"
 		gameState += gameStateTable
@@ -291,32 +291,25 @@ func (manager *Manager) ProcessRound(round *Round) {
 		switch command {
 		case "d":
 			manager.game.PlayerMovesToRight(player)
-			break
 
 		case "a":
 			manager.game.PlayerMovesToLeft(player)
-			break
 
 		case "w":
 			manager.game.PlayerMovesToUp(player)
-			break
 
 		case "s":
 			manager.game.PlayerMovesToDown(player)
-			break
 
 		// case "x":
 		// 	manager.game.ExplodePlayersBombs(player)
-		// 	break
 
 		case "l":
 			manager.sendGameStateToPlayer(player)
-			break
 
 		case "n":
 			// nothing
 			manager.sendGameStateToPlayer(player)
-			break
 
 		}
 	}
@@ -437,8 +430,6 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 			destinationField = manager.game.gameMap.getField(pRow-distance, pCol)
 		}
 
-		break
-
 	// Osten
 	case "d":
 		destinationField = manager.game.gameMap.getField(pRow, pCol+distance)
@@ -446,7 +437,6 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 			distance -= 1
 			destinationField = manager.game.gameMap.getField(pRow, pCol+distance)
 		}
-		break
 
 	// Süden
 	case "s":
@@ -455,7 +445,6 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 			distance -= 1
 			destinationField = manager.game.gameMap.getField(pRow+distance, pCol)
 		}
-		break
 
 	// Westen
 	case "a":
@@ -464,7 +453,6 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 			distance -= 1
 			destinationField = manager.game.gameMap.getField(pRow, pCol-distance)
 		}
-		break
 	}
 
 	return destinationField

@@ -38,7 +38,7 @@ func (field *Field) toString() string {
 
 	j = strconv.Itoa(field.column)
 
-	fieldString := fmt.Sprintf("x:%sy:%s", j, i)
+	fieldString := fmt.Sprintf("x:%s,y:%s", j, i)
 
 	return fieldString
 

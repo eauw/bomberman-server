@@ -170,16 +170,9 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
 			mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
 
-			// mutex.Lock()
-			// gameManager.MessageReceived(messageString, newPlayer)
-			// mutex.Unlock()
-
 			gameMessage := gamemanager.NewGameChannelMessage(messageString, newPlayer)
 			gameManager.GetGameChannel() <- gameMessage
 
-			// sample process for string received
-			// newMessage := strings.ToUpper(messageString)
-			// send new string back to client
 			conn.Write([]byte(messageString + "\n"))
 		} else {
 			if strings.Contains(err.Error(), "use of closed network connection") {
@@ -206,13 +199,3 @@ func handleSpecChannel() {
 	}
 
 }
-
-// called as goroutine
-// func newSpectatorConnected(conn net.Conn) {
-// 	conn.Write([]byte("Hello Spectator\n"))
-
-// 	for {
-// 		var x = <-specChannel
-
-// 	}
-// }

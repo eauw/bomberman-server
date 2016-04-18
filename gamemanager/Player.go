@@ -74,15 +74,12 @@ func (player *Player) applySpecial(special *Special) {
 	switch special.powerType {
 	case "r":
 		player.reach += 1
-		break
 
 	case "b":
 		player.addBomb()
-		break
 
 	case "h":
 		player.protection = 5
-		break
 	}
 }
 
