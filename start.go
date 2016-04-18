@@ -23,7 +23,7 @@ var specChannel chan string
 var spectators []net.Conn = make([]net.Conn, 0)
 
 var rounds int
-var minPlayers int
+var maxPlayers int
 var height int
 var width int
 var timeout float64
@@ -31,7 +31,7 @@ var timeout float64
 var mutex *sync.Mutex
 
 func init() {
-	flag.IntVar(&minPlayers, "players", 2, "set min. players")
+	flag.IntVar(&maxPlayers, "players", 2, "set min. players")
 	flag.IntVar(&rounds, "rounds", 1000, "set max. rounds")
 	flag.IntVar(&height, "height", 20, "set maps height")
 	flag.IntVar(&width, "width", 20, "set maps width")
@@ -131,61 +131,67 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 	conn.Write([]byte("Successfully connected to Bomberman-Server\n"))
 	conn.Write([]byte("Enter q to disconnect.\n"))
 
-	// get clients ip
-	clientIP := helper.IpFromAddr(conn)
+	if gameManager.PlayersCount() < maxPlayers {
+		// get clients ip
+		clientIP := helper.IpFromAddr(conn)
 
-	mutex.Lock()
-	newPlayer := gameManager.PlayerConnected(clientIP, conn)
-	mutex.Unlock()
+		mutex.Lock()
+		newPlayer := gameManager.PlayerConnected(clientIP, conn)
+		mutex.Unlock()
 
-	if gameManager.PlayersCount() >= minPlayers {
-		timer := time.NewTimer(time.Second)
-		go func() {
-			<-timer.C
-			mutex.Lock()
-			gameManager.GameStart()
-			mutex.Unlock()
-		}()
+		conn.Write([]byte("YourID:"))
+		conn.Write([]byte(newPlayer.GetID()))
+		conn.Write([]byte("\n"))
+		conn.Write([]byte("YourName:"))
+		conn.Write([]byte(newPlayer.GetName()))
+		conn.Write([]byte("\n"))
 
-	}
+		if gameManager.PlayersCount() == maxPlayers {
+			timer := time.NewTimer(time.Second)
+			go func() {
+				<-timer.C
+				mutex.Lock()
+				gameManager.GameStart()
+				mutex.Unlock()
+			}()
 
-	conn.Write([]byte("YourID:"))
-	conn.Write([]byte(newPlayer.GetID()))
-	conn.Write([]byte("\n"))
-	conn.Write([]byte("YourName:"))
-	conn.Write([]byte(newPlayer.GetName()))
-	conn.Write([]byte("\n"))
-
-	// run loop forever (or until ctrl-c)
-	for {
-		messageBytes, _, err := bufio.NewReader(conn).ReadLine()
-		if err == nil {
-			messageString := string(messageBytes)
-
-			// output message received
-			fmt.Println("----------------")
-			timeStamp := time.Now()
-			fmt.Println(timeStamp)
-
-			mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
-			mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
-
-			gameMessage := gamemanager.NewGameChannelMessage(messageString, newPlayer)
-			gameManager.GetGameChannel() <- gameMessage
-
-			conn.Write([]byte(messageString + "\n"))
-		} else {
-			if strings.Contains(err.Error(), "use of closed network connection") {
-				fmt.Printf("Client %s disconnected.\n", newPlayer.GetID())
-			} else {
-				fmt.Printf("Connection Error: %s\n", err)
-				fmt.Println("Client disconnected.")
-				conn.Close()
-			}
-
-			return
 		}
+
+		// run loop forever (or until ctrl-c)
+		for {
+			messageBytes, _, err := bufio.NewReader(conn).ReadLine()
+			if err == nil {
+				messageString := string(messageBytes)
+
+				// output message received
+				fmt.Println("----------------")
+				timeStamp := time.Now()
+				fmt.Println(timeStamp)
+
+				mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
+				mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
+
+				gameMessage := gamemanager.NewGameChannelMessage(messageString, newPlayer)
+				gameManager.GetGameChannel() <- gameMessage
+
+				conn.Write([]byte(messageString + "\n"))
+			} else {
+				if strings.Contains(err.Error(), "use of closed network connection") {
+					fmt.Printf("Client %s disconnected.\n", newPlayer.GetID())
+				} else {
+					fmt.Printf("Connection Error: %s\n", err)
+					fmt.Println("Client disconnected.")
+					conn.Close()
+				}
+
+				return
+			}
+		}
+	} else {
+		conn.Write([]byte("Sorry, the player limit is reached.\n"))
+		conn.Close()
 	}
+
 }
 
 // called as goroutine
