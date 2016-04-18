@@ -45,7 +45,6 @@ func (httpServer *HTTPServer) handleHTTPChannel() {
 		//fmt.Printf("httpServer: %s\n", x)
 		switch x {
 		case "":
-			break
 
 		}
 	}

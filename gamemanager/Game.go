@@ -134,19 +134,15 @@ func handleGameChannelMessage(gcm *GameChannelMessage) {
 	switch gcm.GetText() {
 	case "move up":
 		// gcm.GetPlayer().moveUp()
-		break
 
 	case "move down":
 		// gcm.GetPlayer().moveDown()
-		break
 
 	case "move left":
 		// gcm.GetPlayer().moveLeft()
-		break
 
 	case "move right":
 		// gcm.GetPlayer().moveRight()
-		break
 
 	}
 }
