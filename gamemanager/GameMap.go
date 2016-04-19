@@ -213,15 +213,19 @@ func createFields(width int, height int) [][]*Field {
 			// Rand um das Spielfeld anlegen
 			if i == 0 {
 				field.wall = NewWall(false)
+				field.isBorder = true
 			}
 			if i == width-1 {
 				field.wall = NewWall(false)
+				field.isBorder = true
 			}
 			if j == 0 {
 				field.wall = NewWall(false)
+				field.isBorder = true
 			}
 			if j == height-1 {
 				field.wall = NewWall(false)
+				field.isBorder = true
 			}
 		}
 	}
