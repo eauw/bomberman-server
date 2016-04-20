@@ -22,16 +22,18 @@ type Manager struct {
 	commandTimeout     float64
 	rounds             []*Round
 	currentRound       *Round
+	roundTimer         *time.Timer
 }
 
 func NewManager() *Manager {
-	ch := make(chan GameChannelMessage)
+	ch := make(chan GameChannelMessage, 2)
 	manager := &Manager{
 		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
 		rounds:             []*Round{},
 		channel:            ch,
+		roundTimer:         nil,
 	}
 
 	go manager.channelHandler()
@@ -87,6 +89,7 @@ func (manager *Manager) timeout() {
 	timer := time.NewTimer(time.Duration(float64(time.Second) * manager.commandTimeout))
 	go func() {
 		<-timer.C
+
 		gameChannelMessage := NewGameChannelMessage("processRound", nil)
 		manager.channel <- gameChannelMessage
 	}()
@@ -233,14 +236,19 @@ func (manager *Manager) messageReceived(message string, player *Player) {
 			playerCommands := manager.currentRound.playerCommands
 
 			if _, alreadyExits := playerCommands[player.id]; alreadyExits {
-				conn.Write([]byte("Your already have send a message.\n"))
+				conn.Write([]byte("You already have send a message.\n"))
 			} else {
 				manager.currentRound.playerCommands[player.id] = message
 			}
 
-			// if len(playerCommands) == len(manager.game.players) {
-			// 	manager.ProcessRound(manager.currentRound)
-			// }
+			if len(playerCommands) == len(manager.game.players) {
+				// manager.ProcessRound(manager.currentRound)
+				manager.roundTimer.Stop()
+				gameChannelMessage := NewGameChannelMessage("processRound", nil)
+				manager.channel <- gameChannelMessage
+				log.Println("OTTO")
+
+			}
 
 		} else {
 			if strings.Contains(message, "name:") {
@@ -364,8 +372,10 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	manager.broadcastWaiting()
 
-	manager.timeout()
-
+	manager.roundTimer = time.AfterFunc(time.Duration(float64(time.Second)*manager.commandTimeout), func() {
+		gameChannelMessage := NewGameChannelMessage("processRound", nil)
+		manager.channel <- gameChannelMessage
+	})
 }
 
 func (manager *Manager) broadcastWaiting() {

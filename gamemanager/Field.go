@@ -15,6 +15,7 @@ type Field struct {
 	explodes bool
 	players  []*Player
 	bombs    []*Bomb
+	isBorder bool
 }
 
 func NewField(row int, column int) *Field {
@@ -27,6 +28,7 @@ func NewField(row int, column int) *Field {
 		explodes: false,
 		players:  make([]*Player, 0), //make(map[string]*Player),
 		bombs:    make([]*Bomb, 0),
+		isBorder: false,
 	}
 }
 
