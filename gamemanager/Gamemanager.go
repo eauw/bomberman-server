@@ -22,7 +22,6 @@ type Manager struct {
 	commandTimeout     float64
 	rounds             []*Round
 	currentRound       *Round
-	roundTimer         *time.Timer
 }
 
 func NewManager() *Manager {
@@ -33,7 +32,6 @@ func NewManager() *Manager {
 		currentPlayerIndex: 0,
 		rounds:             []*Round{},
 		channel:            ch,
-		roundTimer:         nil,
 	}
 
 	go manager.channelHandler()
@@ -243,7 +241,7 @@ func (manager *Manager) messageReceived(message string, player *Player) {
 
 			if len(playerCommands) == len(manager.game.players) {
 				// manager.ProcessRound(manager.currentRound)
-				manager.roundTimer.Stop()
+
 				gameChannelMessage := NewGameChannelMessage("processRound", nil)
 				manager.channel <- gameChannelMessage
 				log.Println("OTTO")
@@ -372,10 +370,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	manager.broadcastWaiting()
 
-	manager.roundTimer = time.AfterFunc(time.Duration(float64(time.Second)*manager.commandTimeout), func() {
-		gameChannelMessage := NewGameChannelMessage("processRound", nil)
-		manager.channel <- gameChannelMessage
-	})
+	manager.timeout()
 }
 
 func (manager *Manager) broadcastWaiting() {
