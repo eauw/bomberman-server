@@ -1,8 +1,8 @@
 package gamemanager
 
 import (
-	"bomberman-server/helper"
 	"fmt"
+	"github.com/eauw/bomberman-server/helper"
 	"log"
 	"math/rand"
 	"sync"

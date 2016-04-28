@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bomberman-server/gamemanager"
-	"bomberman-server/helper"
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/eauw/bomberman-server/gamemanager"
+	"github.com/eauw/bomberman-server/helper"
 	"log"
 	"net"
 	"strings"
