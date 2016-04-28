@@ -1,9 +1,10 @@
 package gamemanager
 
-import "bomberman-server/helper"
-
-import "fmt"
-import "github.com/fatih/color"
+import (
+	"fmt"
+	"github.com/eauw/bomberman-server/helper"
+	"github.com/fatih/color"
+)
 
 type GameMap struct {
 	game   *Game

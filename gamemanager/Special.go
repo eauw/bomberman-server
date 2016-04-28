@@ -1,6 +1,6 @@
 package gamemanager
 
-import "bomberman-server/helper"
+import "github.com/eauw/bomberman-server/helper"
 import "strings"
 
 /*

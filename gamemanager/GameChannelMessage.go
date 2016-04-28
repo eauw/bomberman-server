@@ -2,7 +2,7 @@ package gamemanager
 
 import (
 	// "fmt"
-	"bomberman-server/tcpmessage"
+	"github.com/eauw/bomberman-server/tcpmessage"
 )
 
 type GameChannelMessage struct {

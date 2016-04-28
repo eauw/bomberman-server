@@ -2,7 +2,7 @@ package main
 
 import (
 	// "fmt"
-	"bomberman-server/gamemanager"
+	"github.com/eauw/bomberman-server/gamemanager"
 	"html/template"
 	"io/ioutil"
 	"log"

@@ -1,7 +1,7 @@
 package gamemanager
 
 import (
-	"bomberman-server/helper"
+	"github.com/eauw/bomberman-server/helper"
 )
 
 type Bomb struct {
