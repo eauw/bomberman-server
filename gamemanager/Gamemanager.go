@@ -6,13 +6,15 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type Manager struct {
-	game               *Game
+	currentGame        *Game
+	games              []*Game
 	channel            chan GameChannelMessage
 	mainChannel        chan string
 	specChannel        chan string
@@ -20,8 +22,6 @@ type Manager struct {
 	playersOrder       []string
 	playersConn        map[string]net.Conn
 	commandTimeout     float64
-	rounds             []*Round
-	currentRound       *Round
 }
 
 func NewManager() *Manager {
@@ -30,7 +30,6 @@ func NewManager() *Manager {
 		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
 		playersConn:        map[string]net.Conn{},
 		currentPlayerIndex: 0,
-		rounds:             []*Round{},
 		channel:            ch,
 	}
 
@@ -51,32 +50,41 @@ func (manager *Manager) SetSpecChannel(ch chan string) {
 	manager.specChannel = ch
 }
 
-func (manager *Manager) Start(rounds int, height int, width int, timeout float64) {
+func (manager *Manager) Start(rounds int, height int, width int, gamesCount int, timeout float64) {
 
 	if rounds < 1 {
 		rounds = 1
 	}
 
-	for i := 1; i <= rounds; i++ {
-		round := NewRound()
-		round.id = i
-		manager.rounds = append(manager.rounds, round)
+	manager.commandTimeout = timeout
+
+	// init games and rounds
+	for i := 1; i <= gamesCount; i++ {
+		newGame := NewGame(height, width)
+		newGame.id = i
+
+		for j := 1; j <= rounds; j++ {
+			round := NewRound()
+			round.id = j
+			newGame.rounds = append(newGame.rounds, round)
+		}
+
+		manager.games = append(manager.games, newGame)
 	}
 
-	manager.commandTimeout = timeout
-	manager.game = NewGame(height, width)
-	manager.currentRound = manager.rounds[0]
-	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
+	manager.currentGame = manager.games[0]
+	manager.currentGame.currentRound = manager.currentGame.rounds[0]
+	log.Println(manager.GameState(manager.currentGame.gameMap.toStringForServer()))
 }
 
 func (manager *Manager) GameStart() {
-	manager.game.start()
+	manager.currentGame.start()
 
-	for _, p := range manager.game.players {
+	for _, p := range manager.currentGame.players {
 		manager.sendGameStateToPlayer(p)
 	}
 
-	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
+	log.Println(manager.GameState(manager.currentGame.gameMap.toStringForServer()))
 
 	manager.broadcastWaiting()
 
@@ -94,8 +102,8 @@ func (manager *Manager) timeout() {
 }
 
 func (manager *Manager) PlayersCount() int {
-	if manager.game.players != nil {
-		return len(manager.game.players)
+	if manager.currentGame.players != nil {
+		return len(manager.currentGame.players)
 	} else {
 		return 0
 	}
@@ -105,8 +113,8 @@ func (manager *Manager) PlayersCount() int {
 func (manager *Manager) generatePlayersOrder() {
 	a := []string{}
 
-	for i := range manager.game.players {
-		a = append(a, manager.game.players[i].id)
+	for i := range manager.currentGame.players {
+		a = append(a, manager.currentGame.players[i].id)
 	}
 
 	rand.Seed(time.Now().UnixNano())
@@ -121,11 +129,11 @@ func (manager *Manager) generatePlayersOrder() {
 }
 
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
-	newPlayer := NewPlayer("New Player", manager.game.gameMap.fields[0][0])
+	newPlayer := NewPlayer("New Player", manager.currentGame.gameMap.fields[0][0])
 	newPlayer.SetIP(ip)
 	newPlayer.addBomb()
-	manager.game.addPlayer(newPlayer)
-	newPlayer.name = "Player" + strconv.Itoa(len(manager.game.players))
+	manager.currentGame.addPlayer(newPlayer)
+	newPlayer.name = "Player" + strconv.Itoa(len(manager.currentGame.players))
 
 	manager.playersConn[newPlayer.id] = conn
 
@@ -135,16 +143,17 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 func (manager *Manager) GameState(mapString string) string {
 
 	infos := "\n"
-	if manager.game.started {
-		infos += fmt.Sprintf("round:%d/%d,", manager.currentRound.id, len(manager.rounds))
+	infos += fmt.Sprintf("game:%d/%d,", manager.currentGame.id, len(manager.games))
+	if manager.currentGame.started {
+		infos += fmt.Sprintf("round:%d/%d,", manager.currentGame.currentRound.id, len(manager.currentGame.rounds))
 	} else {
-		infos += fmt.Sprintf("rounds:%d,", len(manager.rounds))
+		infos += fmt.Sprintf("rounds:%d,", len(manager.currentGame.rounds))
 	}
 
-	infos += fmt.Sprintf("players:%d,", len(manager.game.players))
+	infos += fmt.Sprintf("players:%d,", len(manager.currentGame.players))
 
-	x := manager.game.gameMap.height
-	y := manager.game.gameMap.width
+	x := manager.currentGame.gameMap.height
+	y := manager.currentGame.gameMap.width
 
 	xString := strconv.Itoa(x)
 
@@ -172,11 +181,11 @@ func (manager *Manager) GameState(mapString string) string {
 	gameState += "\n"
 
 	// gamestatetable
-	if manager.game.started {
+	if manager.currentGame.started {
 		// Tabelle erstellen mit dem Fuchs an erster Stelle
-		playersTable := make([]*Player, len(manager.game.players))
+		playersTable := make([]*Player, len(manager.currentGame.players))
 		i := 1
-		for _, p := range manager.game.players {
+		for _, p := range manager.currentGame.players {
 			if p.isFox > 0 {
 				playersTable[0] = p
 			} else {
@@ -196,7 +205,7 @@ func (manager *Manager) GameState(mapString string) string {
 
 	// gameState += "bombs:\n"
 
-	// for _, p := range manager.game.players {
+	// for _, p := range manager.currentGame.players {
 	// 	gameState += fmt.Sprintf("player: %s, bombs: %s\n", p.name, p.bombs)
 	// }
 
@@ -211,7 +220,7 @@ func (manager *Manager) channelHandler() {
 		gameChannelMessage := <-manager.channel
 
 		if gameChannelMessage.text == "processRound" {
-			manager.ProcessRound(manager.currentRound)
+			manager.ProcessRound(manager.currentGame.currentRound)
 		} else {
 			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player)
 		}
@@ -229,17 +238,17 @@ func (manager *Manager) messageReceived(message string, player *Player) {
 	} else {
 
 		// Befehle werden erst entgegengenommen wenn das Spiel gestartet wurde
-		if manager.game.started {
+		if manager.currentGame.started {
 
-			playerCommands := manager.currentRound.playerCommands
+			playerCommands := manager.currentGame.currentRound.playerCommands
 
 			if _, alreadyExits := playerCommands[player.id]; alreadyExits {
 				conn.Write([]byte("You already have send a message.\n"))
 			} else {
-				manager.currentRound.playerCommands[player.id] = message
+				manager.currentGame.currentRound.playerCommands[player.id] = message
 			}
 
-			if len(playerCommands) == len(manager.game.players) {
+			if len(playerCommands) == len(manager.currentGame.players) {
 				// manager.ProcessRound(manager.currentRound)
 
 				gameChannelMessage := NewGameChannelMessage("processRound", nil)
@@ -266,13 +275,13 @@ func (manager *Manager) messageReceived(message string, player *Player) {
 }
 
 func (manager *Manager) ProcessRound(round *Round) {
-	fields := manager.game.gameMap.fields
-	bombs := manager.game.gameMap.bombs
+	fields := manager.currentGame.gameMap.fields
+	bombs := manager.currentGame.gameMap.bombs
 
 	log.Printf("Processing Round %d\n", round.id)
 
 	for playerID, command := range round.playerCommands {
-		player := manager.game.getPlayerByID(playerID)
+		player := manager.currentGame.getPlayerByID(playerID)
 
 		messageSlice := strings.Split(command, "")
 
@@ -289,26 +298,26 @@ func (manager *Manager) ProcessRound(round *Round) {
 				if available > 0 {
 					// Bomben sind verfügbar
 					field := manager.destinationField(player, messageSlice)
-					manager.game.PlayerPlacesBomb(player, field)
+					manager.currentGame.PlayerPlacesBomb(player, field)
 				}
 			}
 		}
 
 		switch command {
 		case "d":
-			manager.game.PlayerMovesToRight(player)
+			manager.currentGame.PlayerMovesToRight(player)
 
 		case "a":
-			manager.game.PlayerMovesToLeft(player)
+			manager.currentGame.PlayerMovesToLeft(player)
 
 		case "w":
-			manager.game.PlayerMovesToUp(player)
+			manager.currentGame.PlayerMovesToUp(player)
 
 		case "s":
-			manager.game.PlayerMovesToDown(player)
+			manager.currentGame.PlayerMovesToDown(player)
 
 		// case "x":
-		// 	manager.game.ExplodePlayersBombs(player)
+		// 	manager.currentGame.ExplodePlayersBombs(player)
 
 		case "l":
 			manager.sendGameStateToPlayer(player)
@@ -324,12 +333,12 @@ func (manager *Manager) ProcessRound(round *Round) {
 	for _, b := range bombs {
 		b.timer -= 1
 		if b.field != nil && b.timer <= 0 {
-			b.explode(manager.game.gameMap)
+			b.explode(manager.currentGame.gameMap)
 		}
 	}
 
 	// Punkte des Fuchses erhöhen und Schutz abziehen falls nötig
-	for _, p := range manager.game.players {
+	for _, p := range manager.currentGame.players {
 		if p.isFox > 0 {
 			p.isFox += 1
 			p.points += p.isFox
@@ -344,18 +353,6 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	manager.broadcastGamestate()
 
-	// nächste Runde setzen
-	roundIdx := round.id
-
-	// prüfen ob die letzte Runde erreicht ist
-	if roundIdx >= len(manager.rounds) {
-		// dann beenden
-		manager.finishGame()
-	} else {
-		// sonst nächste Runde
-		manager.currentRound = manager.rounds[roundIdx]
-	}
-
 	// Neue Runde konfigurieren
 
 	// explodierte Bomben zurücksetzen
@@ -368,33 +365,59 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	// TODO: Specials respawn implementieren
 
+	// nächste Runde setzen
+
+	if round.id == len(manager.currentGame.rounds) {
+		manager.currentGame.finished = true
+
+		if manager.currentGame.id == len(manager.games) {
+			manager.finishGame()
+		} else {
+			manager.nextGame()
+		}
+
+	} else {
+		manager.currentGame.currentRound = manager.currentGame.rounds[round.id]
+
+	}
+
 	manager.broadcastWaiting()
 
 	manager.timeout()
+
+}
+
+func (manager *Manager) nextGame() {
+	previousGame := manager.currentGame
+	manager.currentGame = manager.games[manager.currentGame.id]
+	manager.currentGame.started = true
+	manager.currentGame.gameMap = previousGame.gameMap // TODO: oder neue Map erzeugen
+	manager.currentGame.players = previousGame.players
+	manager.currentGame.currentRound = manager.currentGame.rounds[0]
 }
 
 func (manager *Manager) broadcastWaiting() {
 	log.Println("waiting for commands")
-	for _, p := range manager.game.players {
+	for _, p := range manager.currentGame.players {
 		conn := manager.playersConn[p.id]
 		conn.Write([]byte("wfyc: waiting for your command\n"))
 	}
 }
 
 func (manager *Manager) broadcastGamestate() {
-	for _, p := range manager.game.players {
+	for _, p := range manager.currentGame.players {
 		manager.sendGameStateToPlayer(p)
 	}
 
-	log.Println(manager.GameState(manager.game.gameMap.toStringForServer()))
+	log.Println(manager.GameState(manager.currentGame.gameMap.toStringForServer()))
 
-	manager.specChannel <- manager.GameState(manager.game.gameMap.toStringForServer())
+	manager.specChannel <- manager.GameState(manager.currentGame.gameMap.toStringForServer())
 }
 
 func (manager *Manager) sendGameStateToPlayer(p *Player) {
 	conn := manager.playersConn[p.id]
-	conn.Write([]byte(buildHeader(manager.GameState(manager.game.gameMap.toString())))) // ???
-	conn.Write([]byte(manager.GameState(manager.game.gameMap.toString())))
+	conn.Write([]byte(buildHeader(manager.GameState(manager.currentGame.gameMap.toString())))) // ???
+	conn.Write([]byte(manager.GameState(manager.currentGame.gameMap.toString())))
 }
 
 // Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
@@ -429,34 +452,34 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 	switch direction {
 	// Norden
 	case "w":
-		destinationField = manager.game.gameMap.getField(pRow-distance, pCol)
+		destinationField = manager.currentGame.gameMap.getField(pRow-distance, pCol)
 		for destinationField == nil {
 			distance -= 1
-			destinationField = manager.game.gameMap.getField(pRow-distance, pCol)
+			destinationField = manager.currentGame.gameMap.getField(pRow-distance, pCol)
 		}
 
 	// Osten
 	case "d":
-		destinationField = manager.game.gameMap.getField(pRow, pCol+distance)
+		destinationField = manager.currentGame.gameMap.getField(pRow, pCol+distance)
 		for destinationField == nil {
 			distance -= 1
-			destinationField = manager.game.gameMap.getField(pRow, pCol+distance)
+			destinationField = manager.currentGame.gameMap.getField(pRow, pCol+distance)
 		}
 
 	// Süden
 	case "s":
-		destinationField = manager.game.gameMap.getField(pRow+distance, pCol)
+		destinationField = manager.currentGame.gameMap.getField(pRow+distance, pCol)
 		for destinationField == nil {
 			distance -= 1
-			destinationField = manager.game.gameMap.getField(pRow+distance, pCol)
+			destinationField = manager.currentGame.gameMap.getField(pRow+distance, pCol)
 		}
 
 	// Westen
 	case "a":
-		destinationField = manager.game.gameMap.getField(pRow, pCol-distance)
+		destinationField = manager.currentGame.gameMap.getField(pRow, pCol-distance)
 		for destinationField == nil {
 			distance -= 1
-			destinationField = manager.game.gameMap.getField(pRow, pCol-distance)
+			destinationField = manager.currentGame.gameMap.getField(pRow, pCol-distance)
 		}
 	}
 
@@ -469,7 +492,7 @@ func (manager *Manager) playerQuit(player *Player) {
 	conn.Write([]byte("good bye\n"))
 
 	delete(manager.playersConn, player.id)
-	manager.game.removePlayer(player)
+	manager.currentGame.removePlayer(player)
 
 	log.Printf("Player %s has left the game.\n", player.id)
 
@@ -478,11 +501,14 @@ func (manager *Manager) playerQuit(player *Player) {
 
 func (manager *Manager) finishGame() {
 	log.Println("Game is over.")
+	// TODO: Spielergebnis senden
 
 	for _, conn := range manager.playersConn {
 		conn.Write([]byte("game is over\n"))
 		conn.Close()
 	}
+
+	os.Exit(0)
 }
 
 func (manager *Manager) sendMessageToPlayer(message string, player *Player) {

@@ -10,11 +10,15 @@ import (
 )
 
 type Game struct {
-	channel     chan *GameChannelMessage
-	mainChannel chan string
-	gameMap     *GameMap
-	players     map[string]*Player
-	started     bool
+	id           int
+	channel      chan *GameChannelMessage
+	mainChannel  chan string
+	gameMap      *GameMap
+	players      map[string]*Player
+	started      bool
+	finished     bool
+	rounds       []*Round
+	currentRound *Round
 }
 
 var mutex = &sync.Mutex{}
@@ -24,10 +28,12 @@ func NewGame(height int, width int) *Game {
 	gm := NewGameMap(height, width)
 
 	newGame := &Game{
-		channel: ch,
-		gameMap: gm,
-		players: make(map[string]*Player),
-		started: false,
+		channel:  ch,
+		gameMap:  gm,
+		players:  make(map[string]*Player),
+		started:  false,
+		finished: false,
+		rounds:   []*Round{},
 	}
 
 	gm.game = newGame
