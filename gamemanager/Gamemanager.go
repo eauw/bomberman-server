@@ -4,7 +4,6 @@ import (
 	// "bomberman-server/tcpmessage"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
 	"os"
 	"strconv"
@@ -15,24 +14,20 @@ import (
 var timer *time.Timer
 
 type Manager struct {
-	currentGame        *Game
-	games              []*Game
-	channel            chan GameChannelMessage
-	mainChannel        chan string
-	specChannel        chan string
-	currentPlayerIndex int
-	playersOrder       []string
-	playersConn        map[string]net.Conn
-	commandTimeout     float64
+	currentGame    *Game
+	games          []*Game
+	channel        chan GameChannelMessage
+	mainChannel    chan string
+	specChannel    chan string
+	playersConn    map[string]net.Conn
+	commandTimeout float64
 }
 
 func NewManager() *Manager {
 	ch := make(chan GameChannelMessage, 2)
 	manager := &Manager{
-		playersOrder:       []string{}, // hält die IDs der Spieler in einer zufälligen Reihenfolge
-		playersConn:        map[string]net.Conn{},
-		currentPlayerIndex: 0,
-		channel:            ch,
+		playersConn: map[string]net.Conn{},
+		channel:     ch,
 	}
 
 	go manager.channelHandler()
@@ -109,25 +104,6 @@ func (manager *Manager) PlayersCount() int {
 	} else {
 		return 0
 	}
-}
-
-// Erstellt eine zufällige Spielerreihenfolge für die Runden.
-func (manager *Manager) generatePlayersOrder() {
-	a := []string{}
-
-	for i := range manager.currentGame.players {
-		a = append(a, manager.currentGame.players[i].id)
-	}
-
-	rand.Seed(time.Now().UnixNano())
-
-	// shuffle
-	for i := range a {
-		j := rand.Intn(i + 1)
-		a[i], a[j] = a[j], a[i]
-	}
-
-	manager.playersOrder = a
 }
 
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
