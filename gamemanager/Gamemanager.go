@@ -197,7 +197,7 @@ func (manager *Manager) channelHandler() {
 	for {
 		gameChannelMessage := <-manager.channel
 
-		if gameChannelMessage.text == "processRound" {
+		if gameChannelMessage.text == "processRound" && gameChannelMessage.player == nil {
 			manager.ProcessRound(manager.currentGame.currentRound)
 		} else {
 			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player)
