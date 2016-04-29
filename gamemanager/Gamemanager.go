@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var timer *time.Timer
+
 type Manager struct {
 	currentGame        *Game
 	games              []*Game
@@ -92,7 +94,7 @@ func (manager *Manager) GameStart() {
 }
 
 func (manager *Manager) timeout() {
-	timer := time.NewTimer(time.Duration(float64(time.Second) * manager.commandTimeout))
+	timer = time.NewTimer(time.Duration(float64(time.Second) * manager.commandTimeout))
 	go func() {
 		<-timer.C
 
@@ -250,10 +252,12 @@ func (manager *Manager) messageReceived(message string, player *Player) {
 
 			if len(playerCommands) == len(manager.currentGame.players) {
 				// manager.ProcessRound(manager.currentRound)
+				if timer != nil {
+					timer.Stop()
 
+				}
 				gameChannelMessage := NewGameChannelMessage("processRound", nil)
 				manager.channel <- gameChannelMessage
-				log.Println("OTTO")
 
 			}
 
