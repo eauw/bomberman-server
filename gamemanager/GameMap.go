@@ -232,15 +232,13 @@ func createFields(width int, height int) [][]*Field {
 	}
 
 	// place walls and specials on the game map
-	// set amount of walls to place
-	wallsCount := int(float64(fieldsCount) * 0.25)
 	// set amount of destructibale walls to place
 	destructibleWallsCount := int(float64(fieldsCount) * 0.05)
 	// set amount of specials to place
 	specialsCount := int(float64(fieldsCount) * 0.1)
 
-	// place walls
-	for i := 0; i <= wallsCount; i++ {
+	// place destructible walls
+	for i := 0; i <= destructibleWallsCount; i++ {
 		randomRow := helper.RandomNumber(0, width)
 		randomColumn := helper.RandomNumber(0, height)
 
@@ -249,18 +247,15 @@ func createFields(width int, height int) [][]*Field {
 		}
 	}
 
-	// place destructible walls
-	for i := 0; i <= destructibleWallsCount; i++ {
-		randomRow := helper.RandomNumber(0, width)
-		randomColumn := helper.RandomNumber(0, height)
-
-		if fields[randomRow][randomColumn].wall == nil {
-			fields[randomRow][randomColumn].wall = NewWall(false)
-		}
-	}
-
 	// place specials
 	placeSpecials(specialsCount, width, height, fields)
+
+        // place wall raster
+        for y := 2; y < height; y+=2 {
+               for x :=2; x < width; x+=2 {
+                       fields[y][x].wall = NewWall(false)
+               }
+        }
 
 	return fields
 }
