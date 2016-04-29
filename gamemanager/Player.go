@@ -22,19 +22,18 @@ type Player struct {
 }
 
 // NewPlayer function is the players constructor
-func NewPlayer(n string, f *Field) *Player {
+func NewPlayer(n string) *Player {
 	playerID := helper.GeneratePlayerID()
 
 	return &Player{
-		id:           playerID,
-		name:         n,
-		currentField: f,
-		isParalyzed:  0,
-		isFox:        0,
-		bombs:        make([]*Bomb, 0),
-		reach:        1,
-		throwrange:   1,
-		protection:   0,
+		id:          playerID,
+		name:        n,
+		isParalyzed: 0,
+		isFox:       0,
+		bombs:       make([]*Bomb, 0),
+		reach:       1,
+		throwrange:  1,
+		protection:  0,
 	}
 }
 

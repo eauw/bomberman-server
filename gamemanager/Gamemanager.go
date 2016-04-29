@@ -107,7 +107,7 @@ func (manager *Manager) PlayersCount() int {
 }
 
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
-	newPlayer := NewPlayer("New Player", manager.currentGame.gameMap.fields[0][0])
+	newPlayer := NewPlayer("New Player")
 	newPlayer.SetIP(ip)
 	newPlayer.addBomb()
 	manager.currentGame.addPlayer(newPlayer)
