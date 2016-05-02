@@ -35,6 +35,18 @@ func (gameMap *GameMap) getField(row int, column int) *Field {
 
 }
 
+func (gameMap *GameMap) isBombable(row int, column int) bool {
+	field := gameMap.getField(row, column)
+	if (field == nil) {
+		return false
+	}
+	if ((field.wall == nil) && (len(field.players) == 0) && (len(field.bombs) == 0)) {
+		return true
+	} else {
+		return false
+	}
+}
+
 // nw n ne
 // w  f e
 // sw s se

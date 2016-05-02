@@ -18,7 +18,8 @@ type Player struct {
 	bombs        []*Bomb
 	reach        int
 	throwrange   int
-	protection   int // Dauer des Schutzes falls meinen welchen eingesammelt hat
+	protection   int // Dauer des Schutzes falls man welchen eingesammelt hat
+	msg          string // Nachricht, die dem Spieler nach dem naechsten gamestate geschickt werden soll.
 }
 
 // NewPlayer function is the players constructor
@@ -32,7 +33,7 @@ func NewPlayer(n string) *Player {
 		isFox:       0,
 		bombs:       make([]*Bomb, 0),
 		reach:       1,
-		throwrange:  1,
+		throwrange:  9,
 		protection:  0,
 	}
 }
