@@ -200,13 +200,13 @@ func (manager *Manager) channelHandler() {
 		if gameChannelMessage.text == "processRound" && gameChannelMessage.player == nil {
 			manager.ProcessRound(manager.currentGame.currentRound)
 		} else {
-			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player)
+			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player, gameChannelMessage.timeStamp)
 		}
 
 	}
 }
 
-func (manager *Manager) messageReceived(message string, player *Player) {
+func (manager *Manager) messageReceived(message string, player *Player, timestamp time.Time) {
 	log.Printf("Message >%s< received from player >%s<", message, player.name)
 	conn := manager.playersConn[player.id]
 
@@ -223,7 +223,7 @@ func (manager *Manager) messageReceived(message string, player *Player) {
 			if _, alreadyExits := playerCommands[player.id]; alreadyExits {
 				conn.Write([]byte("You already have send a message.\n"))
 			} else {
-				manager.currentGame.currentRound.playerCommands[player.id] = message
+				manager.currentGame.currentRound.playerCommands[player.id] = PlayerCommand{message, timestamp}
 			}
 
 			if len(playerCommands) == len(manager.currentGame.players) {
@@ -260,10 +260,13 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	log.Printf("Processing Round %d\n", round.id)
 
+	players := []*Player{}
+
 	for playerID, command := range round.playerCommands {
 		player := manager.currentGame.getPlayerByID(playerID)
+		players = append(players, player)
 
-		messageSlice := strings.Split(command, "")
+		messageSlice := strings.Split(command.message, "")
 
 		// prüfen ob Spieler eine Bombe werfen will
 		if len(messageSlice) > 0 {
@@ -283,7 +286,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 			}
 		}
 
-		switch command {
+		switch command.message {
 		case "d":
 			manager.currentGame.PlayerMovesToRight(player)
 
@@ -307,6 +310,41 @@ func (manager *Manager) ProcessRound(round *Round) {
 			manager.sendGameStateToPlayer(player)
 
 		}
+	}
+
+	// Prüfen ob Fuchs gefangen wurde // NICHT GETESTET!
+	var fox *Player
+	for _, v := range players {
+
+		if v.isFox > 0 {
+			fox = v
+		}
+
+	}
+	if len(fox.currentField.players) >= 2 {
+		playersOnFoxFieldWithoutFox := []*Player{}
+		for _, v := range fox.currentField.players {
+			if v.isFox == 0 {
+				playersOnFoxFieldWithoutFox = append(playersOnFoxFieldWithoutFox, v)
+			}
+		}
+
+		// PlayerCommand mit frühestem timestamp finden
+		var p = playersOnFoxFieldWithoutFox[0]               // ersten player als frühesten annehmen
+		var timestamp = round.playerCommands[p.id].timestamp // timestamp von erstem player festhalten
+		for _, v := range playersOnFoxFieldWithoutFox {
+			playerCommand := round.playerCommands[v.id]
+			if playerCommand.timestamp.Sub(timestamp) < 0 {
+				//playerCommand ist früher
+				timestamp = playerCommand.timestamp
+				p = v
+			}
+		}
+
+		fox.isFox = 0
+		p.isFox += 1
+		manager.currentGame.teleportPlayer(p)
+
 	}
 
 	// Bomben Timer runterzählen und ggf. explodieren lassen
