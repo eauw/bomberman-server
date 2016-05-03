@@ -272,16 +272,18 @@ func (manager *Manager) ProcessRound(round *Round) {
 		if len(messageSlice) > 0 {
 			if messageSlice[0] == "b" {
 				// prüfen ob Spieler aktuell überhaupt verfügbare Bomben hat
-				available := 0
+				available := false
 				for _, b := range player.bombs {
 					if b.field == nil {
-						available += 1
+						// Bomben sind verfügbar
+						field := manager.destinationField(player, messageSlice)
+						manager.currentGame.PlayerPlacesBomb(player, field)
+						available = true
+						break;
 					}
 				}
-				if available > 0 {
-					// Bomben sind verfügbar
-					field := manager.destinationField(player, messageSlice)
-					manager.currentGame.PlayerPlacesBomb(player, field)
+				if !available {
+					player.msg += "E: out of bombs\n"
 				}
 			}
 		}
@@ -436,6 +438,8 @@ func (manager *Manager) sendGameStateToPlayer(p *Player) {
 	conn := manager.playersConn[p.id]
 	conn.Write([]byte(buildHeader(manager.GameState(manager.currentGame.gameMap.toString())))) // ???
 	conn.Write([]byte(manager.GameState(manager.currentGame.gameMap.toString())))
+	conn.Write([]byte(p.msg))
+	p.msg = ""
 }
 
 // Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
@@ -443,17 +447,27 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 	var distance int
 	var direction string
+	var err error
 
 	if len(destination) < 3 {
+		if (len(destination) == 2) {
+			player.msg += "E: incomplete bomb command.\n"
+		}
 		return player.currentField
 	} else {
-		distance, _ = strconv.Atoi(destination[1])
-		direction = destination[2]
+		distance, err = strconv.Atoi(destination[1])
+		if (err == nil) {
+			direction = destination[2]
+		} else {
+			player.msg += "E: invalid distance " + destination[1] + ".\n"
+			return player.currentField
+		}
 	}
 
 	// prüfen ob Richtung gültig ist
 	validDirections := "wasd"
 	if strings.Contains(validDirections, direction) == false {
+	        player.msg += "E: invalid direction " + direction + ". Must be in [wasd].\n"
 		return player.currentField
 	}
 
@@ -462,44 +476,40 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 	var destinationField *Field
 
-	// Prüfen ob der Player weiter werfen will als er darf
+	// Prüfen ob der Player weiter werfen will als er darf (unmoeglich so lange distanz einstellig und throwrange immer 9).
 	if distance > player.throwrange {
 		distance = player.throwrange
 	}
-
+	
+	// The direction-deltas while looking for a field to drop the bomb.
+	var dx int
+	var dy int
+	
 	switch direction {
 	// Norden
 	case "w":
-		destinationField = manager.currentGame.gameMap.getField(pRow-distance, pCol)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow-distance, pCol)
-		}
-
+		dx = 0
+		dy = -1
 	// Osten
 	case "d":
-		destinationField = manager.currentGame.gameMap.getField(pRow, pCol+distance)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow, pCol+distance)
-		}
-
+		dx = +1
+		dy = 0
 	// Süden
 	case "s":
-		destinationField = manager.currentGame.gameMap.getField(pRow+distance, pCol)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow+distance, pCol)
-		}
-
+		dx = 0
+		dy = +1
 	// Westen
 	case "a":
-		destinationField = manager.currentGame.gameMap.getField(pRow, pCol-distance)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow, pCol-distance)
-		}
+		dx = -1
+		dy = 0
 	}
+	
+        for (distance > 0) && manager.currentGame.gameMap.isBombable(pRow + dy, pCol + dx) {
+                distance -= 1
+                pRow += dy
+                pCol += dx
+        }
+        destinationField = manager.currentGame.gameMap.getField(pRow, pCol)
 
 	return destinationField
 }
@@ -527,10 +537,6 @@ func (manager *Manager) finishGame() {
 	}
 
 	os.Exit(0)
-}
-
-func (manager *Manager) sendMessageToPlayer(message string, player *Player) {
-
 }
 
 func buildHeader(message string) string {
