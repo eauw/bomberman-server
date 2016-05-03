@@ -4,6 +4,8 @@ import (
 	"github.com/eauw/bomberman-server/helper"
 )
 
+const bombtimer = 5
+
 type Bomb struct {
 	owner *Player
 	field *Field // das Feld auf das die Bombe geworfen wurde
@@ -59,7 +61,7 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 
 	// Bombe nach Explosion wieder verfügbar machen
 
-	bomb.timer = 5
+	bomb.timer = bombtimer
 	bomb.field.bombs = []*Bomb{}
 	bomb.field = nil
 	gameMap.removeBomb(bomb)
