@@ -36,12 +36,11 @@ func NewGame(height int, width int) *Game {
 		rounds:   []*Round{},
 	}
 
-	gm.game = newGame
-
 	return newGame
 }
 
 func (game *Game) start() {
+	log.Println("game start")
 	game.started = true
 	game.pickRandomPlayer().isFox = 1
 	game.placePlayers()
