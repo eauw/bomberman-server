@@ -7,7 +7,6 @@ import (
 )
 
 type GameMap struct {
-	game   *Game
 	height int
 	width  int
 	fields [][]*Field
@@ -33,6 +32,18 @@ func (gameMap *GameMap) getField(row int, column int) *Field {
 		return gameMap.fields[row][column]
 	}
 
+}
+
+func (gameMap *GameMap) isBombable(row int, column int) bool {
+	field := gameMap.getField(row, column)
+	if field == nil {
+		return false
+	}
+	if (field.wall == nil) && (len(field.players) == 0) && (len(field.bombs) == 0) {
+		return true
+	} else {
+		return false
+	}
 }
 
 // nw n ne
@@ -250,12 +261,12 @@ func createFields(width int, height int) [][]*Field {
 	// place specials
 	placeSpecials(specialsCount, width, height, fields)
 
-        // place wall raster
-        for y := 2; y < height; y+=2 {
-               for x :=2; x < width; x+=2 {
-                       fields[y][x].wall = NewWall(false)
-               }
-        }
+	// place wall raster
+	for y := 2; y < height; y += 2 {
+		for x := 2; x < width; x += 2 {
+			fields[y][x].wall = NewWall(false)
+		}
+	}
 
 	return fields
 }

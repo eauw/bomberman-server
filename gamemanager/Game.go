@@ -36,12 +36,11 @@ func NewGame(height int, width int) *Game {
 		rounds:   []*Round{},
 	}
 
-	gm.game = newGame
-
 	return newGame
 }
 
 func (game *Game) start() {
+	log.Println("game start")
 	game.started = true
 	game.pickRandomPlayer().isFox = 1
 	game.placePlayers()
@@ -183,16 +182,16 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 
 	// prüfen ob der Fuchs auf dem nächsten Feld steht
 	// nur wenn man selbst nicht der Fuchs ist
-	if player.isFox == 0 {
-		for _, p := range nextField.players {
-			if p.isFox > 0 {
-				p.isFox = 0
-				player.isFox += 1
-				game.teleportPlayer(player)
-				return
-			}
-		}
-	}
+	// if player.isFox == 0 {
+	// 	for _, p := range nextField.players {
+	// 		if p.isFox > 0 {
+	// 			p.isFox = 0
+	// 			player.isFox += 1
+	// 			game.teleportPlayer(player)
+	// 			return
+	// 		}
+	// 	}
+	// }
 
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
@@ -229,16 +228,16 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 
 	// prüfen ob der Fuchs auf dem nächsten Feld steht
 	// nur wenn man selbst nicht der Fuchs ist
-	if player.isFox == 0 {
-		for _, p := range nextField.players {
-			if p.isFox > 0 {
-				p.isFox = 0
-				player.isFox += 1
-				game.teleportPlayer(player)
-				return
-			}
-		}
-	}
+	// if player.isFox == 0 {
+	// 	for _, p := range nextField.players {
+	// 		if p.isFox > 0 {
+	// 			p.isFox = 0
+	// 			player.isFox += 1
+	// 			game.teleportPlayer(player)
+	// 			return
+	// 		}
+	// 	}
+	// }
 
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
@@ -274,16 +273,16 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 
 	// prüfen ob der Fuchs auf dem nächsten Feld steht
 	// nur wenn man selbst nicht der Fuchs ist
-	if player.isFox == 0 {
-		for _, p := range nextField.players {
-			if p.isFox > 0 {
-				p.isFox = 0
-				player.isFox += 1
-				game.teleportPlayer(player)
-				return
-			}
-		}
-	}
+	// if player.isFox == 0 {
+	// 	for _, p := range nextField.players {
+	// 		if p.isFox > 0 {
+	// 			p.isFox = 0
+	// 			player.isFox += 1
+	// 			game.teleportPlayer(player)
+	// 			return
+	// 		}
+	// 	}
+	// }
 
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)
@@ -320,16 +319,16 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 
 	// prüfen ob der Fuchs auf dem nächsten Feld steht
 	// nur wenn man selbst nicht der Fuchs ist
-	if player.isFox == 0 {
-		for _, p := range nextField.players {
-			if p.isFox > 0 {
-				p.isFox = 0
-				player.isFox += 1
-				game.teleportPlayer(player)
-				return
-			}
-		}
-	}
+	// if player.isFox == 0 {
+	// 	for _, p := range nextField.players {
+	// 		if p.isFox > 0 {
+	// 			p.isFox = 0
+	// 			player.isFox += 1
+	// 			game.teleportPlayer(player)
+	// 			return
+	// 		}
+	// 	}
+	// }
 
 	nextField.addPlayer(player)
 	currentField.removePlayer(player)

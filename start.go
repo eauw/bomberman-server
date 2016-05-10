@@ -166,12 +166,12 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 				messageString := string(messageBytes)
 
 				// output message received
-				fmt.Println("----------------")
-				timeStamp := time.Now()
-				fmt.Println(timeStamp)
+				// fmt.Println("----------------")
+				// timeStamp := time.Now()
+				// fmt.Println(timeStamp)
 
-				mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
-				mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
+				// mainChannel <- fmt.Sprintf("Message from client: %s\n", clientIP)
+				// mainChannel <- fmt.Sprintf("Message Received:%s\n", messageString)
 
 				gameMessage := gamemanager.NewGameChannelMessage(messageString, newPlayer)
 				gameManager.GetGameChannel() <- gameMessage

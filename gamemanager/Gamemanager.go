@@ -21,6 +21,7 @@ type Manager struct {
 	specChannel    chan string
 	playersConn    map[string]net.Conn
 	commandTimeout float64
+	players        []*Player
 }
 
 func NewManager() *Manager {
@@ -28,6 +29,7 @@ func NewManager() *Manager {
 	manager := &Manager{
 		playersConn: map[string]net.Conn{},
 		channel:     ch,
+		players:     []*Player{},
 	}
 
 	go manager.channelHandler()
@@ -63,6 +65,7 @@ func (manager *Manager) Start(rounds int, height int, width int, gamesCount int,
 		for j := 1; j <= rounds; j++ {
 			round := NewRound()
 			round.id = j
+
 			newGame.rounds = append(newGame.rounds, round)
 		}
 
@@ -70,11 +73,18 @@ func (manager *Manager) Start(rounds int, height int, width int, gamesCount int,
 	}
 
 	manager.currentGame = manager.games[0]
+
 	manager.currentGame.currentRound = manager.currentGame.rounds[0]
+
 	log.Println(manager.GameState(manager.currentGame.gameMap.toStringForServer()))
 }
 
 func (manager *Manager) GameStart() {
+	for _, v := range manager.players {
+		manager.currentGame.addPlayer(v)
+
+	}
+
 	manager.currentGame.start()
 
 	for _, p := range manager.currentGame.players {
@@ -99,8 +109,8 @@ func (manager *Manager) timeout() {
 }
 
 func (manager *Manager) PlayersCount() int {
-	if manager.currentGame.players != nil {
-		return len(manager.currentGame.players)
+	if manager.players != nil {
+		return len(manager.players)
 	} else {
 		return 0
 	}
@@ -110,8 +120,8 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	newPlayer := NewPlayer("New Player")
 	newPlayer.SetIP(ip)
 	newPlayer.addBomb()
-	manager.currentGame.addPlayer(newPlayer)
-	newPlayer.name = "Player" + strconv.Itoa(len(manager.currentGame.players))
+	manager.players = append(manager.players, newPlayer)
+	newPlayer.name = "Player" + strconv.Itoa(len(manager.players))
 
 	manager.playersConn[newPlayer.id] = conn
 
@@ -200,13 +210,13 @@ func (manager *Manager) channelHandler() {
 		if gameChannelMessage.text == "processRound" && gameChannelMessage.player == nil {
 			manager.ProcessRound(manager.currentGame.currentRound)
 		} else {
-			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player)
+			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player, gameChannelMessage.timeStamp)
 		}
 
 	}
 }
 
-func (manager *Manager) messageReceived(message string, player *Player) {
+func (manager *Manager) messageReceived(message string, player *Player, timestamp time.Time) {
 	log.Printf("Message >%s< received from player >%s<", message, player.name)
 	conn := manager.playersConn[player.id]
 
@@ -223,7 +233,7 @@ func (manager *Manager) messageReceived(message string, player *Player) {
 			if _, alreadyExits := playerCommands[player.id]; alreadyExits {
 				conn.Write([]byte("You already have send a message.\n"))
 			} else {
-				manager.currentGame.currentRound.playerCommands[player.id] = message
+				playerCommands[player.id] = PlayerCommand{message, timestamp}
 			}
 
 			if len(playerCommands) == len(manager.currentGame.players) {
@@ -260,30 +270,35 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	log.Printf("Processing Round %d\n", round.id)
 
-	for playerID, command := range round.playerCommands {
-		player := manager.currentGame.getPlayerByID(playerID)
+	for _, player := range manager.currentGame.players {
+		command := PlayerCommand{"n", time.Now()}
+		if cmd, ok := round.playerCommands[player.id]; ok {
+			command = cmd
+		}
 
-		messageSlice := strings.Split(command, "")
+		messageSlice := strings.Split(command.message, "")
 
 		// prüfen ob Spieler eine Bombe werfen will
 		if len(messageSlice) > 0 {
 			if messageSlice[0] == "b" {
 				// prüfen ob Spieler aktuell überhaupt verfügbare Bomben hat
-				available := 0
+				available := false
 				for _, b := range player.bombs {
 					if b.field == nil {
-						available += 1
+						// Bomben sind verfügbar
+						field := manager.destinationField(player, messageSlice)
+						manager.currentGame.PlayerPlacesBomb(player, field)
+						available = true
+						break
 					}
 				}
-				if available > 0 {
-					// Bomben sind verfügbar
-					field := manager.destinationField(player, messageSlice)
-					manager.currentGame.PlayerPlacesBomb(player, field)
+				if !available {
+					player.msg += "E: out of bombs\n"
 				}
 			}
 		}
 
-		switch command {
+		switch command.message {
 		case "d":
 			manager.currentGame.PlayerMovesToRight(player)
 
@@ -305,8 +320,46 @@ func (manager *Manager) ProcessRound(round *Round) {
 		case "n":
 			// nothing
 			manager.sendGameStateToPlayer(player)
-
+		default:
+			// nothing
 		}
+
+	}
+
+	// Prüfen ob Fuchs gefangen wurde // NICHT GETESTET!
+	var fox *Player
+	for _, v := range manager.currentGame.players {
+
+		if v.isFox > 0 {
+			fox = v
+		}
+
+	}
+
+	if len(fox.currentField.players) >= 2 {
+		playersOnFoxFieldWithoutFox := []*Player{}
+		for _, v := range fox.currentField.players {
+			if v.isFox == 0 {
+				playersOnFoxFieldWithoutFox = append(playersOnFoxFieldWithoutFox, v)
+			}
+		}
+
+		// PlayerCommand mit frühestem timestamp finden
+		var p = playersOnFoxFieldWithoutFox[0]               // ersten player als frühesten annehmen
+		var timestamp = round.playerCommands[p.id].timestamp // timestamp von erstem player festhalten
+		for _, v := range playersOnFoxFieldWithoutFox {
+			playerCommand := round.playerCommands[v.id]
+			if playerCommand.timestamp.Sub(timestamp) < 0 {
+				//playerCommand ist früher
+				timestamp = playerCommand.timestamp
+				p = v
+			}
+		}
+
+		fox.isFox = 0
+		p.isFox += 1
+		manager.currentGame.teleportPlayer(p)
+
 	}
 
 	// Bomben Timer runterzählen und ggf. explodieren lassen
@@ -398,6 +451,8 @@ func (manager *Manager) sendGameStateToPlayer(p *Player) {
 	conn := manager.playersConn[p.id]
 	conn.Write([]byte(buildHeader(manager.GameState(manager.currentGame.gameMap.toString())))) // ???
 	conn.Write([]byte(manager.GameState(manager.currentGame.gameMap.toString())))
+	conn.Write([]byte(p.msg))
+	p.msg = ""
 }
 
 // Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
@@ -405,17 +460,27 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 	var distance int
 	var direction string
+	var err error
 
 	if len(destination) < 3 {
+		if len(destination) == 2 {
+			player.msg += "E: incomplete bomb command.\n"
+		}
 		return player.currentField
 	} else {
-		distance, _ = strconv.Atoi(destination[1])
-		direction = destination[2]
+		distance, err = strconv.Atoi(destination[1])
+		if err == nil {
+			direction = destination[2]
+		} else {
+			player.msg += "E: invalid distance " + destination[1] + ".\n"
+			return player.currentField
+		}
 	}
 
 	// prüfen ob Richtung gültig ist
 	validDirections := "wasd"
 	if strings.Contains(validDirections, direction) == false {
+		player.msg += "E: invalid direction " + direction + ". Must be in [wasd].\n"
 		return player.currentField
 	}
 
@@ -424,44 +489,40 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 
 	var destinationField *Field
 
-	// Prüfen ob der Player weiter werfen will als er darf
+	// Prüfen ob der Player weiter werfen will als er darf (unmoeglich so lange distanz einstellig und throwrange immer 9).
 	if distance > player.throwrange {
 		distance = player.throwrange
 	}
 
+	// The direction-deltas while looking for a field to drop the bomb.
+	var dx int
+	var dy int
+
 	switch direction {
 	// Norden
 	case "w":
-		destinationField = manager.currentGame.gameMap.getField(pRow-distance, pCol)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow-distance, pCol)
-		}
-
+		dx = 0
+		dy = -1
 	// Osten
 	case "d":
-		destinationField = manager.currentGame.gameMap.getField(pRow, pCol+distance)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow, pCol+distance)
-		}
-
+		dx = +1
+		dy = 0
 	// Süden
 	case "s":
-		destinationField = manager.currentGame.gameMap.getField(pRow+distance, pCol)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow+distance, pCol)
-		}
-
+		dx = 0
+		dy = +1
 	// Westen
 	case "a":
-		destinationField = manager.currentGame.gameMap.getField(pRow, pCol-distance)
-		for destinationField == nil {
-			distance -= 1
-			destinationField = manager.currentGame.gameMap.getField(pRow, pCol-distance)
-		}
+		dx = -1
+		dy = 0
 	}
+
+	for (distance > 0) && manager.currentGame.gameMap.isBombable(pRow+dy, pCol+dx) {
+		distance -= 1
+		pRow += dy
+		pCol += dx
+	}
+	destinationField = manager.currentGame.gameMap.getField(pRow, pCol)
 
 	return destinationField
 }
@@ -489,10 +550,6 @@ func (manager *Manager) finishGame() {
 	}
 
 	os.Exit(0)
-}
-
-func (manager *Manager) sendMessageToPlayer(message string, player *Player) {
-
 }
 
 func buildHeader(message string) string {

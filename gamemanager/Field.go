@@ -14,7 +14,7 @@ type Field struct {
 	wall     *Wall
 	explodes bool
 	players  []*Player
-	bombs    []*Bomb
+	bombs    []*Bomb // TODO: one bomb per field should be enough. Power can be increased later.
 	isBorder bool
 }
 

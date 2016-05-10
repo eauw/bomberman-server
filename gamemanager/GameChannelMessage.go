@@ -3,18 +3,21 @@ package gamemanager
 import (
 	// "fmt"
 	"github.com/eauw/bomberman-server/tcpmessage"
+	"time"
 )
 
 type GameChannelMessage struct {
-	text   string
-	player *Player
+	text      string
+	player    *Player
+	timeStamp time.Time
 }
 
 func NewGameChannelMessage(text string, player *Player) GameChannelMessage {
 
 	return GameChannelMessage{
-		text:   text,
-		player: player,
+		text:      text,
+		player:    player,
+		timeStamp: time.Now(),
 	}
 }
 
