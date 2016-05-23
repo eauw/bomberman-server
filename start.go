@@ -42,6 +42,10 @@ func init() {
 	flag.Parse()
 }
 
+func printParameters() {
+	fmt.Printf("\nStarting Game with Parameters\nPlayers: %d\nGames: %d, Rounds: %d\nMapsize: %d * %d\nTimeout: %fs", maxPlayers, gamesCount, rounds, width, height, timeout)
+}
+
 func startHttpServer() {
 	fmt.Println("Launching http server...")
 	httpServer = NewHTTPServer()
@@ -54,6 +58,9 @@ func startHttpServer() {
 
 func main() {
 	mutex = &sync.Mutex{}
+
+	// print parameters
+	printParameters()
 
 	// handle command line arguments
 	if httpServerBool {
