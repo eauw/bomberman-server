@@ -21,6 +21,7 @@ type Manager struct {
 	specChannel    chan string
 	playersConn    map[string]net.Conn
 	commandTimeout float64
+	minTimeout 		 int
 	players        []*Player
 }
 
@@ -49,7 +50,8 @@ func (manager *Manager) SetSpecChannel(ch chan string) {
 	manager.specChannel = ch
 }
 
-func (manager *Manager) Start(rounds int, height int, width int, gamesCount int, timeout float64) {
+func (manager *Manager) Start(rounds int, height int, width int, gamesCount int, timeout float64, minTimeout int) {
+	manager.minTimeout = minTimeout
 
 	if rounds < 1 {
 		rounds = 1
@@ -430,6 +432,9 @@ func (manager *Manager) nextGame() {
 }
 
 func (manager *Manager) broadcastWaiting() {
+	// minimum timeout
+	time.Sleep(time.Millisecond * time.Duration(manager.minTimeout))
+
 	log.Println("waiting for commands")
 	for _, p := range manager.currentGame.players {
 		conn := manager.playersConn[p.id]
