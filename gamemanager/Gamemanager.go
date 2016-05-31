@@ -184,7 +184,7 @@ func (manager *Manager) GameState(mapString string) string {
 				playersTable[0] = p
 			} else {
 				playersTable[i] = p
-				i += 1
+				i++
 			}
 		}
 
@@ -227,7 +227,17 @@ func (manager *Manager) messageReceived(message string, player *Player, timestam
 
 	if strings.Contains(message, "name:") {
 		name := strings.TrimPrefix(message, "name:")
-		player.SetName(name)
+		if manager.nameAlreadyTaken(name) == false {
+			player.SetName(name)
+			conn.Write([]byte("YourID:"))
+			conn.Write([]byte(player.GetID()))
+			conn.Write([]byte("\n"))
+			conn.Write([]byte("YourName:"))
+			conn.Write([]byte(player.GetName()))
+			conn.Write([]byte("\n"))
+		} else {
+			player.msg += "E: name already taken\n"
+		}
 	}
 
 	// mit q verlässt der Spieler den Server
@@ -260,18 +270,32 @@ func (manager *Manager) messageReceived(message string, player *Player, timestam
 		} else {
 			if strings.Contains(message, "name:") {
 				name := strings.TrimPrefix(message, "name:")
-				player.SetName(name)
-				conn.Write([]byte("YourID:"))
-				conn.Write([]byte(player.GetID()))
-				conn.Write([]byte("\n"))
-				conn.Write([]byte("YourName:"))
-				conn.Write([]byte(player.GetName()))
-				conn.Write([]byte("\n"))
+				if manager.nameAlreadyTaken(name) == false {
+					player.SetName(name)
+					conn.Write([]byte("YourID:"))
+					conn.Write([]byte(player.GetID()))
+					conn.Write([]byte("\n"))
+					conn.Write([]byte("YourName:"))
+					conn.Write([]byte(player.GetName()))
+					conn.Write([]byte("\n"))
+				} else {
+					player.msg += "E: name already taken\n"
+				}
 			} else {
 				conn.Write([]byte("Game waiting for more players.\n"))
 			}
 		}
 	}
+}
+
+func (manager *Manager) nameAlreadyTaken(name string) bool {
+	for _, p := range manager.players {
+		if p.name == name {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (manager *Manager) ProcessRound(round *Round) {
