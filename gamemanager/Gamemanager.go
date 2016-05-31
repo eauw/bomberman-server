@@ -225,6 +225,11 @@ func (manager *Manager) messageReceived(message string, player *Player, timestam
 	log.Printf("Message >%s< received from player >%s<", message, player.name)
 	conn := manager.playersConn[player.id]
 
+	if strings.Contains(message, "name:") {
+		name := strings.TrimPrefix(message, "name:")
+		player.SetName(name)
+	}
+
 	// mit q verlässt der Spieler den Server
 	if message == "q" {
 		manager.playerQuit(player)
