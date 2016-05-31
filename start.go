@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/eauw/bomberman-server/gamemanager"
-	"github.com/eauw/bomberman-server/helper"
 	"log"
 	"net"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/eauw/bomberman-server/gamemanager"
+	"github.com/eauw/bomberman-server/helper"
 )
 
 var httpServer *HTTPServer
@@ -189,9 +190,16 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 			} else {
 				if strings.Contains(err.Error(), "use of closed network connection") {
 					fmt.Printf("Client %s disconnected.\n", newPlayer.GetID())
+					mutex.Lock()
+					gameManager.PlayerDisconnected(newPlayer)
+					mutex.Unlock()
+					conn.Close()
 				} else {
 					fmt.Printf("Connection Error: %s\n", err)
 					fmt.Println("Client disconnected.")
+					mutex.Lock()
+					gameManager.PlayerDisconnected(newPlayer)
+					mutex.Unlock()
 					conn.Close()
 				}
 

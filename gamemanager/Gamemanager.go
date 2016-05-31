@@ -21,7 +21,7 @@ type Manager struct {
 	specChannel    chan string
 	playersConn    map[string]net.Conn
 	commandTimeout float64
-	minTimeout 		 int
+	minTimeout     int
 	players        []*Player
 }
 
@@ -130,6 +130,10 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	return newPlayer
 }
 
+func (manager *Manager) PlayerDisconnected(player *Player) {
+	delete(manager.playersConn, player.id)
+}
+
 func (manager *Manager) GameState(mapString string) string {
 
 	infos := "\n"
@@ -214,7 +218,6 @@ func (manager *Manager) channelHandler() {
 		} else {
 			manager.messageReceived(gameChannelMessage.text, gameChannelMessage.player, gameChannelMessage.timeStamp)
 		}
-
 	}
 }
 
@@ -359,14 +362,14 @@ func (manager *Manager) ProcessRound(round *Round) {
 		}
 
 		fox.isFox = 0
-		p.isFox += 1
+		p.isFox++
 		manager.currentGame.teleportPlayer(p)
 
 	}
 
 	// Bomben Timer runterzählen und ggf. explodieren lassen
 	for _, b := range bombs {
-		b.timer -= 1
+		b.timer--
 		if b.field != nil && b.timer <= 0 {
 			b.explode(manager.currentGame.gameMap)
 		}
@@ -375,14 +378,14 @@ func (manager *Manager) ProcessRound(round *Round) {
 	// Punkte des Fuchses erhöhen und Schutz abziehen falls nötig
 	for _, p := range manager.currentGame.players {
 		if p.isFox > 0 {
-			p.isFox += 1
+			p.isFox++
 			p.points += p.isFox
 		}
 		if p.protection > 0 {
-			p.protection -= 1
+			p.protection--
 		}
 		if p.isParalyzed > 0 {
-			p.isParalyzed -= 1
+			p.isParalyzed--
 		}
 	}
 
@@ -416,10 +419,13 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	}
 
-	manager.broadcastWaiting()
+	if len(manager.playersConn) > 0 {
+		manager.broadcastWaiting()
 
-	manager.timeout()
-
+		manager.timeout()
+	} else {
+		log.Println("no players connected anymore!")
+	}
 }
 
 func (manager *Manager) nextGame() {
@@ -437,8 +443,9 @@ func (manager *Manager) broadcastWaiting() {
 
 	log.Println("waiting for commands")
 	for _, p := range manager.currentGame.players {
-		conn := manager.playersConn[p.id]
-		conn.Write([]byte("wfyc: waiting for your command\n"))
+		if conn, ok := manager.playersConn[p.id]; ok == true {
+			conn.Write([]byte("wfyc: waiting for your command\n"))
+		}
 	}
 }
 
@@ -453,11 +460,12 @@ func (manager *Manager) broadcastGamestate() {
 }
 
 func (manager *Manager) sendGameStateToPlayer(p *Player) {
-	conn := manager.playersConn[p.id]
-	conn.Write([]byte(buildHeader(manager.GameState(manager.currentGame.gameMap.toString())))) // ???
-	conn.Write([]byte(manager.GameState(manager.currentGame.gameMap.toString())))
-	conn.Write([]byte(p.msg))
-	p.msg = ""
+	if conn, ok := manager.playersConn[p.id]; ok == true {
+		conn.Write([]byte(buildHeader(manager.GameState(manager.currentGame.gameMap.toString())))) // ???
+		conn.Write([]byte(manager.GameState(manager.currentGame.gameMap.toString())))
+		conn.Write([]byte(p.msg))
+		p.msg = ""
+	}
 }
 
 // Gibt für einen gegebenen Spieler und ein Ziel das entsprechende Feld zurück.
@@ -523,7 +531,7 @@ func (manager *Manager) destinationField(player *Player, destination []string) *
 	}
 
 	for (distance > 0) && manager.currentGame.gameMap.isBombable(pRow+dy, pCol+dx) {
-		distance -= 1
+		distance--
 		pRow += dy
 		pCol += dx
 	}
@@ -568,7 +576,7 @@ func buildHeader(message string) string {
 	return headerString
 }
 
-type TCPHeader struct {
-	bytes         []byte
-	messageLength int
-}
+// type TCPHeader struct {
+// 	bytes         []byte
+// 	messageLength int
+// }

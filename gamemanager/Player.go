@@ -2,10 +2,11 @@ package gamemanager
 
 import (
 	"fmt"
+
 	"github.com/eauw/bomberman-server/helper"
 )
 
-// Player
+// Player ...
 type Player struct {
 	id           string
 	ip           string
