@@ -13,6 +13,7 @@ import (
 
 var timer *time.Timer
 
+// Manager ...
 type Manager struct {
 	currentGame    *Game
 	games          []*Game

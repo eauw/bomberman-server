@@ -79,7 +79,7 @@ func (player *Player) applySpecial(special *Special) {
 		player.addBomb()
 
 	case "h":
-		player.protection = 5
+		player.protection = 20
 	}
 }
 
@@ -101,7 +101,6 @@ func (player *Player) getAvailableBomb() *Bomb {
 
 func (player *Player) resetSpecials() {
 	player.reach = 1
-	player.protection = 0
 	player.bombs = []*Bomb{}
 	player.addBomb()
 }
