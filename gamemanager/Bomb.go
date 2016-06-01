@@ -53,9 +53,8 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 		for _, p := range f.players {
 			if p.protection == 0 {
 				p.isParalyzed = 3
+				p.resetSpecials()
 			}
-
-			p.resetSpecials()
 		}
 	}
 

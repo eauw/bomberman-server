@@ -23,13 +23,13 @@ var specChannel chan string
 
 var spectators []net.Conn = make([]net.Conn, 0)
 
-var rounds int
-var maxPlayers int
-var height int
-var width int
-var timeout float64
-var minTimeout int
-var gamesCount int
+var rounds int      // Anzahl Runden pro Spiel
+var maxPlayers int  // Anzahl Spieler. Min. und Max.
+var height int      // Höhe der Karte (Anzahl vertikaler Felder)
+var width int       // Breite der Karte (Anzahl horizontaler Felder)
+var timeout float64 // Zeitspanne in der auf Befehle von Clients gewartet wird in Sek.
+var minTimeout int  // Mindestwartezeit
+var gamesCount int  // Anzahl Matches
 
 var mutex *sync.Mutex
 
