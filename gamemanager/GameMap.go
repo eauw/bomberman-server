@@ -2,6 +2,7 @@ package gamemanager
 
 import (
 	"fmt"
+
 	"github.com/eauw/bomberman-server/helper"
 	"github.com/fatih/color"
 )
@@ -119,6 +120,65 @@ func (gameMap *GameMap) GetNOSWFieldsOfField(f *Field) []*Field {
 	newField8 := gameMap.southernFieldOfField(f)
 	if newField8 != nil {
 		arr = append(arr, newField8)
+	}
+
+	return arr
+}
+
+// GetFieldsThatAreImpactedFromExplosion(originField *Field, reach int) ist wie GetNOSWFieldsOfFieldWithReach() nur dass die Explosion nur bis zu einer Wand geht und die Felder danach nicht berücksichtigt werden.
+func (gameMap *GameMap) GetFieldsThatAreImpactedFromExplosion(originField *Field, reach int) []*Field {
+	arr := []*Field{}
+
+	field := originField
+
+	for i := 1; i <= reach; i++ {
+
+		field = gameMap.northernFieldOfField(field)
+		if field != nil {
+			arr = append(arr, field)
+			if field.wall != nil {
+				break
+			}
+		}
+	}
+
+	field = originField
+
+	for i := 1; i <= reach; i++ {
+
+		field = gameMap.westernFieldOfField(field)
+		if field != nil {
+			arr = append(arr, field)
+			if field.wall != nil {
+				break
+			}
+		}
+	}
+
+	field = originField
+
+	for i := 1; i <= reach; i++ {
+
+		field = gameMap.easternFieldOfField(field)
+		if field != nil {
+			arr = append(arr, field)
+			if field.wall != nil {
+				break
+			}
+		}
+	}
+
+	field = originField
+
+	for i := 1; i <= reach; i++ {
+
+		field = gameMap.southernFieldOfField(field)
+		if field != nil {
+			arr = append(arr, field)
+			if field.wall != nil {
+				break
+			}
+		}
 	}
 
 	return arr
