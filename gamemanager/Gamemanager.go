@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/eauw/bomberman-server/helper"
 )
 
 var timer *time.Timer
@@ -24,6 +26,8 @@ type Manager struct {
 	commandTimeout float64
 	minTimeout     int
 	players        []*Player
+	foxOrder       []*Player
+	currentFox     *Player
 }
 
 func NewManager() *Manager {
@@ -32,6 +36,7 @@ func NewManager() *Manager {
 		playersConn: map[string]net.Conn{},
 		channel:     ch,
 		players:     []*Player{},
+		foxOrder:    []*Player{},
 	}
 
 	go manager.channelHandler()
@@ -84,11 +89,12 @@ func (manager *Manager) Start(rounds int, height int, width int, gamesCount int,
 
 func (manager *Manager) GameStart() {
 	for _, v := range manager.players {
+		manager.foxOrder = append(manager.foxOrder, v)
 		manager.currentGame.addPlayer(v)
-
 	}
 
 	manager.currentGame.start()
+	manager.chooseFox()
 
 	for _, p := range manager.currentGame.players {
 		manager.sendGameStateToPlayer(p)
@@ -114,9 +120,31 @@ func (manager *Manager) timeout() {
 func (manager *Manager) PlayersCount() int {
 	if manager.players != nil {
 		return len(manager.players)
-	} else {
-		return 0
 	}
+
+	return 0
+}
+
+func (manager *Manager) chooseFox() {
+	index := helper.RandomNumber(0, len(manager.foxOrder))
+	player := manager.foxOrder[index] // pick random player
+
+	// remove picked person from array
+	slice1 := manager.foxOrder[:index]
+	slice2 := manager.foxOrder[index+1:]
+
+	manager.foxOrder = append(slice1, slice2...)
+
+	player.isFox = true
+
+	if manager.currentFox == nil {
+		manager.currentFox = player
+		return
+	}
+
+	manager.currentFox.isFox = false
+	manager.currentFox = player
+
 }
 
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
@@ -181,7 +209,7 @@ func (manager *Manager) GameState(mapString string) string {
 		playersTable := make([]*Player, len(manager.currentGame.players))
 		i := 1
 		for _, p := range manager.currentGame.players {
-			if p.isFox > 0 {
+			if p.isFox {
 				playersTable[0] = p
 			} else {
 				playersTable[i] = p
@@ -364,17 +392,15 @@ func (manager *Manager) ProcessRound(round *Round) {
 	// Prüfen ob Fuchs gefangen wurde // NICHT GETESTET!
 	var fox *Player
 	for _, v := range manager.currentGame.players {
-
-		if v.isFox > 0 {
+		if v.isFox {
 			fox = v
 		}
-
 	}
 
 	if len(fox.currentField.players) >= 2 {
 		playersOnFoxFieldWithoutFox := []*Player{}
 		for _, v := range fox.currentField.players {
-			if v.isFox == 0 {
+			if v.isFox == false {
 				playersOnFoxFieldWithoutFox = append(playersOnFoxFieldWithoutFox, v)
 			}
 		}
@@ -391,8 +417,9 @@ func (manager *Manager) ProcessRound(round *Round) {
 			}
 		}
 
-		fox.isFox = 0
-		p.isFox++
+		fox.isFox = false
+		p.points++
+		manager.currentFox = p
 		manager.currentGame.teleportPlayer(p)
 
 	}
@@ -407,9 +434,9 @@ func (manager *Manager) ProcessRound(round *Round) {
 
 	// Punkte des Fuchses erhöhen und Schutz abziehen falls nötig
 	for _, p := range manager.currentGame.players {
-		if p.isFox > 0 {
-			p.isFox++
-			p.points += p.isFox
+		if p.isFox {
+			p.foxRounds++
+			p.points += p.foxRounds
 		}
 		if p.protection > 0 {
 			p.protection--
@@ -465,6 +492,7 @@ func (manager *Manager) nextGame() {
 	manager.currentGame.gameMap = previousGame.gameMap // TODO: oder neue Map erzeugen
 	manager.currentGame.players = previousGame.players
 	manager.currentGame.currentRound = manager.currentGame.rounds[0]
+	manager.chooseFox()
 }
 
 func (manager *Manager) broadcastWaiting() {

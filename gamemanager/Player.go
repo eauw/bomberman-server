@@ -14,7 +14,8 @@ type Player struct {
 	points       int
 	currentField *Field
 	isParalyzed  int
-	isFox        int
+	isFox        bool
+	foxRounds    int
 	bombs        []*Bomb
 	reach        int
 	throwrange   int
@@ -30,7 +31,8 @@ func NewPlayer(n string) *Player {
 		id:          playerID,
 		name:        n,
 		isParalyzed: 0,
-		isFox:       0,
+		isFox:       false,
+		foxRounds:   0,
 		bombs:       make([]*Bomb, 0),
 		reach:       1,
 		throwrange:  9,

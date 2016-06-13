@@ -29,7 +29,7 @@ var height int      // Höhe der Karte (Anzahl vertikaler Felder)
 var width int       // Breite der Karte (Anzahl horizontaler Felder)
 var timeout float64 // Zeitspanne in der auf Befehle von Clients gewartet wird in Sek.
 var minTimeout int  // Mindestwartezeit
-var gamesCount int  // Anzahl Matches
+var gamesCount = 2  // Anzahl Matches // da es standardmäßig zwei Spieler gibt, gibt es auch zwei Spiele
 
 var mutex *sync.Mutex
 
@@ -38,7 +38,7 @@ func init() {
 	flag.IntVar(&rounds, "rounds", 200, "set max. rounds")
 	flag.IntVar(&height, "height", 20, "set maps height")
 	flag.IntVar(&width, "width", 20, "set maps width")
-	flag.IntVar(&gamesCount, "games", 3, "set how many games will be played")
+	// flag.IntVar(&gamesCount, "games", 3, "set how many games will be played") // obsolet da es so viele Spiele wie Player gibt
 	flag.Float64Var(&timeout, "timeout", 0.5, "command timeout")
 	flag.IntVar(&minTimeout, "mintimeout", 100, "minimum timeout")
 	flag.BoolVar(&httpServerBool, "w", false, "start http server")
@@ -61,6 +61,8 @@ func startHttpServer() {
 
 func main() {
 	mutex = &sync.Mutex{}
+
+	gamesCount = maxPlayers
 
 	// print parameters
 	printParameters()

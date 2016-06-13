@@ -2,11 +2,12 @@ package gamemanager
 
 import (
 	"fmt"
-	"github.com/eauw/bomberman-server/helper"
 	"log"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/eauw/bomberman-server/helper"
 )
 
 type Game struct {
@@ -42,18 +43,8 @@ func NewGame(height int, width int) *Game {
 func (game *Game) start() {
 	log.Println("game start")
 	game.started = true
-	game.pickRandomPlayer().isFox = 1
+	// game.pickRandomPlayer().isFox = 1
 	game.placePlayers()
-
-	go game.handleGameChannel()
-}
-
-// receives all information about the game
-func (game *Game) handleGameChannel() {
-	for {
-		var gameChannelMessage = <-game.channel
-		handleGameChannelMessage(gameChannelMessage)
-	}
 }
 
 func (game *Game) placePlayers() {
