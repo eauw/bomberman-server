@@ -93,8 +93,8 @@ func (manager *Manager) GameStart() {
 		manager.currentGame.addPlayer(v)
 	}
 
-	manager.currentGame.start()
 	manager.chooseFox()
+	manager.currentGame.start()
 
 	for _, p := range manager.currentGame.players {
 		manager.sendGameStateToPlayer(p)
@@ -137,14 +137,9 @@ func (manager *Manager) chooseFox() {
 
 	player.isFox = true
 
-	if manager.currentFox == nil {
-		manager.currentFox = player
-		return
+	if manager.currentFox != nil {
+		manager.currentFox.isFox = false
 	}
-
-	manager.currentFox.isFox = false
-	manager.currentFox = player
-
 }
 
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
@@ -418,6 +413,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 		}
 
 		fox.isFox = false
+		p.isFox = true
 		p.points++
 		manager.currentFox = p
 		manager.currentGame.teleportPlayer(p)
@@ -492,6 +488,11 @@ func (manager *Manager) nextGame() {
 	manager.currentGame.gameMap = previousGame.gameMap // TODO: oder neue Map erzeugen
 	manager.currentGame.players = previousGame.players
 	manager.currentGame.currentRound = manager.currentGame.rounds[0]
+
+	manager.currentFox = nil
+	for _, p := range manager.currentGame.players {
+		p.isFox = false
+	}
 	manager.chooseFox()
 }
 
