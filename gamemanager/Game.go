@@ -161,7 +161,7 @@ func (game *Game) PlayerMovesToLeft(player *Player) {
 	nextField := game.gameMap.fields[currentField.row][currentField.column-1]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.wall != nil {
+	if nextField.wall != nil || len(nextField.bombs) > 0 {
 		return
 	}
 
@@ -207,7 +207,7 @@ func (game *Game) PlayerMovesToRight(player *Player) {
 	nextField := game.gameMap.fields[currentField.row][currentField.column+1]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.wall != nil {
+	if nextField.wall != nil || len(nextField.bombs) > 0 {
 		return
 	}
 
@@ -252,7 +252,7 @@ func (game *Game) PlayerMovesToUp(player *Player) {
 	nextField := game.gameMap.fields[currentField.row-1][currentField.column]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.wall != nil {
+	if nextField.wall != nil || len(nextField.bombs) > 0 {
 		return
 	}
 
@@ -298,7 +298,7 @@ func (game *Game) PlayerMovesToDown(player *Player) {
 	nextField := game.gameMap.fields[currentField.row+1][currentField.column]
 
 	// prüfen ob der Spieler versucht gegen eine Wand zu laufen
-	if nextField.wall != nil {
+	if nextField.wall != nil || len(nextField.bombs) > 0 {
 		return
 	}
 
