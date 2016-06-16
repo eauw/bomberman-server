@@ -156,6 +156,26 @@ func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 
 func (manager *Manager) PlayerDisconnected(player *Player) {
 	delete(manager.playersConn, player.id)
+	manager.removePlayer(player)
+}
+
+func (manager *Manager) removePlayer(player *Player) {
+	index := -1
+
+	for i := range manager.players {
+		if manager.players[i].id == player.id {
+			index = i
+		}
+	}
+
+	if index > -1 {
+		slice1 := manager.players[:index]
+		slice2 := manager.players[index+1:]
+
+		newArray := append(slice1, slice2...)
+
+		manager.players = newArray
+	}
 }
 
 func (manager *Manager) GameState(mapString string) string {

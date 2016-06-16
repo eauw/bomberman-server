@@ -151,6 +151,8 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 
 		mutex.Lock()
 		newPlayer := gameManager.PlayerConnected(clientIP, conn)
+		fmt.Printf("new player %s added\n", newPlayer.GetName())
+		fmt.Printf("%d/%d players connected\n", gameManager.PlayersCount(), maxPlayers)
 		mutex.Unlock()
 
 		conn.Write([]byte("YourID:"))
@@ -194,6 +196,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 					fmt.Printf("Client %s disconnected.\n", newPlayer.GetID())
 					mutex.Lock()
 					gameManager.PlayerDisconnected(newPlayer)
+					fmt.Printf("%d/%d players connected\n", gameManager.PlayersCount(), maxPlayers)
 					mutex.Unlock()
 					conn.Close()
 				} else {
@@ -201,6 +204,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 					fmt.Println("Client disconnected.")
 					mutex.Lock()
 					gameManager.PlayerDisconnected(newPlayer)
+					fmt.Printf("%d/%d players connected\n", gameManager.PlayersCount(), maxPlayers)
 					mutex.Unlock()
 					conn.Close()
 				}
@@ -210,6 +214,7 @@ func newClientConnected(conn net.Conn, gameManager *gamemanager.Manager) {
 		}
 	} else {
 		conn.Write([]byte("Sorry, the player limit is reached.\n"))
+		fmt.Println("Client disconnected because players limit is reached.")
 		conn.Close()
 	}
 
