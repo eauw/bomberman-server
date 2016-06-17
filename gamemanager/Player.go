@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/eauw/bomberman-server/helper"
+	"github.com/fatih/color"
 )
 
 // Player ...
@@ -21,15 +22,16 @@ type Player struct {
 	throwrange   int
 	protection   int    // Dauer des Schutzes falls man welchen eingesammelt hat
 	msg          string // Nachricht, die dem Spieler nach dem naechsten gamestate geschickt werden soll.
+	color        *color.Color
 }
 
 // NewPlayer function is the players constructor
-func NewPlayer(n string) *Player {
+func NewPlayer(name string) *Player {
 	playerID := helper.GeneratePlayerID()
 
 	return &Player{
 		id:          playerID,
-		name:        n,
+		name:        name,
 		isParalyzed: 0,
 		isFox:       false,
 		foxRounds:   0,

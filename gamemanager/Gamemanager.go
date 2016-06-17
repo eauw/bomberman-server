@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/eauw/bomberman-server/helper"
+	"github.com/fatih/color"
 )
 
 var timer *time.Timer
@@ -28,15 +29,27 @@ type Manager struct {
 	players        []*Player
 	foxOrder       []*Player
 	currentFox     *Player
+	playerColors   []*color.Color
 }
 
 func NewManager() *Manager {
 	ch := make(chan GameChannelMessage, 2)
+	colors := []*color.Color{color.New(color.BgRed),
+		color.New(color.BgBlue),
+		color.New(color.BgGreen),
+		color.New(color.BgYellow),
+		color.New(color.BgCyan),
+		color.New(color.BgMagenta),
+		color.New(color.BgHiBlue),
+		color.New(color.BgHiCyan),
+		color.New(color.BgHiRed)}
+
 	manager := &Manager{
-		playersConn: map[string]net.Conn{},
-		channel:     ch,
-		players:     []*Player{},
-		foxOrder:    []*Player{},
+		playersConn:  map[string]net.Conn{},
+		channel:      ch,
+		players:      []*Player{},
+		foxOrder:     []*Player{},
+		playerColors: colors,
 	}
 
 	go manager.channelHandler()
@@ -142,9 +155,23 @@ func (manager *Manager) chooseFox() {
 	}
 }
 
+func (manager *Manager) pickRandomColor() *color.Color {
+	index := helper.RandomNumber(0, len(manager.playerColors))
+	color := manager.playerColors[index]
+
+	// remove picked person from array
+	slice1 := manager.playerColors[:index]
+	slice2 := manager.playerColors[index+1:]
+
+	manager.playerColors = append(slice1, slice2...)
+
+	return color
+}
+
 func (manager *Manager) PlayerConnected(ip string, conn net.Conn) *Player {
 	newPlayer := NewPlayer("New Player")
 	newPlayer.SetIP(ip)
+	newPlayer.color = manager.pickRandomColor()
 	newPlayer.addBomb()
 	manager.players = append(manager.players, newPlayer)
 	newPlayer.name = "Player" + strconv.Itoa(len(manager.players))
@@ -176,6 +203,81 @@ func (manager *Manager) removePlayer(player *Player) {
 
 		manager.players = newArray
 	}
+}
+
+func (manager *Manager) GameStateForServer(mapString string) string {
+	infos := "\n"
+	infos += fmt.Sprintf("game:%d/%d,", manager.currentGame.id, len(manager.games))
+	if manager.currentGame.started {
+		infos += fmt.Sprintf("round:%d/%d,", manager.currentGame.currentRound.id, len(manager.currentGame.rounds))
+	} else {
+		infos += fmt.Sprintf("rounds:%d,", len(manager.currentGame.rounds))
+	}
+
+	infos += fmt.Sprintf("players:%d,", len(manager.currentGame.players))
+
+	x := manager.currentGame.gameMap.height
+	y := manager.currentGame.gameMap.width
+
+	xString := strconv.Itoa(x)
+
+	if x < 10 {
+		xString = "0" + xString
+	}
+
+	yString := strconv.Itoa(y)
+
+	if y < 10 {
+		yString = "0" + yString
+	}
+
+	infos += fmt.Sprintf("mapsize:x%sy%s,", xString, yString)
+	infos += fmt.Sprintf("timeout:%.2fs,", manager.commandTimeout)
+	infos += "\n"
+
+	gameState := "\033[H\033[2J"
+	gameState += "***********************************************************"
+	gameState += "\n"
+	gameState += infos
+	gameState += "\n"
+	gameState += "map:"
+	gameState += mapString
+	gameState += "\n"
+
+	// gamestatetable
+	if manager.currentGame.started {
+		// Tabelle erstellen mit dem Fuchs an erster Stelle
+		playersTable := make([]*Player, len(manager.currentGame.players))
+		i := 1
+		for _, p := range manager.currentGame.players {
+			if p.isFox {
+				playersTable[0] = p
+			} else {
+				playersTable[i] = p
+				i++
+			}
+		}
+
+		gameStateTable := "scoretable:\n"
+		for _, p := range playersTable {
+			c := p.color.SprintFunc()
+			gameStateTable += c(fmt.Sprintf("name:%s,score:%d,%s;\n", p.name, p.points, p.currentField.toString()))
+		}
+		gameStateTable += "/scoretable"
+		gameState += gameStateTable
+	}
+	gameState += "\n"
+
+	// gameState += "bombs:\n"
+
+	// for _, p := range manager.currentGame.players {
+	// 	gameState += fmt.Sprintf("player: %s, bombs: %s\n", p.name, p.bombs)
+	// }
+
+	gameState += "***********************************************************"
+	gameState += "\n"
+
+	return gameState
 }
 
 func (manager *Manager) GameState(mapString string) string {
@@ -533,7 +635,7 @@ func (manager *Manager) broadcastGamestate() {
 		manager.sendGameStateToPlayer(p)
 	}
 
-	log.Println(manager.GameState(manager.currentGame.gameMap.toStringForServer()))
+	log.Println(manager.GameStateForServer(manager.currentGame.gameMap.toStringForServer()))
 
 	manager.specChannel <- manager.GameState(manager.currentGame.gameMap.toStringForServer())
 }
