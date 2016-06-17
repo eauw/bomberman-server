@@ -261,7 +261,8 @@ func (manager *Manager) GameStateForServer(mapString string) string {
 		gameStateTable := "scoretable:\n"
 		for _, p := range playersTable {
 			c := p.color.SprintFunc()
-			gameStateTable += c(fmt.Sprintf("name:%s,score:%d,%s;\n", p.name, p.points, p.currentField.toString()))
+			gameStateTable += c(fmt.Sprintf("name:%s,score:%d,%s;", p.name, p.points, p.currentField.toString()))
+			gameStateTable += fmt.Sprintf("\n")
 		}
 		gameStateTable += "/scoretable"
 		gameState += gameStateTable
