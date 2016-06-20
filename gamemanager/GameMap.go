@@ -428,10 +428,12 @@ func (gm *GameMap) toStringForServer() string {
 					fieldChar = "P"
 				} else if f.players[0].isFox {
 					// Fuchs
-					fieldChar = "f"
+					c := f.players[0].color.SprintFunc()
+					fieldChar = c("f")
 				} else {
 					// normaler Spieler
-					fieldChar = "p"
+					c := f.players[0].color.SprintFunc()
+					fieldChar = c("p")
 				}
 
 			} else if len(f.bombs) > 0 {
