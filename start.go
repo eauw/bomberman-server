@@ -39,8 +39,8 @@ func init() {
 	flag.IntVar(&height, "height", 20, "set maps height")
 	flag.IntVar(&width, "width", 20, "set maps width")
 	// flag.IntVar(&gamesCount, "games", 3, "set how many games will be played") // obsolet da es so viele Spiele wie Player gibt
-	flag.Float64Var(&timeout, "timeout", 0.5, "command timeout")
-	flag.IntVar(&minTimeout, "mintimeout", 100, "minimum timeout")
+	flag.Float64Var(&timeout, "timeout", 0.5, "command timeout in seconds")
+	flag.IntVar(&minTimeout, "mintimeout", 100, "minimum timeout in milliseconds")
 	flag.BoolVar(&httpServerBool, "w", false, "start http server")
 	flag.Parse()
 }
