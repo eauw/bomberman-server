@@ -643,7 +643,7 @@ func (manager *Manager) broadcastGamestate() {
 
 	log.Println(manager.GameStateForServer(manager.currentGame.gameMap.toStringForServer()))
 
-	manager.specChannel <- manager.GameState(manager.currentGame.gameMap.toStringForServer())
+	manager.specChannel <- manager.GameState(manager.currentGame.gameMap.toString())
 }
 
 func (manager *Manager) sendGameStateToPlayer(p *Player) {
