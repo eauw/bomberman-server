@@ -34,15 +34,20 @@ type Manager struct {
 
 func NewManager() *Manager {
 	ch := make(chan GameChannelMessage, 2)
-	colors := []*color.Color{color.New(color.BgRed),
+	colors := []*color.Color{
+		color.New(color.BgRed),
+		color.New(color.BgHiRed),
 		color.New(color.BgBlue),
-		color.New(color.BgGreen),
-		color.New(color.BgYellow),
-		color.New(color.BgCyan),
-		color.New(color.BgMagenta),
 		color.New(color.BgHiBlue),
+		color.New(color.BgGreen),
+		color.New(color.BgHiGreen),
+		color.New(color.BgYellow),
+		color.New(color.BgHiYellow),
+		color.New(color.BgCyan),
 		color.New(color.BgHiCyan),
-		color.New(color.BgHiRed)}
+		color.New(color.BgMagenta),
+		color.New(color.BgHiMagenta),
+	}
 
 	manager := &Manager{
 		playersConn:  map[string]net.Conn{},
@@ -555,7 +560,7 @@ func (manager *Manager) ProcessRound(round *Round) {
 	for _, p := range manager.currentGame.players {
 		if p.isFox {
 			p.foxRounds++
-			p.points += p.foxRounds
+			p.points++ // += p.foxRounds
 		}
 		if p.protection > 0 {
 			p.protection--
