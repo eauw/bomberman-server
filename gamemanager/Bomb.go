@@ -4,7 +4,8 @@ import (
 	"github.com/eauw/bomberman-server/helper"
 )
 
-const bombtimer = 5
+const bombtimer = 3
+const paralyzedtime = 5
 
 type Bomb struct {
 	owner *Player
@@ -19,7 +20,7 @@ func NewBomb() *Bomb {
 
 	return &Bomb{
 		reach: 1,
-		timer: 5,
+		timer: bombtimer,
 		id:    id,
 		field: nil,
 		owner: nil,
@@ -52,7 +53,7 @@ func (bomb *Bomb) explode(gameMap *GameMap) {
 		// Spieler werden durch Explosionsstrahl gelähmt
 		for _, p := range f.players {
 			if p.protection == 0 {
-				p.isParalyzed = 3
+				p.isParalyzed = paralyzedtime
 				p.resetSpecials()
 			}
 		}
