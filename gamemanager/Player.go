@@ -83,7 +83,7 @@ func (player *Player) applySpecial(special *Special) {
 		player.addBomb()
 
 	case "h":
-		player.protection = 20
+		player.protection = 30
 	}
 }
 
