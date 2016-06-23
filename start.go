@@ -109,7 +109,9 @@ func main() {
 		}
 
 		if gameConn != nil {
-			go newClientConnected(gameConn, gameManager)
+			if gameManager.GameStarted == false {
+				go newClientConnected(gameConn, gameManager)
+			}
 		}
 	}
 }

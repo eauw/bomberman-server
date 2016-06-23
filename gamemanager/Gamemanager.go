@@ -18,6 +18,7 @@ var timer *time.Timer
 
 // Manager ...
 type Manager struct {
+	GameStarted    bool
 	currentGame    *Game
 	games          []*Game
 	channel        chan GameChannelMessage
@@ -50,6 +51,7 @@ func NewManager() *Manager {
 	}
 
 	manager := &Manager{
+		GameStarted:  false,
 		playersConn:  map[string]net.Conn{},
 		channel:      ch,
 		players:      []*Player{},
@@ -75,6 +77,7 @@ func (manager *Manager) SetSpecChannel(ch chan string) {
 }
 
 func (manager *Manager) Start(rounds int, height int, width int, gamesCount int, timeout float64, minTimeout int) {
+
 	manager.minTimeout = minTimeout
 
 	if rounds < 1 {
@@ -106,6 +109,8 @@ func (manager *Manager) Start(rounds int, height int, width int, gamesCount int,
 }
 
 func (manager *Manager) GameStart() {
+	manager.GameStarted = true
+
 	for _, v := range manager.players {
 		manager.foxOrder = append(manager.foxOrder, v)
 		manager.currentGame.addPlayer(v)
@@ -192,6 +197,11 @@ func (manager *Manager) PlayerDisconnected(player *Player) {
 }
 
 func (manager *Manager) removePlayer(player *Player) {
+	// remove player from field
+	// TODO:
+	player.currentField.removePlayer(player)
+
+	// remove player from players array
 	index := -1
 
 	for i := range manager.players {
