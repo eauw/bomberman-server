@@ -197,6 +197,11 @@ func (manager *Manager) PlayerDisconnected(player *Player) {
 }
 
 func (manager *Manager) removePlayer(player *Player) {
+	// remove player from field
+	// TODO:
+	player.currentField.removePlayer(player)
+
+	// remove player from players array
 	index := -1
 
 	for i := range manager.players {
