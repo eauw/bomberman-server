@@ -267,14 +267,12 @@ func (manager *Manager) GameStateForServer(mapString string) string {
 
 	infos += fmt.Sprintf("mapsize:x%sy%s,", xString, yString)
 	infos += fmt.Sprintf("timeout:%.2fs,", manager.commandTimeout)
-	infos += "\n"
 
 	gameState := "\033[H\033[2J"
 	gameState += "***********************************************************"
 	gameState += "\n"
 	gameState += infos
 	gameState += "\n"
-	gameState += "map:"
 	gameState += mapString
 	gameState += "\n"
 
@@ -292,14 +290,14 @@ func (manager *Manager) GameStateForServer(mapString string) string {
 			}
 		}
 
-		gameStateTable := "scoretable:\n"
+		gameStateTable := ""
 		for _, p := range playersTable {
 			c := p.color.SprintFunc()
 			gameStateTable += c(fmt.Sprintf(" "))
 			gameStateTable += fmt.Sprintf("name:%s,score:%d,%s;", p.name, p.points, p.currentField.toString())
 			gameStateTable += fmt.Sprintf("\n")
 		}
-		gameStateTable += "/scoretable"
+
 		gameState += gameStateTable
 	}
 	gameState += "\n"
