@@ -101,6 +101,10 @@ func main() {
 	go handleSpecListener(specListener)
 
 	for {
+		if gameManager.GameStarted == true {
+			break
+		}
+
 		// accept connection on port
 		gameConn, gameConnErr := gameListener.Accept()
 
