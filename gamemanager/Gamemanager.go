@@ -30,33 +30,38 @@ type Manager struct {
 	players        []*Player
 	foxOrder       []*Player
 	currentFox     *Player
-	playerColors   []*color.Color
+	colors         []*color.Color
+	hiColors       []*color.Color
 }
 
 func NewManager() *Manager {
 	ch := make(chan GameChannelMessage, 2)
-	colors := []*color.Color{
-		color.New(color.BgRed),
+	hc := []*color.Color{
 		color.New(color.BgHiRed),
-		color.New(color.BgBlue),
 		color.New(color.BgHiBlue),
-		color.New(color.BgGreen),
 		color.New(color.BgHiGreen),
-		color.New(color.BgYellow),
 		color.New(color.BgHiYellow),
-		color.New(color.BgCyan),
 		color.New(color.BgHiCyan),
-		color.New(color.BgMagenta),
 		color.New(color.BgHiMagenta),
 	}
 
+	c := []*color.Color{
+		color.New(color.BgRed),
+		color.New(color.BgBlue),
+		color.New(color.BgGreen),
+		color.New(color.BgYellow),
+		color.New(color.BgCyan),
+		color.New(color.BgMagenta),
+	}
+
 	manager := &Manager{
-		GameStarted:  false,
-		playersConn:  map[string]net.Conn{},
-		channel:      ch,
-		players:      []*Player{},
-		foxOrder:     []*Player{},
-		playerColors: colors,
+		GameStarted: false,
+		playersConn: map[string]net.Conn{},
+		channel:     ch,
+		players:     []*Player{},
+		foxOrder:    []*Player{},
+		colors:      c,
+		hiColors:    hc,
 	}
 
 	go manager.channelHandler()
@@ -166,14 +171,29 @@ func (manager *Manager) chooseFox() {
 }
 
 func (manager *Manager) pickRandomColor() *color.Color {
-	index := helper.RandomNumber(0, len(manager.playerColors))
-	color := manager.playerColors[index]
+	var availableColors []*color.Color
+	colorPalette := 0
+
+	// first pick high colors. if no high color is available anymore, pick dark color.
+	if len(manager.hiColors) > 0 {
+		colorPalette = 0
+		availableColors = manager.hiColors
+	} else {
+		colorPalette = 1
+		availableColors = manager.colors
+	}
+	index := helper.RandomNumber(0, len(availableColors))
+	color := availableColors[index]
 
 	// remove picked person from array
-	slice1 := manager.playerColors[:index]
-	slice2 := manager.playerColors[index+1:]
+	slice1 := availableColors[:index]
+	slice2 := availableColors[index+1:]
 
-	manager.playerColors = append(slice1, slice2...)
+	if colorPalette == 0 {
+		manager.hiColors = append(slice1, slice2...)
+	} else {
+		manager.colors = append(slice1, slice2...)
+	}
 
 	return color
 }
