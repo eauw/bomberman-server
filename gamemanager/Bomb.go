@@ -4,7 +4,7 @@ import (
 	"github.com/eauw/bomberman-server/helper"
 )
 
-const bombtimer = 3
+const bombtimer = 5
 const paralyzedtime = 5
 
 type Bomb struct {
